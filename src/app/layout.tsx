@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
 import { LenisProvider } from '@/components/LenisProvider'
+import { FloatingContactButton } from '@/components/FloatingContactButton'
 
 const metropolisBlack = localFont({
   src: '../../public/fonts/Metropolis-Black.otf',
@@ -66,6 +67,7 @@ export default function RootLayout({
         </LenisProvider>
         {/* Noise texture overlay for premium feel */}
         <div className="noise-overlay" />
+        <FloatingContactButton />
       </body>
     </html>
   )

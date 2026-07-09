@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
+import Link from 'next/link'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ArrowRight } from 'lucide-react'
@@ -278,23 +279,22 @@ function AboutSection() {
       className="py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-black"
     >
       <div ref={contentRef} className="max-w-5xl mx-auto">
-        <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-8">01 — About</p>
+        <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-8">02 — Page</p>
         <h2 ref={headingRef} className="stylish-header text-4xl md:text-5xl lg:text-6xl mb-12 soft-mask-reveal">
           <span className="metropolis-upper text-white">GET TO </span>
           <span className="bacalisties-script text-white text-5xl md:text-6xl lg:text-7xl">knowPICARVIEW</span>
         </h2>
         <div className="space-y-6 text-lg md:text-xl text-zinc-300 leading-relaxed">
           <p className="text-2xl md:text-3xl text-white font-light leading-normal">
-            How we help <span className="font-bold">YOU</span> connect with your audience
+            We are your creative team.
           </p>
-          <p className="text-xl md:text-2xl italic text-zinc-400">
-            Create your view
-          </p>
-          <p className="max-w-4xl">
-            At Picarview, we help you transform how you experience your ideas. Through creativity, design, and innovation, we give your ideas depth, clarity, and meaning — turning them into experiences that inspire, resonate, and make your ideas fit.
+          <p className="text-xl md:text-2xl italic text-zinc-400 max-w-4xl">
+            Focused on combining creativity, innovation, and design to shape visual experiences that go beyond
+            appearance delivering depth, clarity, and lasting impact.
           </p>
           <p className="max-w-4xl">
-            We go beyond aesthetics, bringing your ideas to life in ways that allow them to evolve across multiple dimensions, connect with their environment, and leave a lasting impression. Every project is designed to be thoughtful, intentional, and meaningful — ensuring your vision not only stands out but also stays with your audience.
+            We go beyond aesthetics, bringing your ideas to life in ways that allow them to evolve across multiple
+            dimensions, connect with their environment, and leave a lasting impression.
           </p>
         </div>
       </div>
@@ -309,24 +309,24 @@ function MissionVisionSection() {
 
   const cards = [
     {
-      label: 'Mission',
-      content: 'Our mission is to define how pictures, art, and visual ideas are seen and experienced.',
+      label: 'Partners Page',
+      content: 'Partners Page',
     },
     {
-      label: 'What we do',
-      content: 'Transform visuals into meaningful, multidimensional experiences.',
+      label: 'What we value',
+      content: 'We work with brands that play a role in the environment today and tomorrow.',
     },
     {
-      label: 'How we do it',
-      content: 'Through creativity, design, and innovation.',
+      label: 'What we make',
+      content: 'Creating ideas and connecting with their audience through pictures and arts innovation.',
     },
     {
-      label: 'What you feel',
-      content: 'Inspired, understood, and impressed by intentional design.',
+      label: 'How we grow',
+      content: 'Ideas that evolve with clarity, depth, and lasting impact.',
     },
     {
       label: 'Vision',
-      content: 'Our vision is to shape perception through innovative design, creativity, and visual expression.',
+      content: 'Our vision is to build partnerships that shape the future of visual expression.',
     },
   ]
 
@@ -361,6 +361,14 @@ function MissionVisionSection() {
       data-theme="light"
       className="py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-white"
     >
+      <div className="max-w-7xl mx-auto mb-16">
+        <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-4">03 — Page</p>
+        <h2 className="stylish-header text-4xl md:text-5xl lg:text-6xl soft-mask-reveal">
+          <span className="metropolis-upper text-black">PARTNERS </span>
+          <span className="bacalisties-script text-black text-5xl md:text-6xl lg:text-7xl">Page</span>
+        </h2>
+      </div>
+
       <div ref={cardsRef} className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {cards.map((card, index) => (
           <div
@@ -417,16 +425,13 @@ function GoalSection() {
       className="py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-black"
     >
       <div className="max-w-6xl mx-auto text-center">
-        <p ref={labelRef} className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-12 soft-mask-reveal">THE GOAL</p>
+        <p ref={labelRef} className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-12 soft-mask-reveal">04 — Page</p>
         <h2
           ref={textRef}
           className="text-3xl md:text-5xl lg:text-6xl font-light text-white leading-tight soft-mask-reveal"
         >
-          Our goal <span className="text-zinc-400">→</span> is to connect{' '}
-          <span className="font-bold bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent">
-            YOU
-          </span>{' '}
-          with your audience.
+          We partner with brands that play a role in the environment today and tomorrow, creating ideas and connecting
+          with their audience through pictures and arts innovation.
         </h2>
       </div>
     </section>
@@ -518,10 +523,10 @@ function ServicesSection() {
     >
       <div className="max-w-7xl mx-auto">
         <div className="mb-16">
-          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-4">02 — Services</p>
+          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-4">05 — Services</p>
           <h2 ref={headingRef} className="stylish-header text-4xl md:text-5xl lg:text-6xl soft-mask-reveal">
-            <span className="metropolis-upper text-black">OUR </span>
-            <span className="bacalisties-script text-black text-5xl md:text-6xl lg:text-7xl">SERVICES</span>
+            <span className="metropolis-upper text-black">SERVICE </span>
+            <span className="bacalisties-script text-black text-5xl md:text-6xl lg:text-7xl">pillars.</span>
           </h2>
         </div>
 
@@ -608,11 +613,22 @@ function WorksSection() {
     >
       <div className="max-w-7xl mx-auto">
         <div className="mb-16">
-          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-4">03 — Work</p>
+          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-4">06 — Project Page</p>
           <h2 ref={headingRef} className="stylish-header text-4xl md:text-5xl lg:text-6xl soft-mask-reveal">
-            <span className="metropolis-upper text-white">OUR </span>
-            <span className="bacalisties-script text-white text-5xl md:text-6xl lg:text-7xl">WORKS</span>
+            <span className="metropolis-upper text-white">PROJECT </span>
+            <span className="bacalisties-script text-white text-5xl md:text-6xl lg:text-7xl">Page</span>
           </h2>
+          <p className="mt-6 max-w-3xl text-base md:text-lg text-zinc-300 leading-relaxed">
+            We bring your ideas to life, evolve them across multiple dimensions, connect with their environment, and
+            leave a lasting impression.
+          </p>
+          <a
+            href="#work"
+            className="mt-8 inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/10 px-6 py-3 text-[0.72rem] uppercase tracking-[0.28em] text-white backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/15"
+          >
+            Check Our Works
+            <ArrowRight className="h-4 w-4" />
+          </a>
         </div>
 
         <div
@@ -777,27 +793,51 @@ function PromiseSection() {
   )
 }
 
-// Contact Section
 function ContactSection() {
   return (
-    <section id="contact" data-theme="light" className="py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-white">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div>
-          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-4">06 — Contact</p>
-          <h2 className="font-metropolis-black text-5xl md:text-6xl uppercase text-black leading-none mb-6">
-            Let&apos;s Create<br />
-            Your View
-          </h2>
-          <p className="text-lg text-zinc-600 max-w-xl">
-            Ready to transform your vision into meaningful experiences? Let&apos;s start a conversation.
-          </p>
+    <section id="contact" data-theme="light" className="relative py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-white text-black overflow-hidden">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-12 lg:gap-16 items-end">
+        <div className="space-y-8">
+          <div className="space-y-4 max-w-xl">
+            <p className="text-[0.68rem] uppercase tracking-[0.45em] text-zinc-400">06 — Contact</p>
+            <h2 className="font-metropolis-black text-4xl md:text-5xl lg:text-6xl uppercase text-black leading-[0.92]">
+              A lighter way to begin the conversation.
+            </h2>
+          </div>
+
+          <div className="max-w-xl space-y-5 text-base md:text-lg text-zinc-600 leading-[1.9]">
+            <p>
+              Tap the floating orb in the bottom-right corner whenever you&apos;re ready. It opens the full brief without
+              taking over the page.
+            </p>
+            <p>
+              That keeps the experience clean, and gives you a quicker way to reach us from anywhere on the site.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            {['Tap to open', 'Quick brief', 'Designed for flow'].map((item) => (
+              <span
+                key={item}
+                className="rounded-full border border-black/10 bg-zinc-50 px-4 py-2 text-[0.68rem] uppercase tracking-[0.28em] text-zinc-600"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+
+          <Link
+            href="/contact"
+            className="inline-flex items-center gap-3 text-[0.72rem] uppercase tracking-[0.3em] text-black transition-opacity hover:opacity-60"
+          >
+            Open the contact page
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
-        <div className="flex flex-col gap-6 lg:items-end">
-          <a href="mailto:hello@picarview.com" className="btn btn-dark">
-            Start a Project
-            <ArrowRight className="w-5 h-5" />
-          </a>
-          <p className="text-sm text-zinc-500 uppercase tracking-[0.25em]">hello@picarview.com</p>
+
+        <div className="flex justify-start lg:justify-end">
+          <div className="pointer-events-none hidden lg:block h-64 w-64 rounded-full border border-dashed border-black/10" />
         </div>
       </div>
     </section>
