@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -68,65 +68,89 @@ function useSoftMaskReveal(elementRef: React.RefObject<HTMLElement>, splitByChar
   }, [elementRef, splitByChar])
 }
 
-// Diagonal Razor Transition
-function DiagonalRazorTransition() {
+const showcaseCards = [
+  { image: '/images/img1.png', label: '01 / BRANDING', color: '#ffb000', alt: 'Picarview branding work' },
+  { image: '/images/img2.png', label: '02 / 3D ART', color: '#b9ff32', alt: 'Picarview 3D artwork' },
+  { image: '/images/img3.png', label: '03 / DIRECTION', color: '#ff4fa3', alt: 'Picarview art direction' },
+  { image: '/images/img4.png', label: '04 / VISUALS', color: '#22d9ee', alt: 'Picarview visual design' },
+]
+
+// Pinned neo-brutalist card build between About and Our Foundation.
+function InteractiveCardsTransition() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const topPanelRef = useRef<HTMLDivElement>(null)
-  const bottomPanelRef = useRef<HTMLDivElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
-  const preAnimRef = useRef<HTMLDivElement>(null)
-  const ringsRef = useRef<HTMLDivElement>(null)
-  const scanLineRef = useRef<HTMLDivElement>(null)
-  const [particles] = useState(() => 
-    Array.from({ length: 12 }, () => ({
-      left: Math.random() * 100,
-      top: Math.random() * 100,
-      delay: Math.random() * 2,
-      duration: 2 + Math.random() * 2
-    }))
-  )
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: 'top top',
-          end: '+=160%',
-          scrub: 1,
-          pin: true,
-        },
+      const cards = gsap.utils.toArray<HTMLElement>('.brutalist-card')
+      const media = gsap.matchMedia()
+
+      media.add('(min-width: 768px)', () => {
+        gsap.set(cards, { opacity: 0, scale: 0.1, x: 0, y: 0, transformOrigin: '50% 50%' })
+        gsap.set(cards[0], { rotation: -20 })
+        gsap.set(cards[1], { rotation: 22 })
+        gsap.set(cards[2], { rotation: -18 })
+        gsap.set(cards[3], { rotation: 24 })
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top top',
+            end: '+=3000',
+            scrub: 1,
+            pin: true,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        })
+
+        tl.to(cards[0], { scale: 1, opacity: 1, rotation: -2, duration: 0.8, ease: 'power3.out' })
+          .to(cards[0], { x: '-16vw', rotation: -7, duration: 0.65, ease: 'power2.inOut' })
+          .to(cards[1], { scale: 1, opacity: 1, x: '14vw', rotation: 4, duration: 0.75, ease: 'power3.out' }, '<')
+          .to(cards[0], { x: '-25vw', rotation: -8, duration: 0.65, ease: 'power2.inOut' })
+          .to(cards[1], { x: 0, rotation: -2, duration: 0.65, ease: 'power2.inOut' }, '<')
+          .to(cards[2], { scale: 1, opacity: 1, x: '25vw', rotation: 7, duration: 0.75, ease: 'power3.out' }, '<')
+          .to(cards[0], { x: '-34vw', rotation: -9, duration: 0.7, ease: 'power2.inOut' })
+          .to(cards[1], { x: '-11.5vw', rotation: -3, duration: 0.7, ease: 'power2.inOut' }, '<')
+          .to(cards[2], { x: '11.5vw', rotation: 3, duration: 0.7, ease: 'power2.inOut' }, '<')
+          .to(cards[3], { scale: 1, opacity: 1, x: '34vw', rotation: 9, duration: 0.8, ease: 'power3.out' }, '<')
+          .to(cards, { y: -8, duration: 0.35, ease: 'power1.inOut' })
       })
 
-      // Initial pre-animations (rings, scan lines, particles)
-      tl.fromTo(preAnimRef.current, 
-        { opacity: 0 },
-        { opacity: 1, duration: 0.45 }
-      )
-      .to(ringsRef.current,
-        { scale: 1.5, opacity: 0.8, duration: 0.6 },
-        0
-      )
-      .to(scanLineRef.current,
-        { y: '100vh', duration: 0.75 },
-        0.1
-      )
-      // Fade out pre-animations
-      .to(preAnimRef.current, {
-        opacity: 0,
-        duration: 0.35,
+      media.add('(max-width: 767px)', () => {
+        gsap.set(cards, { opacity: 0, scale: 0.12, x: 0, y: 0 })
+
+        const finalX = ['-42vw', '-14vw', '14vw', '42vw']
+        const rotations = [-8, -3, 3, 8]
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top top',
+            end: '+=2400',
+            scrub: 1,
+            pin: true,
+            anticipatePin: 1,
+          },
+        })
+
+        cards.forEach((card, index) => {
+          tl.to(card, {
+            opacity: 1,
+            scale: 1,
+            x: finalX[index],
+            rotation: rotations[index],
+            duration: 0.75,
+            ease: 'power3.out',
+          })
+
+          if (index < cards.length - 1) {
+            tl.to(cards.slice(0, index + 1), { scale: 0.86, duration: 0.3, ease: 'power2.inOut' })
+          }
+        })
+
+        tl.to(cards, { scale: 0.86, y: -6, duration: 0.35 })
       })
-      // Slide panels in diagonally
-      .to([topPanelRef.current, bottomPanelRef.current], {
-        x: 0,
-        duration: 1.4,
-        ease: 'power2.inOut',
-      })
-      // Lock together and fade in content
-      .to(contentRef.current, {
-        opacity: 1,
-        duration: 0.7,
-      }, '-=0.3')
+
+      return () => media.revert()
 
     }, containerRef)
 
@@ -134,52 +158,32 @@ function DiagonalRazorTransition() {
   }, [])
 
   return (
-    <div ref={containerRef} data-theme="dark" className="diagonal-razor-container">
-      {/* Pre-animations layer */}
-      <div ref={preAnimRef} className="diagonal-pre-anim">
-        {/* Concentric rings */}
-        <div ref={ringsRef} className="diagonal-rings">
-          <div className="diagonal-ring"></div>
-          <div className="diagonal-ring"></div>
-          <div className="diagonal-ring"></div>
+    <>
+      <section ref={containerRef} data-theme="light" className="cards-section">
+        <div className="cards-section__heading">
+          <span>Selected expressions</span>
+          <span>Scroll to collect · 01—04</span>
         </div>
-        
-        {/* Scan line */}
-        <div ref={scanLineRef} className="diagonal-scan-line"></div>
-        
-        {/* Floating particles */}
-        <div className="diagonal-particles">
-          {particles.map((particle, i) => (
-            <div 
-              key={i} 
-              className="diagonal-particle"
-              style={{
-                left: `${particle.left}%`,
-                top: `${particle.top}%`,
-                animationDelay: `${particle.delay}s`,
-                animationDuration: `${particle.duration}s`
-              }}
-            ></div>
+
+        <div className="cards-section__deck">
+          {showcaseCards.map((card) => (
+            <article className="brutalist-card" style={{ backgroundColor: card.color }} key={card.label}>
+              <div className="brutalist-card__image">
+                <img src={card.image} alt={card.alt} />
+              </div>
+              <span className="brutalist-card__tag">{card.label}</span>
+            </article>
           ))}
         </div>
-      </div>
 
-      {/* Diagonal panels */}
-      <div ref={topPanelRef} className="diagonal-panel diagonal-panel-top" />
-      <div ref={bottomPanelRef} className="diagonal-panel diagonal-panel-bottom" />
-      
-      {/* Content */}
-      <div ref={contentRef} className="diagonal-content">
-        <div className="text-center px-6">
-          <p className="text-white text-sm uppercase tracking-[0.4em] mb-4">
-            Unveiling Excellence
-          </p>
-          <h3 className="font-metropolis-black text-4xl md:text-6xl uppercase text-white">
-            Our Foundation
-          </h3>
-        </div>
-      </div>
-    </div>
+        <span className="cards-section__index" aria-hidden="true">PICARVIEW®</span>
+      </section>
+
+      <section data-theme="dark" className="foundation-intro">
+        <p>Unveiling Excellence</p>
+        <h3>Our Foundation</h3>
+      </section>
+    </>
   )
 }
 
@@ -250,6 +254,24 @@ function AboutSection() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Pull the About panel over the final hero frames like the next card in a stack.
+      gsap.fromTo(
+        sectionRef.current,
+        { y: 120, borderTopLeftRadius: 48, borderTopRightRadius: 48 },
+        {
+          y: 0,
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 0,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top bottom',
+            end: 'top 58%',
+            scrub: true,
+          },
+        }
+      )
+
       gsap.fromTo(
         contentRef.current,
         { opacity: 0, y: 60 },
@@ -276,7 +298,7 @@ function AboutSection() {
       id="about"
       ref={sectionRef}
       data-theme="dark"
-      className="py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-black"
+      className="about-cover-section py-28 md:py-40 px-6 md:px-12 lg:px-24"
     >
       <div ref={contentRef} className="max-w-5xl mx-auto">
         <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-8">02 — Page</p>
@@ -438,77 +460,81 @@ function GoalSection() {
   )
 }
 
-// Services Section with Hover Cards
+// Scroll-written service statements over the open space in img5.
 function ServicesSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
-  const cardsRef = useRef<HTMLDivElement>(null)
-  const headingRef = useRef<HTMLHeadingElement>(null)
-
-  useSoftMaskReveal(headingRef, false)
 
   const services = [
     {
       title: 'Discovery',
       number: '01',
-      subServices: [
-        'Creative Idea Development',
-        'Visual & Identity Exploration',
-        'Creative Direction Alignment',
-        'Creative Discovery Workshops',
-      ],
+      statement: 'Finding the idea worth seeing',
     },
     {
       title: 'Strategy',
       number: '02',
-      subServices: [
-        'Campaign Planning',
-        'Concept Development',
-        'Brand & Audience Research',
-        'Creative Strategy & Insights',
-      ],
+      statement: 'Giving every visual a reason',
     },
     {
-      title: 'Innovation',
+      title: 'Direction',
       number: '03',
-      subServices: [
-        'Creative Innovation',
-        'Product Development',
-        'Creative Concepts Build-up',
-        'Pictures & Arts Development',
-      ],
+      statement: 'Shaping a language people feel',
     },
     {
       title: 'Expression',
       number: '04',
-      subServices: [
-        'Creative Design',
-        'Brand Expression',
-        'Photography, Videography',
-        'Visual Art & Experimental Content',
-      ],
+      statement: 'Making the work impossible to forget',
     },
   ]
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const cardElements = cardsRef.current?.querySelectorAll('.service-card')
-      if (!cardElements) return
+      const rows = gsap.utils.toArray<HTMLElement>('.service-script__row')
+      const timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top top',
+          end: '+=2200',
+          pin: true,
+          scrub: 1,
+          anticipatePin: 1,
+        },
+      })
 
-      gsap.fromTo(
-        cardElements,
-        { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: cardsRef.current,
-            start: 'top 75%',
-          },
-        }
+      timeline.fromTo(
+        '.service-script__eyebrow, .service-script__title',
+        { opacity: 0, x: 35 },
+        { opacity: 1, x: 0, duration: 0.45, stagger: 0.12, ease: 'power2.out' }
       )
+
+      rows.forEach((row) => {
+        const label = row.querySelector('.service-script__label')
+        const characters = row.querySelectorAll('.service-script__char')
+
+        timeline
+          .fromTo(label, { opacity: 0, x: 18 }, { opacity: 1, x: 0, duration: 0.18 })
+          .fromTo(
+            characters,
+            { opacity: 0, yPercent: 55, rotate: 4 },
+            {
+              opacity: 1,
+              yPercent: 0,
+              rotate: 0,
+              duration: 0.055,
+              stagger: 0.018,
+              ease: 'power2.out',
+            },
+            '<0.04'
+          )
+          .fromTo(
+            row.querySelector('.service-script__stroke'),
+            { scaleX: 0 },
+            { scaleX: 1, duration: 0.26, ease: 'power2.inOut' },
+            '<0.16'
+          )
+      })
+
+      timeline.to('.service-script__content', { y: -8, duration: 0.3, ease: 'power1.inOut' })
     }, sectionRef)
 
     return () => ctx.revert()
@@ -519,41 +545,32 @@ function ServicesSection() {
       id="services"
       ref={sectionRef}
       data-theme="light"
-      className="py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-white"
+      className="service-script"
     >
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-16">
-          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-4">05 — Services</p>
-          <h2 ref={headingRef} className="stylish-header text-4xl md:text-5xl lg:text-6xl soft-mask-reveal">
-            <span className="metropolis-upper text-black">SERVICE </span>
-            <span className="bacalisties-script text-black text-5xl md:text-6xl lg:text-7xl">pillars.</span>
-          </h2>
-        </div>
+      <img className="service-script__background" src="/images/img5.png" alt="Editorial fashion composition" />
+      <div className="service-script__wash" aria-hidden="true" />
 
-        <div
-          ref={cardsRef}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
+      <div className="service-script__content">
+        <p className="service-script__eyebrow">05 — Services</p>
+        <h2 className="service-script__title">
+          What we bring <span>to the frame</span>
+        </h2>
+
+        <div className="service-script__lines">
           {services.map((service) => (
-            <div key={service.title} className="service-card">
-              <div className="service-card-content">
-                <p className="text-xs uppercase tracking-[0.3em] text-zinc-500 mb-4">
-                  {service.number}
-                </p>
-                <h3 className="font-metropolis-black text-3xl md:text-4xl uppercase text-black mb-4">
-                  {service.title}
-                </h3>
-              </div>
-              <div className="service-card-expanded mt-6">
-                <ul className="space-y-3">
-                  {service.subServices.map((sub) => (
-                    <li key={sub} className="text-sm text-zinc-700 flex items-start gap-2">
-                      <span className="text-orange-500 mt-1">→</span>
-                      <span>{sub}</span>
-                    </li>
+            <div className={`service-script__row service-script__row--${service.number}`} key={service.title}>
+              <span className="service-script__label">{service.number} / {service.title}</span>
+              <p aria-label={service.statement}>
+                <span className="sr-only">{service.statement}</span>
+                <span aria-hidden="true">
+                  {service.statement.split('').map((character, index) => (
+                    <span className="service-script__char" key={`${character}-${index}`}>
+                      {character === ' ' ? '\u00a0' : character}
+                    </span>
                   ))}
-                </ul>
-              </div>
+                </span>
+              </p>
+              <span className="service-script__stroke" aria-hidden="true" />
             </div>
           ))}
         </div>
@@ -562,43 +579,67 @@ function ServicesSection() {
   )
 }
 
-// Works Gallery Section
+const workAccents = ['#ffb000', '#b9ff32', '#ff4fa3', '#22d9ee']
+
+// Aura-led, horizontally scrolling neo-brutalist work gallery.
 function WorksSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
-  const gridRef = useRef<HTMLDivElement>(null)
-  const headingRef = useRef<HTMLHeadingElement>(null)
-
-  useSoftMaskReveal(headingRef, false)
-
-  const colorBlocks = [
-    { gradient: 'bg-gradient-to-br from-blue-500 to-blue-700' },
-    { gradient: 'bg-gradient-to-br from-orange-500 to-orange-700' },
-    { gradient: 'bg-gradient-to-br from-blue-600 to-orange-600' },
-    { gradient: 'bg-gradient-to-br from-zinc-800 to-zinc-950' },
-    { gradient: 'bg-gradient-to-br from-orange-400 to-blue-600' },
-    { gradient: 'bg-gradient-to-br from-blue-400 to-zinc-800' },
-  ]
+  const trackRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const blocks = gridRef.current?.querySelectorAll('.work-block')
-      if (!blocks) return
+      const cards = gsap.utils.toArray<HTMLElement>('.aura-work__card')
+      const track = trackRef.current
+      if (!track || !cards.length) return
 
-      gsap.fromTo(
-        blocks,
-        { opacity: 0, scale: 0.9 },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: gridRef.current,
-            start: 'top 75%',
+      const getTravel = () => Math.max(0, track.scrollWidth - window.innerWidth + window.innerWidth * 0.12)
+      const timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top top',
+          end: () => `+=${Math.max(3600, getTravel() * 1.15)}`,
+          pin: true,
+          scrub: 1,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      })
+
+      timeline
+        .fromTo(
+          '.aura-work__orb',
+          { scale: 0.12, opacity: 0, rotation: -70 },
+          { scale: 1, opacity: 0.9, rotation: 35, duration: 0.8, stagger: 0.08, ease: 'power3.out' }
+        )
+        .fromTo(
+          '.aura-work__heading > *',
+          { opacity: 0, y: 55, rotateX: -50 },
+          { opacity: 1, y: 0, rotateX: 0, duration: 0.55, stagger: 0.1, ease: 'power3.out' },
+          0.18
+        )
+        .fromTo(
+          cards,
+          {
+            opacity: 0,
+            scale: 0.16,
+            y: (index) => index % 2 === 0 ? 180 : -160,
+            rotation: (index) => index % 2 === 0 ? -18 : 18,
           },
-        }
-      )
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            rotation: (index) => [-4, 3, -2, 5][index % 4],
+            duration: 0.7,
+            stagger: 0.08,
+            ease: 'back.out(1.25)',
+          },
+          0.45
+        )
+        .to(track, { x: () => -getTravel(), duration: 3.8, ease: 'none' })
+        .to('.aura-work__orb--one', { xPercent: 35, yPercent: -20, rotation: 145, duration: 3.8, ease: 'none' }, '<')
+        .to('.aura-work__orb--two', { xPercent: -30, yPercent: 25, rotation: -120, duration: 3.8, ease: 'none' }, '<')
+        .to(cards, { y: (index) => index % 2 === 0 ? -12 : 12, duration: 0.35, ease: 'power1.inOut' })
     }, sectionRef)
 
     return () => ctx.revert()
@@ -609,40 +650,42 @@ function WorksSection() {
       id="work"
       ref={sectionRef}
       data-theme="dark"
-      className="py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-black"
+      className="aura-work"
     >
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-16">
-          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-4">06 — Project Page</p>
-          <h2 ref={headingRef} className="stylish-header text-4xl md:text-5xl lg:text-6xl soft-mask-reveal">
-            <span className="metropolis-upper text-white">PROJECT </span>
-            <span className="bacalisties-script text-white text-5xl md:text-6xl lg:text-7xl">Page</span>
-          </h2>
-          <p className="mt-6 max-w-3xl text-base md:text-lg text-zinc-300 leading-relaxed">
-            We bring your ideas to life, evolve them across multiple dimensions, connect with their environment, and
-            leave a lasting impression.
-          </p>
-          <a
-            href="#work"
-            className="mt-8 inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/10 px-6 py-3 text-[0.72rem] uppercase tracking-[0.28em] text-white backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/15"
-          >
-            Check Our Works
-            <ArrowRight className="h-4 w-4" />
-          </a>
-        </div>
+      <div className="aura-work__atmosphere" aria-hidden="true">
+        <div className="aura-work__orb aura-work__orb--one" />
+        <div className="aura-work__orb aura-work__orb--two" />
+        <div className="aura-work__orb aura-work__orb--three" />
+      </div>
 
-        <div
-          ref={gridRef}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {colorBlocks.map((block, index) => (
-            <div key={index} className={`work-block ${block.gradient}`}>
-              <div className="work-block-overlay">
-                <p className="text-white text-sm uppercase tracking-[0.3em]">Coming Soon</p>
-              </div>
+      <header className="aura-work__heading">
+        <p>06 — Project Page</p>
+        <h2><span>Selected</span> work with an aura.</h2>
+        <div className="aura-work__counter">12 projects · Scroll to explore</div>
+      </header>
+
+      <div ref={trackRef} className="aura-work__track">
+        {Array.from({ length: 12 }, (_, index) => (
+          <article
+            className="aura-work__card"
+            style={{ backgroundColor: workAccents[index % workAccents.length] }}
+            key={`work-${index + 1}`}
+          >
+            <div className="aura-work__image-wrap">
+              <img src={`/images/work${index + 1}.png`} alt={`Picarview selected work ${index + 1}`} />
             </div>
-          ))}
-        </div>
+            <footer>
+              <span>{String(index + 1).padStart(2, '0')} / 12</span>
+              <strong>{['Identity', 'Campaign', 'Image-making', 'Art direction'][index % 4]}</strong>
+            </footer>
+          </article>
+        ))}
+      </div>
+
+      <div className="aura-work__rail" aria-hidden="true">
+        <span>Drag through the atmosphere</span>
+        <i />
+        <span>Picarview®</span>
       </div>
     </section>
   )
@@ -873,16 +916,15 @@ export function ContentSections() {
   return (
     <div
       ref={contentRef}
-      className="content-section relative mt-[100vh]"
+      className="content-section content-cover-flow relative"
     >
       <div className="absolute top-0 left-0 right-0 h-px bg-white/20" />
 
       <AboutSection />
-      <DiagonalRazorTransition />
+      <InteractiveCardsTransition />
       <MissionVisionSection />
       <GoalSection />
       <ServicesSection />
-      <ParallaxWindowWorks />
       <WorksSection />
       <PersonalitySection />
       <PromiseSection />
