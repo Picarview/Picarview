@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build && opennextjs-cloudflare build --skipNextBuild",
+    "generate:hero-manifest": "node scripts/generate-hero-manifest.mjs",
+    "dev": "npm run generate:hero-manifest && next dev",
+    "build": "npm run generate:hero-manifest && next build && opennextjs-cloudflare build --skipNextBuild",
     "build:cloudflare": "npm run build",
     "preview:cloudflare": "npm run build && opennextjs-cloudflare preview",
     "deploy:cloudflare": "npm run build && opennextjs-cloudflare deploy",
