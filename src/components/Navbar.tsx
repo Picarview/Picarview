@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -70,7 +71,7 @@ export function Navbar() {
 
   return (
     <>
-      <a
+      <Link
         href="/"
         className="fixed left-6 top-4 z-50 mix-blend-difference"
         aria-label="Picarview home"
@@ -85,7 +86,7 @@ export function Navbar() {
             priority
           />
         </div>
-      </a>
+      </Link>
 
       <nav
         ref={navRef}
