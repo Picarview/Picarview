@@ -9,7 +9,7 @@ import { ArrowRight } from 'lucide-react'
 gsap.registerPlugin(ScrollTrigger)
 
 // Soft Mask Reveal Hook for headings - preserves existing structure
-function useSoftMaskReveal(elementRef: React.RefObject<HTMLElement>, splitByChar = false) {
+function useSoftMaskReveal<T extends HTMLElement>(elementRef: React.RefObject<T | null>, splitByChar = false) {
   useEffect(() => {
     if (!elementRef.current) return
 
