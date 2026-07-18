@@ -29,47 +29,64 @@ export function Hero({ frames }: HeroProps) {
 
     if (!section || !stage || !canvas || !context) return
 
-    const isMobile = window.matchMedia('(max-width: 767px)').matches
-    const prefersDataSavings = 'connection' in navigator &&
-      Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData)
+    type DeviceNavigator = Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string }
+      deviceMemory?: number
+    }
 
-    // Phones use every second source frame. The scroll mapping remains continuous while
-    // network transfer and UHD decoding are nearly halved.
-    const sequenceFrames = isMobile || prefersDataSavings
-      ? frames.filter((_, index) => index % 2 === 0 || index === frames.length - 1)
-      : frames
+    const device = navigator as DeviceNavigator
+    const isMobile = window.matchMedia('(max-width: 767px)').matches
+    const prefersDataSavings = Boolean(device.connection?.saveData)
+    const hasSlowConnection = /(^|-)2g$/.test(device.connection?.effectiveType ?? '')
+    const isLowMemory = typeof device.deviceMemory === 'number' && device.deviceMemory <= 4
+    const hasFewCpuCores = navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4
+    const isConstrained = prefersDataSavings || hasSlowConnection || isLowMemory || hasFewCpuCores
+
+    // Mobile and constrained devices keep every second or third source frame. Progress
+    // still spans the entire sequence, but decoded-image RAM and network work are reduced.
+    const frameStride = prefersDataSavings || hasSlowConnection
+      ? 3
+      : isMobile || isLowMemory
+        ? 2
+        : 1
+    const sequenceFrames = frames.filter(
+      (_, index) => index % frameStride === 0 || index === frames.length - 1
+    )
     const frameCount = sequenceFrames.length
     if (!frameCount) return
 
     const images: Array<HTMLImageElement | undefined> = new Array(frameCount)
+    const decodedFrames = new Set<number>()
     const sequence = { frame: 0 }
     const loadQueue: number[] = []
     const queuedFrames = new Set<number>()
     const loadingFrames = new Set<number>()
-    const preloadRadius = isMobile ? 6 : 12
-    const cacheRadius = isMobile ? 12 : 20
-    const maxConcurrentLoads = isMobile ? 2 : 4
+    const preloadRadius = isMobile ? 5 : 10
+    const maxConcurrentLoads = prefersDataSavings ? 4 : isMobile ? 6 : 10
     let activeLoads = 0
     let lastDrawnFrame = -1
+    let requestedFrame = 0
+    let renderRequest = 0
     let isDisposed = false
 
-    // Draw the current frame at device resolution while preserving its 16:9 crop.
+    // Draw only decoded images, preserving object-fit: cover without DOM layout work.
     const render = () => {
-      const frame = Math.max(0, Math.min(frameCount - 1, Math.round(sequence.frame)))
+      renderRequest = 0
+      const frame = Math.max(0, Math.min(frameCount - 1, requestedFrame))
       let drawableFrame = frame
       let image = images[drawableFrame]
 
       // Keep the last nearby decoded image visible if the exact frame is still loading.
-      if (!image?.complete || !image.naturalWidth) {
-        for (let offset = 1; offset <= preloadRadius; offset += 1) {
+      if (!image || !decodedFrames.has(drawableFrame)) {
+        for (let offset = 1; offset < frameCount; offset += 1) {
           const previous = images[frame - offset]
           const next = images[frame + offset]
-          if (previous?.complete && previous.naturalWidth) {
+          if (previous && decodedFrames.has(frame - offset)) {
             image = previous
             drawableFrame = frame - offset
             break
           }
-          if (next?.complete && next.naturalWidth) {
+          if (next && decodedFrames.has(frame + offset)) {
             image = next
             drawableFrame = frame + offset
             break
@@ -77,7 +94,7 @@ export function Hero({ frames }: HeroProps) {
         }
       }
 
-      if (!image?.complete || !image.naturalWidth || drawableFrame === lastDrawnFrame) return
+      if (!image?.naturalWidth || drawableFrame === lastDrawnFrame) return
 
       const canvasRatio = canvas.width / canvas.height
       const imageRatio = image.naturalWidth / image.naturalHeight
@@ -108,86 +125,112 @@ export function Hero({ frames }: HeroProps) {
       lastDrawnFrame = drawableFrame
     }
 
+    // Scroll, decode, and resize events can happen together. Coalesce them into one paint.
+    const requestRender = (force = false) => {
+      if (force) lastDrawnFrame = -1
+      if (renderRequest) return
+      renderRequest = window.requestAnimationFrame(render)
+    }
+
+    const waitForImageLoad = (image: HTMLImageElement) =>
+      new Promise<void>((resolve, reject) => {
+        if (image.complete) {
+          image.naturalWidth ? resolve() : reject(new Error('Frame failed to load'))
+          return
+        }
+        image.onload = () => resolve()
+        image.onerror = () => reject(new Error('Frame failed to load'))
+      })
+
+    const loadFrame = async (index: number) => {
+      const image = new Image()
+      image.decoding = 'async'
+      image.fetchPriority = index === 0 ? 'high' : 'auto'
+      images[index] = image
+      image.src = sequenceFrames[index]
+
+      // decode() forces decompression before scroll-time drawImage(). The load fallback
+      // covers browsers that reject decode() even though the image itself loaded correctly.
+      try {
+        await image.decode()
+      } catch {
+        await waitForImageLoad(image)
+      }
+
+      if (isDisposed || !image.naturalWidth) return
+      decodedFrames.add(index)
+      if (Math.abs(index - requestedFrame) <= preloadRadius || index === 0) requestRender()
+    }
+
     const pumpLoadQueue = () => {
       while (!isDisposed && activeLoads < maxConcurrentLoads && loadQueue.length) {
         const index = loadQueue.shift()
         if (index === undefined) break
         queuedFrames.delete(index)
 
-        if (images[index] || loadingFrames.has(index)) continue
-
-        const image = new Image()
-        image.decoding = 'async'
-        images[index] = image
+        if (decodedFrames.has(index) || loadingFrames.has(index)) continue
         loadingFrames.add(index)
         activeLoads += 1
 
-        const finish = () => {
+        void loadFrame(index).catch(() => {
+          images[index] = undefined
+        }).finally(() => {
           loadingFrames.delete(index)
           activeLoads -= 1
           if (!isDisposed) pumpLoadQueue()
-        }
-
-        image.onload = () => {
-          if (!isDisposed && Math.abs(index - Math.round(sequence.frame)) <= preloadRadius) render()
-          finish()
-        }
-        image.onerror = () => {
-          images[index] = undefined
-          finish()
-        }
-        image.src = sequenceFrames[index]
+        })
       }
     }
 
-    const queueFrame = (index: number) => {
+    const queueFrame = (index: number, urgent = false) => {
       if (
         index < 0 ||
         index >= frameCount ||
-        images[index] ||
+        decodedFrames.has(index) ||
         loadingFrames.has(index) ||
-        queuedFrames.has(index)
+        (queuedFrames.has(index) && !urgent)
       ) return
 
-      loadQueue.push(index)
+      // Promote frames around a fast scroll jump ahead of background loading.
+      if (queuedFrames.has(index)) {
+        const queuedIndex = loadQueue.indexOf(index)
+        if (queuedIndex >= 0) loadQueue.splice(queuedIndex, 1)
+      }
+      urgent ? loadQueue.unshift(index) : loadQueue.push(index)
       queuedFrames.add(index)
     }
 
     const prepareFramesAround = (frame: number) => {
       const roundedFrame = Math.round(frame)
+      requestedFrame = roundedFrame
 
-      // Re-prioritize pending work around the newest scroll position.
-      loadQueue.length = 0
-      queuedFrames.clear()
-      queueFrame(roundedFrame)
-      for (let offset = 1; offset <= preloadRadius; offset += 1) {
-        queueFrame(roundedFrame + offset)
-        queueFrame(roundedFrame - offset)
+      // Current and nearby frames take priority over progressive sequential preloading.
+      for (let offset = preloadRadius; offset >= 1; offset -= 1) {
+        queueFrame(roundedFrame + offset, true)
+        queueFrame(roundedFrame - offset, true)
       }
+      queueFrame(roundedFrame, true)
       pumpLoadQueue()
-
-      // Release distant decoded images. Browser HTTP caching makes reverse scrolling inexpensive.
-      images.forEach((image, index) => {
-        if (image && !loadingFrames.has(index) && Math.abs(index - roundedFrame) > cacheRadius) {
-          image.onload = null
-          image.onerror = null
-          images[index] = undefined
-        }
-      })
+      requestRender()
     }
 
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect()
-      // Mobile uses 1x while desktop retains a modest Retina boost.
-      const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.25)
-      canvas.width = Math.max(1, Math.round(rect.width * dpr))
-      canvas.height = Math.max(1, Math.round(rect.height * dpr))
-      lastDrawnFrame = -1
-      render()
+      // Cap physical canvas pixels to reduce GPU fill cost on low-end devices.
+      const dprCap = isConstrained ? 1 : isMobile ? 1.25 : 1.5
+      const dpr = Math.min(window.devicePixelRatio || 1, dprCap)
+      const width = Math.max(1, Math.round(rect.width * dpr))
+      const height = Math.max(1, Math.round(rect.height * dpr))
+      if (canvas.width === width && canvas.height === height) return
+      canvas.width = width
+      canvas.height = height
+      requestRender(true)
     }
 
-    // Prime the opening frames; the rolling cache follows the user's scroll position.
-    for (let index = 0; index < Math.min(isMobile ? 8 : 16, frameCount); index += 1) queueFrame(index)
+    // Frame zero is eager/high-priority. The sampled remainder decodes progressively with
+    // bounded concurrency, so page interactivity never waits for the full sequence.
+    queueFrame(0, true)
+    for (let index = 1; index < frameCount; index += 1) queueFrame(index)
     pumpLoadQueue()
 
     const resizeObserver = new ResizeObserver(resizeCanvas)
@@ -208,7 +251,7 @@ export function Hero({ frames }: HeroProps) {
           trigger: section,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: true,
+          scrub: 0.15,
           pin: stage,
           pinSpacing: false,
           anticipatePin: 1,
@@ -222,7 +265,6 @@ export function Hero({ frames }: HeroProps) {
         duration: 1,
         onUpdate: () => {
           prepareFramesAround(sequence.frame)
-          render()
         },
       }, 0)
 
@@ -268,8 +310,10 @@ export function Hero({ frames }: HeroProps) {
 
     return () => {
       isDisposed = true
+      if (renderRequest) window.cancelAnimationFrame(renderRequest)
       loadQueue.length = 0
       queuedFrames.clear()
+      decodedFrames.clear()
       resizeObserver.disconnect()
       ctx.revert()
       images.forEach((image) => {

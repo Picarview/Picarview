@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ArrowRight } from 'lucide-react'
@@ -75,83 +76,101 @@ const showcaseCards = [
   { image: '/images/img4.png', label: '04 / VISUALS', color: '#22d9ee', alt: 'Picarview visual design' },
 ]
 
-// Pinned neo-brutalist card build between About and Our Foundation.
+// Neo-brutalist collection that assembles automatically when it enters view.
 function InteractiveCardsTransition() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       const cards = gsap.utils.toArray<HTMLElement>('.brutalist-card')
+      const heading = gsap.utils.toArray<HTMLElement>('.cards-section__heading span')
       const media = gsap.matchMedia()
 
-      media.add('(min-width: 768px)', () => {
-        gsap.set(cards, { opacity: 0, scale: 0.1, x: 0, y: 0, transformOrigin: '50% 50%' })
-        gsap.set(cards[0], { rotation: -20 })
-        gsap.set(cards[1], { rotation: 22 })
-        gsap.set(cards[2], { rotation: -18 })
-        gsap.set(cards[3], { rotation: 24 })
-
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: 'top top',
-            end: '+=3000',
-            scrub: 1,
-            pin: true,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
+      media.add('(prefers-reduced-motion: reduce) and (min-width: 768px)', () => {
+        gsap.set(heading, { opacity: 1, y: 0 })
+        gsap.set(cards, {
+          opacity: 1,
+          scale: 1,
+          x: (index) => ['-34vw', '-11.5vw', '11.5vw', '34vw'][index],
+          y: -8,
+          rotation: (index) => [-9, -3, 3, 9][index],
         })
-
-        tl.to(cards[0], { scale: 1, opacity: 1, rotation: -2, duration: 0.8, ease: 'power3.out' })
-          .to(cards[0], { x: '-16vw', rotation: -7, duration: 0.65, ease: 'power2.inOut' })
-          .to(cards[1], { scale: 1, opacity: 1, x: '14vw', rotation: 4, duration: 0.75, ease: 'power3.out' }, '<')
-          .to(cards[0], { x: '-25vw', rotation: -8, duration: 0.65, ease: 'power2.inOut' })
-          .to(cards[1], { x: 0, rotation: -2, duration: 0.65, ease: 'power2.inOut' }, '<')
-          .to(cards[2], { scale: 1, opacity: 1, x: '25vw', rotation: 7, duration: 0.75, ease: 'power3.out' }, '<')
-          .to(cards[0], { x: '-34vw', rotation: -9, duration: 0.7, ease: 'power2.inOut' })
-          .to(cards[1], { x: '-11.5vw', rotation: -3, duration: 0.7, ease: 'power2.inOut' }, '<')
-          .to(cards[2], { x: '11.5vw', rotation: 3, duration: 0.7, ease: 'power2.inOut' }, '<')
-          .to(cards[3], { scale: 1, opacity: 1, x: '34vw', rotation: 9, duration: 0.8, ease: 'power3.out' }, '<')
-          .to(cards, { y: -8, duration: 0.35, ease: 'power1.inOut' })
       })
 
-      media.add('(max-width: 767px)', () => {
-        gsap.set(cards, { opacity: 0, scale: 0.12, x: 0, y: 0 })
+      media.add('(prefers-reduced-motion: reduce) and (max-width: 767px)', () => {
+        gsap.set(heading, { opacity: 1, y: 0 })
+        gsap.set(cards, {
+          opacity: 1,
+          scale: 0.78,
+          x: (index) => ['-39vw', '-13vw', '13vw', '39vw'][index],
+          y: -4,
+          rotation: (index) => [-8, -3, 3, 8][index],
+        })
+      })
 
-        const finalX = ['-42vw', '-14vw', '14vw', '42vw']
-        const rotations = [-8, -3, 3, 8]
+      media.add('(prefers-reduced-motion: no-preference)', () => {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: containerRef.current,
-            start: 'top top',
-            end: '+=2400',
-            scrub: 1,
-            pin: true,
-            anticipatePin: 1,
+            start: 'top 72%',
+            toggleActions: 'play none none none',
+            once: true,
           },
         })
 
-        cards.forEach((card, index) => {
-          tl.to(card, {
-            opacity: 1,
-            scale: 1,
-            x: finalX[index],
-            rotation: rotations[index],
-            duration: 0.75,
-            ease: 'power3.out',
+        tl.fromTo(
+          heading,
+          { opacity: 0, y: 18 },
+          { opacity: 1, y: 0, duration: 0.45, stagger: 0.08, ease: 'power2.out' }
+        )
+
+        media.add('(min-width: 768px)', () => {
+          gsap.set(cards, {
+            opacity: 0,
+            scale: 0.12,
+            x: 0,
+            y: 80,
+            z: -900,
+            rotation: (index) => [-22, 18, -17, 24][index],
+            transformOrigin: '50% 50%',
           })
 
-          if (index < cards.length - 1) {
-            tl.to(cards.slice(0, index + 1), { scale: 0.86, duration: 0.3, ease: 'power2.inOut' })
-          }
+          tl.to(cards, {
+            opacity: 1,
+            scale: 1,
+            x: (index) => ['-34vw', '-11.5vw', '11.5vw', '34vw'][index],
+            y: -8,
+            z: 0,
+            rotation: (index) => [-9, -3, 3, 9][index],
+            duration: 0.9,
+            stagger: 0.16,
+            ease: 'back.out(1.25)',
+          }, '-=0.12')
         })
 
-        tl.to(cards, { scale: 0.86, y: -6, duration: 0.35 })
+        media.add('(max-width: 767px)', () => {
+          gsap.set(cards, {
+            opacity: 0,
+            scale: 0.15,
+            x: 0,
+            y: 56,
+            rotation: (index) => [-18, 14, -12, 18][index],
+          })
+
+          tl.to(cards, {
+            opacity: 1,
+            scale: 0.78,
+            x: (index) => ['-39vw', '-13vw', '13vw', '39vw'][index],
+            y: -4,
+            rotation: (index) => [-8, -3, 3, 8][index],
+            duration: 0.72,
+            stagger: 0.13,
+            ease: 'back.out(1.15)',
+          }, '-=0.1')
+        })
       })
 
       return () => media.revert()
-
     }, containerRef)
 
     return () => ctx.revert()
@@ -162,7 +181,7 @@ function InteractiveCardsTransition() {
       <section ref={containerRef} data-theme="light" className="cards-section">
         <div className="cards-section__heading">
           <span>Selected expressions</span>
-          <span>Scroll to collect · 01—04</span>
+          <span>Arriving together · 01—04</span>
         </div>
 
         <div className="cards-section__deck">
@@ -460,7 +479,7 @@ function GoalSection() {
   )
 }
 
-// Scroll-written service statements over the open space in img5.
+// Service statements write themselves when the composition enters the viewport.
 function ServicesSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
 
@@ -488,56 +507,69 @@ function ServicesSection() {
   ]
 
   useEffect(() => {
+    const media = gsap.matchMedia()
     const ctx = gsap.context(() => {
       const rows = gsap.utils.toArray<HTMLElement>('.service-script__row')
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top top',
-          end: '+=2200',
-          pin: true,
-          scrub: 1,
-          anticipatePin: 1,
-        },
+
+      media.add('(prefers-reduced-motion: reduce)', () => {
+        gsap.set(
+          '.service-script__eyebrow, .service-script__title, .service-script__label, .service-script__char',
+          { opacity: 1, x: 0, yPercent: 0, rotate: 0 }
+        )
+        gsap.set('.service-script__stroke', { scaleX: 1 })
       })
 
-      timeline.fromTo(
-        '.service-script__eyebrow, .service-script__title',
-        { opacity: 0, x: 35 },
-        { opacity: 1, x: 0, duration: 0.45, stagger: 0.12, ease: 'power2.out' }
-      )
+      media.add('(prefers-reduced-motion: no-preference)', () => {
+        const timeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 72%',
+            toggleActions: 'play none none none',
+            once: true,
+          },
+        })
 
-      rows.forEach((row) => {
-        const label = row.querySelector('.service-script__label')
-        const characters = row.querySelectorAll('.service-script__char')
+        timeline.fromTo(
+          '.service-script__eyebrow, .service-script__title',
+          { opacity: 0, x: 35 },
+          { opacity: 1, x: 0, duration: 0.45, stagger: 0.12, ease: 'power2.out' }
+        )
 
-        timeline
-          .fromTo(label, { opacity: 0, x: 18 }, { opacity: 1, x: 0, duration: 0.18 })
-          .fromTo(
-            characters,
-            { opacity: 0, yPercent: 55, rotate: 4 },
-            {
-              opacity: 1,
-              yPercent: 0,
-              rotate: 0,
-              duration: 0.055,
-              stagger: 0.018,
-              ease: 'power2.out',
-            },
-            '<0.04'
-          )
-          .fromTo(
-            row.querySelector('.service-script__stroke'),
-            { scaleX: 0 },
-            { scaleX: 1, duration: 0.26, ease: 'power2.inOut' },
-            '<0.16'
-          )
+        rows.forEach((row) => {
+          const label = row.querySelector('.service-script__label')
+          const characters = row.querySelectorAll('.service-script__char')
+
+          timeline
+            .fromTo(label, { opacity: 0, x: 18 }, { opacity: 1, x: 0, duration: 0.18 })
+            .fromTo(
+              characters,
+              { opacity: 0, yPercent: 55, rotate: 4 },
+              {
+                opacity: 1,
+                yPercent: 0,
+                rotate: 0,
+                duration: 0.055,
+                stagger: 0.018,
+                ease: 'power2.out',
+              },
+              '<0.04'
+            )
+            .fromTo(
+              row.querySelector('.service-script__stroke'),
+              { scaleX: 0 },
+              { scaleX: 1, duration: 0.26, ease: 'power2.inOut' },
+              '<0.16'
+            )
+        })
+
+        timeline.to('.service-script__content', { y: -8, duration: 0.3, ease: 'power1.inOut' })
       })
-
-      timeline.to('.service-script__content', { y: -8, duration: 0.3, ease: 'power1.inOut' })
     }, sectionRef)
 
-    return () => ctx.revert()
+    return () => {
+      media.revert()
+      ctx.revert()
+    }
   }, [])
 
   return (
@@ -660,8 +692,12 @@ function WorksSection() {
 
       <header className="aura-work__heading">
         <p>06 — Project Page</p>
-        <h2><span>Selected</span> work with an aura.</h2>
+        <h2><span>Selected</span> work, thoughtfully crafted.</h2>
         <div className="aura-work__counter">12 projects · Scroll to explore</div>
+        <Link href="/projects" className="aura-work__cta">
+          View all projects
+          <ArrowRight className="h-4 w-4" />
+        </Link>
       </header>
 
       <div ref={trackRef} className="aura-work__track">
@@ -892,9 +928,15 @@ function Footer() {
   return (
     <footer data-theme="light" className="py-12 px-6 md:px-12 lg:px-24 border-t border-black/10 bg-white">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-2">
-          <span className="font-metropolis-black text-2xl uppercase text-black">Picarview</span>
-        </div>
+        <Link href="/" aria-label="Picarview home" className="block transition-opacity hover:opacity-70">
+          <Image
+            src="/logo-black.png"
+            alt="Picarview"
+            width={150}
+            height={60}
+            className="h-10 w-auto object-contain"
+          />
+        </Link>
         <p className="text-zinc-500 text-sm">© 2026 Picarview. All rights reserved.</p>
         <div className="flex items-center gap-6">
           <a href="#" className="text-zinc-500 hover:text-black transition-colors text-sm uppercase tracking-[0.25em]">
