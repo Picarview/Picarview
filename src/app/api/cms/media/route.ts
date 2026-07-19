@@ -17,6 +17,8 @@ export async function GET(request: Request) {
   return new Response(object.body, {
     headers: {
       'Content-Type': object.httpMetadata?.contentType ?? 'application/octet-stream',
+      'Content-Disposition': 'inline',
+      'X-Content-Type-Options': 'nosniff',
       'Cache-Control': object.httpMetadata?.cacheControl ?? 'public, max-age=31536000, immutable',
       ETag: object.httpEtag,
     },

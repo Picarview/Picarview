@@ -83,3 +83,7 @@ Open `/admin`, sign in, and upload a test partner logo and project image. Publis
 - D1 stores the object key, title, subtitle, alt text, order, and publication state.
 - Deleting an entry removes both its D1 record and its R2 object.
 - The upload endpoint accepts PNG, JPG, WebP, and AVIF files up to 10 MB.
+- File signatures are checked server-side; changing an unsafe file's extension or MIME type is not sufficient.
+- Login attempts are limited to five failures per client IP in a 15-minute window.
+- Admin sessions use signed, `HttpOnly`, `Secure`, `SameSite=Strict` cookies with a 12-hour lifetime.
+- Global CSP, clickjacking, MIME-sniffing, referrer, browser-permission, and HTTPS headers are enabled.

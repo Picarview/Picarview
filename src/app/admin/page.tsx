@@ -202,7 +202,7 @@ export default function AdminPage() {
           <h1>Admin access</h1>
           <label>
             <span>Password</span>
-            <input name="password" type="password" autoComplete="current-password" required autoFocus />
+            <input name="password" type="password" autoComplete="current-password" maxLength={512} required autoFocus />
           </label>
           <button disabled={busy}>{busy ? 'Checking…' : 'Enter dashboard'}</button>
           {message && <p className="admin-message">{message}</p>}
@@ -231,9 +231,9 @@ export default function AdminPage() {
           <label><span>Content type</span>
             <select name="type"><option value="project">Project</option><option value="partner">Partner logo</option></select>
           </label>
-          <label><span>Title</span><input name="title" placeholder="Project or partner name" required /></label>
-          <label><span>Subtitle</span><input name="subtitle" placeholder="Identity, campaign, industry…" /></label>
-          <label><span>Image description</span><input name="altText" placeholder="Accessible description" required /></label>
+          <label><span>Title</span><input name="title" placeholder="Project or partner name" maxLength={120} required /></label>
+          <label><span>Subtitle</span><input name="subtitle" placeholder="Identity, campaign, industry…" maxLength={200} /></label>
+          <label><span>Image description</span><input name="altText" placeholder="Accessible description" maxLength={300} required /></label>
           <label><span>Status</span>
             <select name="published" defaultValue="true"><option value="true">Published</option><option value="false">Draft</option></select>
           </label>

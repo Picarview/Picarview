@@ -5,6 +5,7 @@ import {
   isSameOrigin,
   publicCmsItem,
   readCookie,
+  safeImageBytes,
   safeImageType,
   SESSION_COOKIE,
   verifyAdminSession,
@@ -28,9 +29,10 @@ export async function GET(request: Request) {
      FROM content_items ORDER BY type ASC, sort_order ASC, created_at DESC`
   ).all<CmsItem>()
 
-  return NextResponse.json({
-    items: (query.results ?? []).map((item) => ({ ...publicCmsItem(item), published: Boolean(item.published) })),
-  })
+  return NextResponse.json(
+    { items: (query.results ?? []).map((item) => ({ ...publicCmsItem(item), published: Boolean(item.published) })) },
+    { headers: { 'Cache-Control': 'no-store' } }
+  )
 }
 
 export async function POST(request: Request) {
@@ -40,6 +42,11 @@ export async function POST(request: Request) {
   const { CMS_DB, CMS_MEDIA } = getCmsEnv()
   if (!CMS_DB || !CMS_MEDIA) {
     return NextResponse.json({ error: 'D1 or R2 is not configured.' }, { status: 503 })
+  }
+
+  const contentLength = Number(request.headers.get('content-length') ?? 0)
+  if (contentLength > 11 * 1024 * 1024) {
+    return NextResponse.json({ error: 'Upload request is too large.' }, { status: 413 })
   }
 
   const form = await request.formData()
@@ -53,8 +60,18 @@ export async function POST(request: Request) {
   if ((type !== 'partner' && type !== 'project') || !title || !altText || !(file instanceof File)) {
     return NextResponse.json({ error: 'Type, title, alt text, and image are required.' }, { status: 400 })
   }
+  if (title.length > 120 || subtitle.length > 200 || altText.length > 300) {
+    return NextResponse.json(
+      { error: 'Title must be 120 characters or fewer, subtitle 200, and description 300.' },
+      { status: 400 }
+    )
+  }
   if (!safeImageType(file) || file.size > 10 * 1024 * 1024) {
     return NextResponse.json({ error: 'Use PNG, JPG, WebP, or AVIF up to 10 MB.' }, { status: 400 })
+  }
+  const fileBuffer = await file.arrayBuffer()
+  if (!safeImageBytes(new Uint8Array(fileBuffer), file.type)) {
+    return NextResponse.json({ error: 'The uploaded file does not contain a valid supported image.' }, { status: 400 })
   }
 
   const id = crypto.randomUUID()
@@ -64,7 +81,7 @@ export async function POST(request: Request) {
   ).bind(type).first<{ value: number }>()
   const sortOrder = nextOrder?.value ?? 1
 
-  await CMS_MEDIA.put(objectKey, await file.arrayBuffer(), {
+  await CMS_MEDIA.put(objectKey, fileBuffer, {
     httpMetadata: { contentType: file.type, cacheControl: 'public, max-age=31536000, immutable' },
   })
 
@@ -90,7 +107,9 @@ export async function DELETE(request: Request) {
   if (!CMS_DB || !CMS_MEDIA) return NextResponse.json({ error: 'CMS is not configured.' }, { status: 503 })
 
   const id = new URL(request.url).searchParams.get('id')
-  if (!id) return NextResponse.json({ error: 'Missing id.' }, { status: 400 })
+  if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+    return NextResponse.json({ error: 'Invalid id.' }, { status: 400 })
+  }
 
   const item = await CMS_DB.prepare('SELECT object_key FROM content_items WHERE id = ?')
     .bind(id).first<{ object_key: string }>()
