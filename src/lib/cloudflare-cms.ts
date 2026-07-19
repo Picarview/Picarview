@@ -19,6 +19,7 @@ interface CmsDatabase {
 interface CmsObject {
   body: ReadableStream
   httpEtag: string
+  size: number
   httpMetadata?: { contentType?: string; cacheControl?: string }
 }
 
@@ -26,7 +27,7 @@ interface CmsBucket {
   put(key: string, value: ArrayBuffer, options?: {
     httpMetadata?: { contentType?: string; cacheControl?: string }
   }): Promise<unknown>
-  get(key: string): Promise<CmsObject | null>
+  get(key: string, options?: { range?: { offset: number; length?: number } }): Promise<CmsObject | null>
   delete(key: string): Promise<void>
 }
 
@@ -47,6 +48,16 @@ export interface CmsItem {
   sort_order: number
   published: number
   created_at: string
+}
+
+export interface CmsSiteMedia {
+  slot: 'hero' | 'expression-1' | 'expression-2' | 'expression-3' | 'expression-4'
+  media_type: 'image' | 'video'
+  title: string
+  alt_text: string
+  object_key: string
+  mime_type: string
+  updated_at: string
 }
 
 export function getCmsEnv(): CmsEnv {
@@ -145,6 +156,21 @@ export function safeImageBytes(bytes: Uint8Array, type: string) {
     if (bytes.length < 12 || new TextDecoder().decode(bytes.subarray(4, 8)) !== 'ftyp') return false
     const brand = new TextDecoder().decode(bytes.subarray(8, Math.min(bytes.length, 32)))
     return brand.includes('avif') || brand.includes('avis')
+  }
+  return false
+}
+
+export function safeVideoType(file: File) {
+  return ['video/mp4', 'video/webm'].includes(file.type)
+}
+
+export function safeVideoBytes(bytes: Uint8Array, type: string) {
+  if (type === 'video/mp4') {
+    return bytes.length >= 12 && new TextDecoder().decode(bytes.subarray(4, 8)) === 'ftyp'
+  }
+  if (type === 'video/webm') {
+    return bytes.length >= 4
+      && bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3
   }
   return false
 }

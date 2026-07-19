@@ -80,6 +80,7 @@ body {
 }
 
 .hero-sequence__canvas,
+.hero-sequence__custom-media,
 .hero-sequence__shade {
   position: absolute;
   inset: 0;
@@ -93,6 +94,16 @@ body {
   filter: contrast(1.09) saturate(1.08) brightness(0.96);
   will-change: transform;
   transform: translate3d(0, 0, 0);
+}
+
+.hero-sequence__custom-media {
+  display: block;
+  z-index: 0;
+  object-fit: cover;
+  object-position: center;
+  filter: contrast(1.04) saturate(1.03) brightness(0.84);
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 .hero-sequence__shade {
@@ -1883,6 +1894,94 @@ body {
 .admin-header > div:last-child { display: flex; align-items: center; gap: 1rem; }
 .admin-header button { display: inline-flex; align-items: center; gap: 0.5rem; }
 
+.admin-site-media {
+  max-width: 1500px;
+  margin: 0 auto 3rem;
+  padding: clamp(1.25rem, 2.5vw, 2.25rem);
+  border: 4px solid #111;
+  background: #22d9ee;
+  box-shadow: 10px 10px 0 #111;
+}
+.admin-site-media > header {
+  padding-bottom: 1.25rem;
+  border-bottom: 3px solid #111;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.admin-site-media > header p,
+.admin-media-slot label > span,
+.admin-media-slot__heading span {
+  font-family: var(--font-metropolis-black);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.admin-site-media > header h2 {
+  font-family: var(--font-metropolis-black);
+  font-size: clamp(1.5rem, 3vw, 3rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+.admin-site-media > header > span { max-width: 270px; font-size: 0.72rem; text-align: right; }
+.admin-site-media__grid {
+  margin-top: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+.admin-media-slot {
+  min-width: 0;
+  padding: 0.8rem;
+  border: 3px solid #111;
+  display: grid;
+  gap: 0.8rem;
+  background: #fff;
+}
+.admin-media-slot__preview {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 2px solid #111;
+  display: grid;
+  place-items: center;
+  background: #111;
+  color: #fff;
+}
+.admin-media-slot__preview video,
+.admin-media-slot__preview img { width: 100%; height: 100%; object-fit: cover; }
+.admin-media-slot__preview > span {
+  font-family: var(--font-metropolis-black);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.admin-media-slot__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+.admin-media-slot__heading h3 { font-family: var(--font-metropolis-black); font-size: 0.9rem; text-transform: uppercase; }
+.admin-media-slot__heading button { font-size: 0.58rem; text-decoration: underline; }
+.admin-media-slot label { display: grid; gap: 0.4rem; }
+.admin-media-slot input {
+  min-width: 0;
+  width: 100%;
+  padding: 0.55rem;
+  border: 2px solid #111;
+  font-size: 0.72rem;
+}
+.admin-media-slot__file { padding: 0.55rem; border: 2px dashed #111; }
+.admin-media-slot__file input { padding: 0; border: 0; }
+.admin-media-slot > button {
+  min-height: 42px;
+  padding: 0.65rem;
+  border: 2px solid #111;
+  color: #fff;
+  background: #111;
+  font-family: var(--font-metropolis-black);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .admin-layout {
   max-width: 1500px;
   margin: 0 auto;
@@ -2066,6 +2165,7 @@ body {
   background: #ff6b8b;
   box-shadow: 12px 12px 0 #fff;
 }
+.admin-delete-card--cyan { background: #22d9ee; }
 
 .admin-delete-card > span {
   display: block;
@@ -2133,6 +2233,9 @@ body {
   .admin-layout { grid-template-columns: 1fr; }
   .admin-library__tools { grid-template-columns: 1fr 1fr; }
   .admin-library__search { grid-column: 1 / -1; }
+  .admin-site-media > header { align-items: flex-start; flex-direction: column; }
+  .admin-site-media > header > span { text-align: left; }
+  .admin-site-media__grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 480px) {
@@ -2140,6 +2243,7 @@ body {
   .admin-library__search { grid-column: auto; }
   .admin-item { grid-template-columns: 70px 1fr auto; gap: 0.7rem; }
   .admin-item__image { width: 70px; }
+  .admin-site-media__grid { grid-template-columns: 1fr; }
 }
 
 /* Contact page */

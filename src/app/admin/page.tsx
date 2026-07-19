@@ -22,6 +22,15 @@ interface AdminResponse {
   items?: AdminItem[]
 }
 
+interface AdminSiteMedia {
+  slot: 'hero' | 'expression-1' | 'expression-2' | 'expression-3' | 'expression-4'
+  mediaType: 'image' | 'video'
+  title: string
+  altText: string
+  mediaUrl: string
+  updatedAt: string
+}
+
 interface UploadState {
   open: boolean
   progress: number
@@ -33,10 +42,14 @@ async function readAdminResponse(response: Response): Promise<AdminResponse> {
   return typeof data === 'object' && data !== null ? data as AdminResponse : {}
 }
 
-function uploadContent(formData: FormData, onProgress: (progress: number) => void): Promise<AdminResponse> {
+function uploadContent(
+  formData: FormData,
+  onProgress: (progress: number) => void,
+  endpoint = '/api/admin/items'
+): Promise<AdminResponse> {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest()
-    request.open('POST', '/api/admin/items')
+    request.open('POST', endpoint)
     request.responseType = 'json'
     request.timeout = 120_000
 
@@ -65,11 +78,13 @@ function uploadContent(formData: FormData, onProgress: (progress: number) => voi
 
 export default function AdminPage() {
   const [items, setItems] = useState<AdminItem[]>([])
+  const [siteMedia, setSiteMedia] = useState<AdminSiteMedia[]>([])
   const [authenticated, setAuthenticated] = useState<boolean | null>(null)
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
   const [upload, setUpload] = useState<UploadState>({ open: false, progress: 0, status: 'Preparing upload…' })
   const [deleteTarget, setDeleteTarget] = useState<AdminItem | null>(null)
+  const [resetTarget, setResetTarget] = useState<AdminSiteMedia | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [signingOut, setSigningOut] = useState(false)
   const [search, setSearch] = useState('')
@@ -95,7 +110,17 @@ export default function AdminPage() {
     setAuthenticated(true)
   }, [])
 
-  useEffect(() => { void loadItems() }, [loadItems])
+  const loadSiteMedia = useCallback(async () => {
+    // Versioned query avoids any stale pre-route 404 cached by an earlier deployment.
+    const response = await fetch('/api/admin/site-media?v=1', { cache: 'no-store' })
+    if (!response.ok) return
+    const data: unknown = await response.json()
+    if (typeof data === 'object' && data !== null && 'items' in data && Array.isArray(data.items)) {
+      setSiteMedia(data.items as AdminSiteMedia[])
+    }
+  }, [])
+
+  useEffect(() => { void Promise.all([loadItems(), loadSiteMedia()]) }, [loadItems, loadSiteMedia])
   useEffect(() => { setVisibleCount(6) }, [search, typeFilter, statusFilter, dateFilter, sort])
 
   const filteredItems = useMemo(() => {
@@ -132,7 +157,7 @@ export default function AdminPage() {
       setMessage(data.error ?? 'Unable to sign in.')
       return
     }
-    await loadItems()
+    await Promise.all([loadItems(), loadSiteMedia()])
   }
 
   async function createItem(event: FormEvent<HTMLFormElement>) {
@@ -159,6 +184,48 @@ export default function AdminPage() {
     } finally {
       setBusy(false)
     }
+  }
+
+  async function updateSiteMedia(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const form = event.currentTarget
+    setBusy(true)
+    setMessage('')
+    setUpload({ open: true, progress: 0, status: 'Preparing media…' })
+
+    try {
+      await uploadContent(new FormData(form), (progress) => {
+        setUpload({
+          open: true,
+          progress,
+          status: progress >= 92 ? 'Activating website media…' : 'Uploading media…',
+        })
+      }, '/api/admin/site-media')
+      setUpload({ open: true, progress: 100, status: 'Website media updated' })
+      form.reset()
+      window.setTimeout(() => setUpload((current) => ({ ...current, open: false })), 650)
+      void loadSiteMedia()
+    } catch (error) {
+      setUpload((current) => ({ ...current, open: false }))
+      setMessage(error instanceof Error ? error.message : 'Unable to update website media.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function restoreSiteDefault() {
+    if (!resetTarget) return
+    setBusy(true)
+    const response = await fetch(`/api/admin/site-media?slot=${encodeURIComponent(resetTarget.slot)}`, { method: 'DELETE' })
+    setBusy(false)
+    if (!response.ok) {
+      const data = await readAdminResponse(response)
+      setMessage(data.error ?? 'Unable to restore the default media.')
+      setResetTarget(null)
+      return
+    }
+    setResetTarget(null)
+    await loadSiteMedia()
   }
 
   async function deleteItem() {
@@ -224,6 +291,45 @@ export default function AdminPage() {
           </button>
         </div>
       </header>
+
+      <section className="admin-site-media">
+        <header>
+          <div><p>Website media</p><h2>Hero + selected expressions</h2></div>
+          <span>Original designs remain the automatic fallback</span>
+        </header>
+        <div className="admin-site-media__grid">
+          {([
+            { slot: 'hero', name: 'Hero background', accept: 'image/png,image/jpeg,image/webp,image/avif,video/mp4,video/webm', note: 'Image ≤10 MB · MP4/WebM ≤40 MB' },
+            { slot: 'expression-1', name: 'Expression 01', accept: 'image/png,image/jpeg,image/webp,image/avif', note: 'Image ≤10 MB' },
+            { slot: 'expression-2', name: 'Expression 02', accept: 'image/png,image/jpeg,image/webp,image/avif', note: 'Image ≤10 MB' },
+            { slot: 'expression-3', name: 'Expression 03', accept: 'image/png,image/jpeg,image/webp,image/avif', note: 'Image ≤10 MB' },
+            { slot: 'expression-4', name: 'Expression 04', accept: 'image/png,image/jpeg,image/webp,image/avif', note: 'Image ≤10 MB' },
+          ] as const).map((field) => {
+            const current = siteMedia.find((item) => item.slot === field.slot)
+            return (
+              <form className="admin-media-slot" onSubmit={updateSiteMedia} key={field.slot}>
+                <input type="hidden" name="slot" value={field.slot} />
+                <div className="admin-media-slot__preview">
+                  {current?.mediaType === 'video' ? (
+                    <video src={current.mediaUrl} muted playsInline preload="metadata" />
+                  ) : current ? (
+                    <Image src={current.mediaUrl} alt={current.altText} fill sizes="240px" className="object-cover" unoptimized />
+                  ) : (
+                    <span>Default</span>
+                  )}
+                </div>
+                <div className="admin-media-slot__heading">
+                  <div><span>{field.slot}</span><h3>{field.name}</h3></div>
+                  {current && <button type="button" onClick={() => setResetTarget(current)} disabled={busy}>Restore default</button>}
+                </div>
+                <label><span>Accessible description</span><input name="altText" maxLength={300} required /></label>
+                <label className="admin-media-slot__file"><span>{field.note}</span><input name="media" type="file" accept={field.accept} required /></label>
+                <button disabled={busy}>{busy ? 'Please wait…' : current ? 'Replace media' : 'Upload media'}</button>
+              </form>
+            )
+          })}
+        </div>
+      </section>
 
       <section className="admin-layout">
         <form className="admin-create" onSubmit={createItem}>
@@ -351,6 +457,26 @@ export default function AdminPage() {
               <button onClick={() => void deleteItem()} disabled={busy}>
                 {deletingId ? <LoaderCircle className="admin-spinner h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
                 {busy ? 'Deleting…' : 'Delete permanently'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {resetTarget && (
+        <div className="admin-delete-modal" role="dialog" aria-modal="true" aria-labelledby="reset-media-title">
+          <div className="admin-delete-card admin-delete-card--cyan">
+            <button className="admin-delete-card__close" onClick={() => setResetTarget(null)} disabled={busy} aria-label="Close restore dialog">
+              <X className="h-5 w-5" />
+            </button>
+            <span>Website media</span>
+            <h2 id="reset-media-title">Restore original?</h2>
+            <p>The uploaded media for <strong>{resetTarget.slot}</strong> will be removed and the original Picarview design will return immediately.</p>
+            <div className="admin-delete-card__actions">
+              <button onClick={() => setResetTarget(null)} disabled={busy}>Keep current</button>
+              <button onClick={() => void restoreSiteDefault()} disabled={busy}>
+                {busy ? <LoaderCircle className="admin-spinner h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                {busy ? 'Restoring…' : 'Restore original'}
               </button>
             </div>
           </div>

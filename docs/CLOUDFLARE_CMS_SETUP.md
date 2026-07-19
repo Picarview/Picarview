@@ -87,3 +87,7 @@ Open `/admin`, sign in, and upload a test partner logo and project image. Publis
 - Login attempts are limited to five failures per client IP in a 15-minute window.
 - Admin sessions use signed, `HttpOnly`, `Secure`, `SameSite=Strict` cookies with a 12-hour lifetime.
 - Global CSP, clickjacking, MIME-sniffing, referrer, browser-permission, and HTTPS headers are enabled.
+- The hero slot accepts a validated image up to 10 MB or MP4/WebM video up to 40 MB.
+- Hero videos are served with byte-range support and native browser streaming.
+- Four selected-expression slots accept validated images up to 10 MB each.
+- Removing any site-media override immediately restores the repository design; an empty CMS never leaves a blank section.

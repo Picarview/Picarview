@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useCmsSiteMedia } from '@/hooks/useCmsSiteMedia'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -16,18 +17,84 @@ interface HeroProps {
   frames: string[]
 }
 
+function createHeroTimeline(
+  section: HTMLElement,
+  stage: HTMLDivElement,
+  sequence?: { frame: number },
+  frameCount = 1,
+  renderFrame?: (frame: number) => void
+) {
+  return gsap.context(() => {
+    const letters = gsap.utils.toArray<HTMLElement>('.hero-sequence__letter')
+    const labelElements = gsap.utils.toArray<HTMLElement>('.hero-sequence__label')
+    const timelineDriver = sequence ?? { frame: 0 }
+
+    gsap.set(letters, { opacity: 0, yPercent: 115, rotateX: -70 })
+    gsap.set(labelElements, { opacity: 0, y: 16 })
+    gsap.set('.hero-sequence__signature', { opacity: 0, clipPath: 'inset(0 100% 0 0)' })
+
+    const timeline = gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 0.15,
+        pin: stage,
+        pinSpacing: false,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      },
+    })
+
+    timeline.to(timelineDriver, {
+      frame: frameCount - 1,
+      duration: 1,
+      onUpdate: () => renderFrame?.(timelineDriver.frame),
+    }, 0)
+    timeline.to('.hero-sequence__intro', { opacity: 0, yPercent: -24, filter: 'blur(8px)', duration: 0.14 }, 0.03)
+    letters.forEach((letter, index) => {
+      timeline.to(letter, { opacity: 1, yPercent: 0, rotateX: 0, duration: 0.105, ease: 'power3.out' }, 0.18 + index * 0.055)
+    })
+    timeline.to('.hero-sequence__signature', {
+      opacity: 1,
+      clipPath: 'inset(0 0% 0 0)',
+      duration: 0.12,
+      ease: 'power2.out',
+    }, 0.53)
+    timeline.to(labelElements, { opacity: 1, y: 0, duration: 0.08, stagger: 0.025, ease: 'power2.out' }, 0.61)
+    timeline.to(labelElements, { opacity: 0, y: -12, duration: 0.08, stagger: 0.015 }, 0.79)
+    timeline.to('.hero-sequence__card', { scale: 1.06, yPercent: -4, duration: 0.06, ease: 'power2.in' }, 0.94)
+    timeline.to('.hero-sequence__word', {
+      letterSpacing: '0.12em',
+      opacity: 0,
+      yPercent: -24,
+      duration: 0.06,
+    }, 0.94)
+  }, section)
+}
+
 export function Hero({ frames }: HeroProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const { items: siteMedia, loading: siteMediaLoading } = useCmsSiteMedia()
+  const heroMedia = siteMedia.find((item) => item.slot === 'hero')
 
   useLayoutEffect(() => {
     const section = sectionRef.current
     const stage = stageRef.current
     const canvas = canvasRef.current
-    const context = canvas?.getContext('2d', { alpha: false })
 
-    if (!section || !stage || !canvas || !context) return
+    if (!section || !stage || siteMediaLoading) return
+    if (heroMedia) {
+      const ctx = createHeroTimeline(section, stage)
+      return () => ctx.revert()
+    }
+
+    if (!canvas) return
+    const context = canvas.getContext('2d', { alpha: false })
+    if (!context) return
 
     type DeviceNavigator = Navigator & {
       connection?: { saveData?: boolean; effectiveType?: string }
@@ -237,76 +304,7 @@ export function Hero({ frames }: HeroProps) {
     resizeObserver.observe(canvas)
     resizeCanvas()
 
-    const ctx = gsap.context(() => {
-      const letters = gsap.utils.toArray<HTMLElement>('.hero-sequence__letter')
-      const labelElements = gsap.utils.toArray<HTMLElement>('.hero-sequence__label')
-
-      gsap.set(letters, { opacity: 0, yPercent: 115, rotateX: -70 })
-      gsap.set(labelElements, { opacity: 0, y: 16 })
-      gsap.set('.hero-sequence__signature', { opacity: 0, clipPath: 'inset(0 100% 0 0)' })
-
-      const timeline = gsap.timeline({
-        defaults: { ease: 'none' },
-        scrollTrigger: {
-          trigger: section,
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: 0.15,
-          pin: stage,
-          pinSpacing: false,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      })
-
-      // This tween spans the entire timeline, giving scroll position a 1:1 frame map.
-      timeline.to(sequence, {
-        frame: frameCount - 1,
-        duration: 1,
-        onUpdate: () => {
-          prepareFramesAround(sequence.frame)
-        },
-      }, 0)
-
-      timeline.to(
-        '.hero-sequence__intro',
-        { opacity: 0, yPercent: -24, filter: 'blur(8px)', duration: 0.14 },
-        0.03
-      )
-
-      letters.forEach((letter, index) => {
-        timeline.to(
-          letter,
-          { opacity: 1, yPercent: 0, rotateX: 0, duration: 0.105, ease: 'power3.out' },
-          0.18 + index * 0.055
-        )
-      })
-
-      timeline.to(
-        '.hero-sequence__signature',
-        { opacity: 1, clipPath: 'inset(0 0% 0 0)', duration: 0.12, ease: 'power2.out' },
-        0.53
-      )
-
-      timeline.to(
-        labelElements,
-        { opacity: 1, y: 0, duration: 0.08, stagger: 0.025, ease: 'power2.out' },
-        0.61
-      )
-      timeline.to(labelElements, { opacity: 0, y: -12, duration: 0.08, stagger: 0.015 }, 0.79)
-
-      // The whole card clears the viewport to reveal the content that follows.
-      timeline.to(
-        '.hero-sequence__card',
-        { scale: 1.06, yPercent: -4, duration: 0.06, ease: 'power2.in' },
-        0.94
-      )
-      timeline.to(
-        '.hero-sequence__word',
-        { letterSpacing: '0.12em', opacity: 0, yPercent: -24, duration: 0.06 },
-        0.94
-      )
-    }, section)
+    const ctx = createHeroTimeline(section, stage, sequence, frameCount, prepareFramesAround)
 
     return () => {
       isDisposed = true
@@ -323,13 +321,34 @@ export function Hero({ frames }: HeroProps) {
         image.src = ''
       })
     }
-  }, [frames])
+  }, [frames, heroMedia, siteMediaLoading])
 
   return (
     <section ref={sectionRef} className="hero-sequence" data-theme="dark" aria-label="Picarview introduction">
       <div ref={stageRef} className="hero-sequence__stage">
         <div className="hero-sequence__card">
-          <canvas ref={canvasRef} className="hero-sequence__canvas" aria-hidden="true" />
+          {heroMedia?.mediaType === 'video' ? (
+            <video
+              className="hero-sequence__custom-media"
+              src={heroMedia.mediaUrl}
+              aria-label={heroMedia.altText}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
+          ) : heroMedia?.mediaType === 'image' ? (
+            <img
+              className="hero-sequence__custom-media"
+              src={heroMedia.mediaUrl}
+              alt={heroMedia.altText}
+              fetchPriority="high"
+              decoding="async"
+            />
+          ) : (
+            <canvas ref={canvasRef} className="hero-sequence__canvas" aria-hidden="true" />
+          )}
           <div className="hero-sequence__shade" aria-hidden="true" />
 
           <header className="hero-sequence__intro">
