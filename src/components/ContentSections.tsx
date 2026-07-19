@@ -343,99 +343,11 @@ function AboutSection() {
   )
 }
 
-// Mission/Vision Cards Grid
-function MissionVisionSection() {
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const cardsRef = useRef<HTMLDivElement>(null)
-
-  const cards = [
-    {
-      label: 'Partners Page',
-      content: 'Partners Page',
-    },
-    {
-      label: 'What we value',
-      content: 'We work with brands that play a role in the environment today and tomorrow.',
-    },
-    {
-      label: 'What we make',
-      content: 'Creating ideas and connecting with their audience through pictures and arts innovation.',
-    },
-    {
-      label: 'How we grow',
-      content: 'Ideas that evolve with clarity, depth, and lasting impact.',
-    },
-    {
-      label: 'Vision',
-      content: 'Our vision is to build partnerships that shape the future of visual expression.',
-    },
-  ]
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const cardElements = cardsRef.current?.querySelectorAll('.info-card')
-      if (!cardElements) return
-
-      gsap.fromTo(
-        cardElements,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          stagger: 0.1,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: cardsRef.current,
-            start: 'top 75%',
-          },
-        }
-      )
-    }, sectionRef)
-
-    return () => ctx.revert()
-  }, [])
-
-  return (
-    <section
-      ref={sectionRef}
-      data-theme="light"
-      className="py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-white"
-    >
-      <div className="max-w-7xl mx-auto mb-16">
-        <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-4">03 — Page</p>
-        <h2 className="stylish-header text-4xl md:text-5xl lg:text-6xl soft-mask-reveal">
-          <span className="metropolis-upper text-black">PARTNERS </span>
-          <span className="bacalisties-script text-black text-5xl md:text-6xl lg:text-7xl">Page</span>
-        </h2>
-      </div>
-
-      <div ref={cardsRef} className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cards.map((card, index) => (
-          <div
-            key={card.label}
-            className={`info-card ${index === cards.length - 1 ? 'md:col-span-2 lg:col-span-3' : ''}`}
-          >
-            <p className="text-xs uppercase tracking-[0.3em] text-zinc-500 mb-3">
-              {card.label}
-            </p>
-            <p className="text-base md:text-lg text-black leading-relaxed">
-              {card.content}
-            </p>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-// Goal Statement Section
+// Partners statement — logo wall will be added beneath this later.
 function GoalSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLHeadingElement>(null)
-  const labelRef = useRef<HTMLParagraphElement>(null)
 
-  useSoftMaskReveal(labelRef, true)
   useSoftMaskReveal(textRef, false)
 
   useEffect(() => {
@@ -462,14 +374,13 @@ function GoalSection() {
   return (
     <section
       ref={sectionRef}
-      data-theme="dark"
-      className="py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-black"
+      data-theme="light"
+      className="partners-statement"
     >
-      <div className="max-w-6xl mx-auto text-center">
-        <p ref={labelRef} className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-12 soft-mask-reveal">04 — Page</p>
+      <div className="partners-statement__inner">
         <h2
           ref={textRef}
-          className="text-3xl md:text-5xl lg:text-6xl font-light text-white leading-tight soft-mask-reveal"
+          className="partners-statement__text soft-mask-reveal"
         >
           We partner with brands that play a role in the environment today and tomorrow, creating ideas and connecting
           with their audience through pictures and arts innovation.
@@ -479,7 +390,7 @@ function GoalSection() {
   )
 }
 
-// Service statements write themselves when the composition enters the viewport.
+// Four service pillars assemble when the composition enters the viewport.
 function ServicesSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
 
@@ -487,36 +398,59 @@ function ServicesSection() {
     {
       title: 'Discovery',
       number: '01',
-      statement: 'Finding the idea worth seeing',
+      statement: 'Uncovering the creative opportunity.',
+      offerings: [
+        'Creative Idea Development',
+        'Visual & Identity Exploration',
+        'Creative Direction Alignment',
+        'Creative Discovery Workshops',
+      ],
     },
     {
       title: 'Strategy',
       number: '02',
-      statement: 'Giving every visual a reason',
+      statement: 'Giving every creative decision a purpose.',
+      offerings: [
+        'Campaign Planning',
+        'Concept Development',
+        'Brand & Audience Research',
+        'Creative Strategy & Insights',
+      ],
     },
     {
-      title: 'Direction',
+      title: 'Innovation',
       number: '03',
-      statement: 'Shaping a language people feel',
+      statement: 'Building new ideas into tangible experiences.',
+      offerings: [
+        'Creative Innovation',
+        'Product Development',
+        'Creative Concept Development',
+        'Picture & Art Development',
+      ],
     },
     {
       title: 'Expression',
       number: '04',
-      statement: 'Making the work impossible to forget',
+      statement: 'Turning strategy into work people can feel.',
+      offerings: [
+        'Creative Design',
+        'Brand Expression',
+        'Photography & Videography',
+        'Visual Art & Experimental Content',
+      ],
     },
   ]
 
   useEffect(() => {
     const media = gsap.matchMedia()
     const ctx = gsap.context(() => {
-      const rows = gsap.utils.toArray<HTMLElement>('.service-script__row')
+      const pillars = gsap.utils.toArray<HTMLElement>('.service-pillar')
 
       media.add('(prefers-reduced-motion: reduce)', () => {
         gsap.set(
-          '.service-script__eyebrow, .service-script__title, .service-script__label, .service-script__char',
-          { opacity: 1, x: 0, yPercent: 0, rotate: 0 }
+          '.service-script__eyebrow, .service-script__title, .service-script__intro, .service-pillar, .service-pillar li',
+          { opacity: 1, x: 0, y: 0, rotate: 0 }
         )
-        gsap.set('.service-script__stroke', { scaleX: 1 })
       })
 
       media.add('(prefers-reduced-motion: no-preference)', () => {
@@ -530,39 +464,31 @@ function ServicesSection() {
         })
 
         timeline.fromTo(
-          '.service-script__eyebrow, .service-script__title',
+          '.service-script__eyebrow, .service-script__title, .service-script__intro',
           { opacity: 0, x: 35 },
-          { opacity: 1, x: 0, duration: 0.45, stagger: 0.12, ease: 'power2.out' }
+          { opacity: 1, x: 0, duration: 0.5, stagger: 0.1, ease: 'power2.out' }
         )
 
-        rows.forEach((row) => {
-          const label = row.querySelector('.service-script__label')
-          const characters = row.querySelectorAll('.service-script__char')
-
+        pillars.forEach((pillar, index) => {
           timeline
-            .fromTo(label, { opacity: 0, x: 18 }, { opacity: 1, x: 0, duration: 0.18 })
             .fromTo(
-              characters,
-              { opacity: 0, yPercent: 55, rotate: 4 },
+              pillar,
+              { opacity: 0, clipPath: 'inset(0 0 100% 0)' },
               {
                 opacity: 1,
-                yPercent: 0,
-                rotate: 0,
-                duration: 0.055,
-                stagger: 0.018,
-                ease: 'power2.out',
+                clipPath: 'inset(0 0 0% 0)',
+                duration: 0.52,
+                ease: 'power3.out',
               },
-              '<0.04'
+              index === 0 ? '-=0.15' : '-=0.32'
             )
             .fromTo(
-              row.querySelector('.service-script__stroke'),
-              { scaleX: 0 },
-              { scaleX: 1, duration: 0.26, ease: 'power2.inOut' },
-              '<0.16'
+              pillar.querySelectorAll('li'),
+              { opacity: 0, x: 16 },
+              { opacity: 1, x: 0, duration: 0.24, stagger: 0.055, ease: 'power2.out' },
+              '<0.18'
             )
         })
-
-        timeline.to('.service-script__content', { y: -8, duration: 0.3, ease: 'power1.inOut' })
       })
     }, sectionRef)
 
@@ -583,27 +509,32 @@ function ServicesSection() {
       <div className="service-script__wash" aria-hidden="true" />
 
       <div className="service-script__content">
-        <p className="service-script__eyebrow">05 — Services</p>
-        <h2 className="service-script__title">
-          What we bring <span>to the frame</span>
-        </h2>
+        <header className="service-script__header">
+          <div>
+            <p className="service-script__eyebrow">05 — Services</p>
+            <h2 className="service-script__title">
+              Four pillars. <span>One creative practice.</span>
+            </h2>
+          </div>
+          <p className="service-script__intro">
+            From the first question to the final expression, our services connect thinking, making, and meaningful visual impact.
+          </p>
+        </header>
 
-        <div className="service-script__lines">
+        <div className="service-pillars">
           {services.map((service) => (
-            <div className={`service-script__row service-script__row--${service.number}`} key={service.title}>
-              <span className="service-script__label">{service.number} / {service.title}</span>
-              <p aria-label={service.statement}>
-                <span className="sr-only">{service.statement}</span>
-                <span aria-hidden="true">
-                  {service.statement.split('').map((character, index) => (
-                    <span className="service-script__char" key={`${character}-${index}`}>
-                      {character === ' ' ? '\u00a0' : character}
-                    </span>
-                  ))}
-                </span>
-              </p>
-              <span className="service-script__stroke" aria-hidden="true" />
-            </div>
+            <article className="service-pillar" key={service.title}>
+              <header>
+                <span>{service.number}</span>
+                <h3>{service.title}</h3>
+              </header>
+              <p>{service.statement}</p>
+              <ul>
+                {service.offerings.map((offering) => (
+                  <li key={offering}>{offering}</li>
+                ))}
+              </ul>
+            </article>
           ))}
         </div>
       </div>
@@ -873,51 +804,68 @@ function PromiseSection() {
 }
 
 function ContactSection() {
+  const sectionRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 72%',
+          once: true,
+        },
+      })
+        .fromTo(
+          '.contact-portal__copy > *',
+          { opacity: 0, y: 45 },
+          { opacity: 1, y: 0, duration: 0.65, stagger: 0.1, ease: 'power3.out' }
+        )
+        .fromTo(
+          '.contact-portal__card',
+          { opacity: 0, scale: 0.72, rotation: 7 },
+          { opacity: 1, scale: 1, rotation: -2, duration: 0.8, ease: 'back.out(1.2)' },
+          '-=0.35'
+        )
+        .fromTo(
+          '.contact-portal__service',
+          { opacity: 0, x: 18 },
+          { opacity: 1, x: 0, duration: 0.35, stagger: 0.06, ease: 'power2.out' },
+          '-=0.35'
+        )
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
+
   return (
-    <section id="contact" data-theme="light" className="relative py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-white text-black overflow-hidden">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-12 lg:gap-16 items-end">
-        <div className="space-y-8">
-          <div className="space-y-4 max-w-xl">
-            <p className="text-[0.68rem] uppercase tracking-[0.45em] text-zinc-400">06 — Contact</p>
-            <h2 className="font-metropolis-black text-4xl md:text-5xl lg:text-6xl uppercase text-black leading-[0.92]">
-              A lighter way to begin the conversation.
-            </h2>
-          </div>
+    <section id="contact" ref={sectionRef} data-theme="dark" className="contact-portal">
+      <div className="contact-portal__aura" aria-hidden="true"><i /><i /></div>
 
-          <div className="max-w-xl space-y-5 text-base md:text-lg text-zinc-600 leading-[1.9]">
-            <p>
-              Tap the floating orb in the bottom-right corner whenever you&apos;re ready. It opens the full brief without
-              taking over the page.
-            </p>
-            <p>
-              That keeps the experience clean, and gives you a quicker way to reach us from anywhere on the site.
-            </p>
-          </div>
+      <div className="contact-portal__inner">
+        <div className="contact-portal__copy">
+          <p className="contact-portal__eyebrow">06 — Contact</p>
+          <h2>Let&apos;s create<br /><span>the next view.</span></h2>
+          <p className="contact-portal__intro">
+            Bring us the ambition. We&apos;ll help shape the strategy, direction, and expression that make it visible.
+          </p>
 
-          <div className="flex flex-wrap gap-3">
-            {['Tap to open', 'Quick brief', 'Designed for flow'].map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-black/10 bg-zinc-50 px-4 py-2 text-[0.68rem] uppercase tracking-[0.28em] text-zinc-600"
-              >
-                {item}
+          <div className="contact-portal__services" aria-label="Selected services">
+            {['Identity', 'Campaigns', 'Art direction', 'Image-making'].map((item, index) => (
+              <span className="contact-portal__service" key={item}>
+                {String(index + 1).padStart(2, '0')} / {item}
               </span>
             ))}
           </div>
-
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-3 text-[0.72rem] uppercase tracking-[0.3em] text-black transition-opacity hover:opacity-60"
-          >
-            Open the contact page
-            <ArrowRight className="w-4 h-4" />
-          </Link>
         </div>
 
-        <div className="flex justify-start lg:justify-end">
-          <div className="pointer-events-none hidden lg:block h-64 w-64 rounded-full border border-dashed border-black/10" />
-        </div>
+        <Link href="/contact" className="contact-portal__card">
+          <span>Project enquiry</span>
+          <strong>Tell us what<br />you&apos;re building.</strong>
+          <div>
+            <span>Open the brief</span>
+            <ArrowRight className="h-6 w-6" />
+          </div>
+        </Link>
       </div>
     </section>
   )
@@ -926,23 +874,23 @@ function ContactSection() {
 // Footer
 function Footer() {
   return (
-    <footer data-theme="light" className="py-12 px-6 md:px-12 lg:px-24 border-t border-black/10 bg-white">
+    <footer data-theme="dark" className="py-12 px-6 md:px-12 lg:px-24 border-t border-white/15 bg-black">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <Link href="/" aria-label="Picarview home" className="block transition-opacity hover:opacity-70">
           <Image
-            src="/logo-black.png"
+            src="/logo-white.png"
             alt="Picarview"
             width={150}
             height={60}
             className="h-10 w-auto object-contain"
           />
         </Link>
-        <p className="text-zinc-500 text-sm">© 2026 Picarview. All rights reserved.</p>
+        <p className="text-zinc-400 text-sm">© 2026 Picarview. All rights reserved.</p>
         <div className="flex items-center gap-6">
-          <a href="#" className="text-zinc-500 hover:text-black transition-colors text-sm uppercase tracking-[0.25em]">
+          <a href="#" className="text-zinc-400 hover:text-white transition-colors text-sm uppercase tracking-[0.25em]">
             Privacy
           </a>
-          <a href="#" className="text-zinc-500 hover:text-black transition-colors text-sm uppercase tracking-[0.25em]">
+          <a href="#" className="text-zinc-400 hover:text-white transition-colors text-sm uppercase tracking-[0.25em]">
             Terms
           </a>
         </div>
@@ -964,7 +912,6 @@ export function ContentSections() {
 
       <AboutSection />
       <InteractiveCardsTransition />
-      <MissionVisionSection />
       <GoalSection />
       <ServicesSection />
       <WorksSection />
