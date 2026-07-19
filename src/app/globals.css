@@ -1899,7 +1899,54 @@ body {
 .admin-upload input { border: 0; padding: 0; min-height: 0; background: transparent; }
 
 .admin-library { padding: clamp(1.25rem, 2.5vw, 2.25rem); }
-.admin-library > header { padding-bottom: 1rem; border-bottom: 3px solid #111; }
+.admin-library > header {
+  padding-bottom: 1rem;
+  border-bottom: 3px solid #111;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.admin-library > header > span {
+  padding: 0.35rem 0.5rem;
+  border: 2px solid #111;
+  background: #ffdc4a;
+  font-family: var(--font-metropolis-black);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.admin-library__tools {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: minmax(190px, 1.6fr) repeat(4, minmax(110px, 1fr));
+  gap: 0.5rem;
+}
+.admin-library__tools select,
+.admin-library__search {
+  min-height: 42px;
+  border: 2px solid #111;
+  background: #fff;
+}
+.admin-library__tools select {
+  min-width: 0;
+  padding: 0.55rem;
+  font-size: 0.7rem;
+}
+.admin-library__search {
+  padding: 0 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.admin-library__search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 0.75rem;
+}
 .admin-empty { margin-top: 1.5rem; padding: 2rem; border: 2px dashed #999; text-align: center; color: #666; }
 .admin-items { margin-top: 1rem; display: grid; gap: 0.75rem; }
 
@@ -1916,10 +1963,183 @@ body {
 .admin-item h3 { margin-top: 0.25rem; font-family: var(--font-metropolis-black); text-transform: uppercase; }
 .admin-item p { margin-top: 0.2rem; color: #666; font-size: 0.8rem; }
 .admin-item button { padding: 0.65rem; border: 2px solid #111; }
+.admin-view-more {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border: 3px solid #111;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #fff;
+  background: #111;
+  font-family: var(--font-metropolis-black);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.admin-view-more span { color: #b9ff32; font-size: 0.58rem; }
+.admin-spinner { animation: admin-spin 0.75s linear infinite; }
+@keyframes admin-spin { to { transform: rotate(360deg); } }
+
+.admin-progress-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(5px);
+}
+
+.admin-progress-card {
+  width: min(100%, 520px);
+  padding: clamp(1.5rem, 5vw, 2.75rem);
+  border: 4px solid #111;
+  color: #111;
+  background: #b9ff32;
+  box-shadow: 12px 12px 0 #fff;
+}
+
+.admin-progress-card__topline {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-progress-card__topline p {
+  font-family: var(--font-metropolis-black);
+  font-size: clamp(1rem, 4vw, 1.45rem);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.admin-progress-card__topline strong {
+  font-family: var(--font-metropolis-black);
+  font-size: clamp(2.5rem, 9vw, 4.75rem);
+  line-height: 0.75;
+}
+
+.admin-progress-track {
+  height: 24px;
+  margin-top: 2rem;
+  overflow: hidden;
+  border: 3px solid #111;
+  background: #fff;
+}
+
+.admin-progress-track span {
+  display: block;
+  height: 100%;
+  background: #111;
+  transition: width 180ms ease-out;
+}
+
+.admin-progress-status {
+  margin-top: 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-delete-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(0, 0, 0, 0.76);
+  backdrop-filter: blur(5px);
+}
+
+.admin-delete-card {
+  position: relative;
+  width: min(100%, 540px);
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 4px solid #111;
+  color: #111;
+  background: #ff6b8b;
+  box-shadow: 12px 12px 0 #fff;
+}
+
+.admin-delete-card > span {
+  display: block;
+  font-family: var(--font-metropolis-black);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.admin-delete-card h2 {
+  max-width: 430px;
+  margin-top: 0.8rem;
+  font-family: var(--font-metropolis-black);
+  font-size: clamp(2.1rem, 8vw, 4.2rem);
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+
+.admin-delete-card > p {
+  max-width: 440px;
+  margin-top: 1.4rem;
+  line-height: 1.55;
+}
+
+.admin-delete-card__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  width: 42px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 3px solid #111;
+  background: #fff;
+}
+
+.admin-delete-card__actions {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.admin-delete-card__actions button {
+  min-height: 48px;
+  padding: 0.75rem 1rem;
+  border: 3px solid #111;
+  font-family: var(--font-metropolis-black);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-delete-card__actions button:first-child { background: #fff; }
+.admin-delete-card__actions button:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fff;
+  background: #111;
+}
 
 @media (max-width: 800px) {
   .admin-header { align-items: flex-start; flex-direction: column; }
   .admin-layout { grid-template-columns: 1fr; }
+  .admin-library__tools { grid-template-columns: 1fr 1fr; }
+  .admin-library__search { grid-column: 1 / -1; }
+}
+
+@media (max-width: 480px) {
+  .admin-library__tools { grid-template-columns: 1fr; }
+  .admin-library__search { grid-column: auto; }
+  .admin-item { grid-template-columns: 70px 1fr auto; gap: 0.7rem; }
+  .admin-item__image { width: 70px; }
 }
 
 /* Contact page */

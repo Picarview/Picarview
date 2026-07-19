@@ -47,7 +47,6 @@ export async function POST(request: Request) {
   const title = String(form.get('title') ?? '').trim()
   const subtitle = String(form.get('subtitle') ?? '').trim()
   const altText = String(form.get('altText') ?? '').trim()
-  const sortOrder = Number(form.get('sortOrder') ?? 0)
   const published = form.get('published') === 'true' ? 1 : 0
   const file = form.get('image')
 
@@ -60,6 +59,10 @@ export async function POST(request: Request) {
 
   const id = crypto.randomUUID()
   const objectKey = `${type === 'partner' ? 'partners' : 'projects'}/${id}.${extensionFor(file)}`
+  const nextOrder = await CMS_DB.prepare(
+    'SELECT COALESCE(MAX(sort_order), 0) + 1 AS value FROM content_items WHERE type = ?'
+  ).bind(type).first<{ value: number }>()
+  const sortOrder = nextOrder?.value ?? 1
 
   await CMS_MEDIA.put(objectKey, await file.arrayBuffer(), {
     httpMetadata: { contentType: file.type, cacheControl: 'public, max-age=31536000, immutable' },
@@ -70,7 +73,7 @@ export async function POST(request: Request) {
       `INSERT INTO content_items
        (id, type, title, subtitle, alt_text, object_key, sort_order, published)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(id, type, title, subtitle, altText, objectKey, Number.isFinite(sortOrder) ? sortOrder : 0, published).run()
+    ).bind(id, type, title, subtitle, altText, objectKey, sortOrder, published).run()
   } catch (error) {
     await CMS_MEDIA.delete(objectKey)
     throw error

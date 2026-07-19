@@ -61,6 +61,7 @@ export function publicCmsItem(item: CmsItem) {
     subtitle: item.subtitle,
     altText: item.alt_text,
     sortOrder: item.sort_order,
+    createdAt: item.created_at,
     imageUrl: `/api/cms/media?key=${encodeURIComponent(item.object_key)}`,
   }
 }
