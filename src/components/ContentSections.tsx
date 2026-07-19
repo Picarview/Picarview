@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ArrowRight } from 'lucide-react'
+import { useCmsItems } from '@/hooks/useCmsItems'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -347,6 +348,7 @@ function AboutSection() {
 function GoalSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLHeadingElement>(null)
+  const partners = useCmsItems('partner')
 
   useSoftMaskReveal(textRef, false)
 
@@ -385,6 +387,16 @@ function GoalSection() {
           We partner with brands that play a role in the environment today and tomorrow, creating ideas and connecting
           with their audience through pictures and arts innovation.
         </h2>
+        {partners.length > 0 && (
+          <div className="partners-statement__logos" aria-label="Picarview partners">
+            {partners.map((partner) => (
+              <figure key={partner.id}>
+                <img src={partner.imageUrl} alt={partner.altText} loading="lazy" />
+                <figcaption className="sr-only">{partner.title}</figcaption>
+              </figure>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )
@@ -548,6 +560,17 @@ const workAccents = ['#ffb000', '#b9ff32', '#ff4fa3', '#22d9ee']
 function WorksSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
+  const cmsProjects = useCmsItems('project')
+  const projects = cmsProjects.length > 0
+    ? cmsProjects.slice(0, 12)
+    : Array.from({ length: 12 }, (_, index) => ({
+        id: `fallback-${index + 1}`,
+        imageUrl: `/images/work${index + 1}.png`,
+        title: `Picarview selected work ${index + 1}`,
+        subtitle: ['Identity', 'Campaign', 'Image-making', 'Art direction'][index % 4],
+        altText: `Picarview selected work ${index + 1}`,
+      }))
+  const projectsKey = projects.map((project) => project.id).join(',')
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -606,7 +629,7 @@ function WorksSection() {
     }, sectionRef)
 
     return () => ctx.revert()
-  }, [])
+  }, [projectsKey])
 
   return (
     <section
@@ -624,7 +647,7 @@ function WorksSection() {
       <header className="aura-work__heading">
         <p>06 — Project Page</p>
         <h2><span>Selected</span> work, thoughtfully crafted.</h2>
-        <div className="aura-work__counter">12 projects · Scroll to explore</div>
+        <div className="aura-work__counter">{projects.length} projects · Scroll to explore</div>
         <Link href="/projects" className="aura-work__cta">
           View all projects
           <ArrowRight className="h-4 w-4" />
@@ -632,18 +655,18 @@ function WorksSection() {
       </header>
 
       <div ref={trackRef} className="aura-work__track">
-        {Array.from({ length: 12 }, (_, index) => (
+        {projects.map((project, index) => (
           <article
             className="aura-work__card"
             style={{ backgroundColor: workAccents[index % workAccents.length] }}
-            key={`work-${index + 1}`}
+            key={project.id}
           >
             <div className="aura-work__image-wrap">
-              <img src={`/images/work${index + 1}.png`} alt={`Picarview selected work ${index + 1}`} />
+              <img src={project.imageUrl} alt={project.altText} />
             </div>
             <footer>
-              <span>{String(index + 1).padStart(2, '0')} / 12</span>
-              <strong>{['Identity', 'Campaign', 'Image-making', 'Art direction'][index % 4]}</strong>
+              <span>{String(index + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}</span>
+              <strong>{project.subtitle || 'Selected work'}</strong>
             </footer>
           </article>
         ))}
