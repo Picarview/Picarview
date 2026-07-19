@@ -1720,6 +1720,8 @@ body {
 }
 
 .project-archive__card {
+  width: 100%;
+  text-align: left;
   aspect-ratio: 4 / 5;
   padding: clamp(0.65rem, 1vw, 0.9rem);
   border: clamp(4px, 0.42vw, 6px) solid #000;
@@ -1760,7 +1762,7 @@ body {
 
 .project-archive__card:hover img { transform: scale(1.04); }
 
-.project-archive__card footer {
+.project-archive__card-footer {
   min-height: 2.65rem;
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -1772,7 +1774,96 @@ body {
   text-transform: uppercase;
 }
 
-.project-archive__card footer strong { text-align: right; }
+.project-archive__card-footer strong { text-align: right; }
+
+.project-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  padding: clamp(1rem, 4vw, 3rem);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(0.5rem, 2vw, 1.5rem);
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(14px);
+}
+
+.project-viewer__card {
+  width: min(100%, 1180px);
+  height: min(86svh, 900px);
+  margin: 0 auto;
+  padding: clamp(0.55rem, 1.2vw, 1rem);
+  border: clamp(3px, 0.4vw, 6px) solid #000;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  color: #000;
+  background: var(--viewer-accent);
+  box-shadow: 14px 14px 0 rgba(255,255,255,0.94);
+  animation: project-viewer-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes project-viewer-in {
+  from { opacity: 0; transform: scale(0.94) translateY(18px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.project-viewer__image {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  border: clamp(3px, 0.35vw, 5px) solid #000;
+  background: #090909;
+}
+
+.project-viewer__card footer {
+  min-height: 64px;
+  padding: 0.75rem 0.35rem 0.1rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.project-viewer__card footer span,
+.project-viewer__card footer strong {
+  font-family: var(--font-metropolis-black);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.project-viewer__card h2 {
+  margin-top: 0.2rem;
+  font-family: var(--font-metropolis-black);
+  font-size: clamp(1rem, 2vw, 1.7rem);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.project-viewer__close,
+.project-viewer__nav {
+  display: grid;
+  place-items: center;
+  border: 3px solid #fff;
+  color: #fff;
+  background: #000;
+}
+
+.project-viewer__close {
+  position: absolute;
+  top: clamp(1rem, 2vw, 2rem);
+  right: clamp(1rem, 2vw, 2rem);
+  z-index: 2;
+  width: 48px;
+  aspect-ratio: 1;
+}
+
+.project-viewer__nav {
+  width: clamp(44px, 5vw, 58px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
 
 .project-archive__footer {
   max-width: 1500px;
@@ -1798,12 +1889,45 @@ body {
   .project-archive { padding: 1.1rem; }
   .project-archive__intro h1 { font-size: clamp(3.5rem, 19vw, 5.6rem); }
   .project-archive__intro > div { margin-left: 0; }
-  .project-archive__grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  .project-archive__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 0.8rem; }
+  .project-archive__card {
+    padding: 0.4rem;
+    border-width: 3px;
+    box-shadow: 5px 5px 0 #000;
+    transform: rotate(-0.7deg);
+  }
   .project-archive__card:nth-child(even) { margin-top: 0; }
+  .project-archive__image { height: calc(100% - 2.2rem); border-width: 2px; }
+  .project-archive__card-footer {
+    min-height: 2rem;
+    grid-template-columns: 1fr auto;
+    gap: 0.25rem;
+    font-size: 0.46rem;
+  }
+  .project-archive__card-footer strong { display: none; }
+  .project-archive__card-footer svg { width: 0.85rem; height: 0.85rem; }
   .project-archive__footer {
     align-items: flex-start;
     flex-direction: column;
   }
+  .project-viewer {
+    padding: 3.8rem 0.8rem 4.6rem;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+  }
+  .project-viewer__card {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: min(74svh, 720px);
+    box-shadow: 7px 7px 0 rgba(255,255,255,0.94);
+  }
+  .project-viewer__card footer { min-height: 54px; }
+  .project-viewer__card footer strong { display: none; }
+  .project-viewer__nav { justify-self: center; width: 48px; }
+  .project-viewer__nav--previous { grid-column: 1; }
+  .project-viewer__nav--next { grid-column: 2; }
+  .project-viewer__close { width: 42px; }
 }
 
 /* Cloudflare-backed admin CMS */
