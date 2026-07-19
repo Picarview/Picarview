@@ -7,6 +7,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ArrowRight } from 'lucide-react'
 import { useCmsItems } from '@/hooks/useCmsItems'
+import { useCmsSiteMedia } from '@/hooks/useCmsSiteMedia'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -80,6 +81,13 @@ const showcaseCards = [
 // Neo-brutalist collection that assembles automatically when it enters view.
 function InteractiveCardsTransition() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const { items: siteMedia } = useCmsSiteMedia()
+  const cards = showcaseCards.map((card, index) => {
+    const replacement = siteMedia.find((item) => item.slot === `expression-${index + 1}`)
+    return replacement
+      ? { ...card, image: replacement.mediaUrl, alt: replacement.altText }
+      : card
+  })
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -186,7 +194,7 @@ function InteractiveCardsTransition() {
         </div>
 
         <div className="cards-section__deck">
-          {showcaseCards.map((card) => (
+          {cards.map((card) => (
             <article className="brutalist-card" style={{ backgroundColor: card.color }} key={card.label}>
               <div className="brutalist-card__image">
                 <img src={card.image} alt={card.alt} />

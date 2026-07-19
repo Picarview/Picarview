@@ -19,6 +19,7 @@ interface CmsDatabase {
 interface CmsObject {
   body: ReadableStream
   httpEtag: string
+  size: number
   httpMetadata?: { contentType?: string; cacheControl?: string }
 }
 
@@ -26,7 +27,7 @@ interface CmsBucket {
   put(key: string, value: ArrayBuffer, options?: {
     httpMetadata?: { contentType?: string; cacheControl?: string }
   }): Promise<unknown>
-  get(key: string): Promise<CmsObject | null>
+  get(key: string, options?: { range?: { offset: number; length?: number } }): Promise<CmsObject | null>
   delete(key: string): Promise<void>
 }
 
@@ -49,6 +50,16 @@ export interface CmsItem {
   created_at: string
 }
 
+export interface CmsSiteMedia {
+  slot: 'hero' | 'expression-1' | 'expression-2' | 'expression-3' | 'expression-4'
+  media_type: 'image' | 'video'
+  title: string
+  alt_text: string
+  object_key: string
+  mime_type: string
+  updated_at: string
+}
+
 export function getCmsEnv(): CmsEnv {
   return getCloudflareContext().env as unknown as CmsEnv
 }
@@ -61,6 +72,7 @@ export function publicCmsItem(item: CmsItem) {
     subtitle: item.subtitle,
     altText: item.alt_text,
     sortOrder: item.sort_order,
+    createdAt: item.created_at,
     imageUrl: `/api/cms/media?key=${encodeURIComponent(item.object_key)}`,
   }
 }
@@ -85,6 +97,20 @@ async function sign(value: string, secret: string) {
   return bytesToBase64Url(new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(value))))
 }
 
+export function timingSafeTextEqual(value: string, expected: string) {
+  const valueBytes = encoder.encode(value)
+  const expectedBytes = encoder.encode(expected)
+  const subtle = crypto.subtle as SubtleCrypto & {
+    timingSafeEqual(a: ArrayBufferView, b: ArrayBufferView): boolean
+  }
+  if (valueBytes.byteLength !== expectedBytes.byteLength) {
+    // Perform a same-length comparison even when returning false.
+    subtle.timingSafeEqual(expectedBytes, expectedBytes)
+    return false
+  }
+  return subtle.timingSafeEqual(valueBytes, expectedBytes)
+}
+
 export async function createAdminSession(secret: string) {
   const expires = Date.now() + 1000 * 60 * 60 * 12
   const payload = String(expires)
@@ -95,7 +121,7 @@ export async function verifyAdminSession(token: string | undefined, secret: stri
   if (!token || !secret) return false
   const [payload, signature] = token.split('.')
   if (!payload || !signature || Number(payload) < Date.now()) return false
-  return signature === await sign(payload, secret)
+  return timingSafeTextEqual(signature, await sign(payload, secret))
 }
 
 export function readCookie(request: Request, name: string) {
@@ -105,11 +131,48 @@ export function readCookie(request: Request, name: string) {
 
 export function isSameOrigin(request: Request) {
   const origin = request.headers.get('origin')
-  return !origin || origin === new URL(request.url).origin
+  const fetchSite = request.headers.get('sec-fetch-site')
+  return origin === new URL(request.url).origin && (!fetchSite || fetchSite === 'same-origin')
 }
 
 export function safeImageType(file: File) {
   return ['image/png', 'image/jpeg', 'image/webp', 'image/avif'].includes(file.type)
+}
+
+export function safeImageBytes(bytes: Uint8Array, type: string) {
+  if (type === 'image/png') {
+    return bytes.length >= 8 && [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
+      .every((byte, index) => bytes[index] === byte)
+  }
+  if (type === 'image/jpeg') {
+    return bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
+  }
+  if (type === 'image/webp') {
+    return bytes.length >= 12
+      && new TextDecoder().decode(bytes.subarray(0, 4)) === 'RIFF'
+      && new TextDecoder().decode(bytes.subarray(8, 12)) === 'WEBP'
+  }
+  if (type === 'image/avif') {
+    if (bytes.length < 12 || new TextDecoder().decode(bytes.subarray(4, 8)) !== 'ftyp') return false
+    const brand = new TextDecoder().decode(bytes.subarray(8, Math.min(bytes.length, 32)))
+    return brand.includes('avif') || brand.includes('avis')
+  }
+  return false
+}
+
+export function safeVideoType(file: File) {
+  return ['video/mp4', 'video/webm'].includes(file.type)
+}
+
+export function safeVideoBytes(bytes: Uint8Array, type: string) {
+  if (type === 'video/mp4') {
+    return bytes.length >= 12 && new TextDecoder().decode(bytes.subarray(4, 8)) === 'ftyp'
+  }
+  if (type === 'video/webm') {
+    return bytes.length >= 4
+      && bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3
+  }
+  return false
 }
 
 export function extensionFor(file: File) {
