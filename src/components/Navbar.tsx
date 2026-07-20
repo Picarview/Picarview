@@ -17,6 +17,7 @@ export function Navbar() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Fade in navbar
       gsap.fromTo(
         navRef.current,
         { y: -100, opacity: 0 },
@@ -28,9 +29,13 @@ export function Navbar() {
     return () => ctx.revert()
   }, [])
 
+  // Separate effect for theme switching - runs after content is mounted
   useEffect(() => {
+    // Delay to ensure all sections are rendered
     const timer = setTimeout(() => {
       const sections = document.querySelectorAll('[data-theme]')
+      
+      console.log('Found sections with data-theme:', sections.length)
       
       sections.forEach((section) => {
         ScrollTrigger.create({
@@ -39,10 +44,12 @@ export function Navbar() {
           end: 'bottom top',
           onEnter: () => {
             const theme = section.getAttribute('data-theme')
+            console.log('Entering section with theme:', theme)
             setNavTheme(theme === 'light' ? 'light' : 'dark')
           },
           onEnterBack: () => {
             const theme = section.getAttribute('data-theme')
+            console.log('Entering back section with theme:', theme)
             setNavTheme(theme === 'light' ? 'light' : 'dark')
           },
         })
@@ -66,12 +73,12 @@ export function Navbar() {
     <>
       <Link
         href="/"
-        className="site-nav-logo"
+        className="fixed left-6 top-4 z-50 mix-blend-difference"
         aria-label="Picarview home"
       >
-        <div className="relative h-7 w-28 md:h-8 md:w-32">
+        <div className="relative h-8 w-32 md:h-10 md:w-36">
           <Image
-            src="/logo-black.png"
+            src="/logo-white.png"
             alt="Picarview Logo"
             fill
             sizes="(max-width: 768px) 128px, 144px"
@@ -83,61 +90,66 @@ export function Navbar() {
 
       <nav
         ref={navRef}
-        className={`site-nav site-nav--${navTheme}`}
+        className="fixed top-4 right-6 z-50 rounded-full border border-white/15 bg-white/10 backdrop-blur-md px-4 md:px-6 py-2.5 md:py-3"
       >
-        <div className="site-nav__inner">
-          <div className="site-nav__links">
-            {navLinks.map((link, index) => (
+        <div className="flex items-center justify-between">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-6">
+            {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
-                className="site-nav__link"
+                className={`text-[0.65rem] uppercase tracking-[0.22em] transition-colors duration-300 ease-in-out ${
+                  navTheme === 'light' 
+                    ? 'text-zinc-700 hover:text-black' 
+                    : 'text-zinc-200 hover:text-white'
+                }`}
               >
-                <span>{String(index + 1).padStart(2, '0')}</span>
                 {link.name}
               </a>
             ))}
           </div>
 
+          {/* Mobile Menu Button */}
           <button
-            className="site-nav__toggle"
+            className={`md:hidden p-2 transition-colors duration-300 ease-in-out ${
+              navTheme === 'light' ? 'text-black' : 'text-white'
+            }`}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={isMenuOpen}
+            aria-label="Toggle menu"
           >
-            <span>Menu</span>
             {isMenuOpen ? (
-              <X className="h-5 w-5" />
+              <X className="w-6 h-6" />
             ) : (
-              <Menu className="h-5 w-5" />
+              <Menu className="w-6 h-6" />
             )}
           </button>
         </div>
       </nav>
 
+      {/* Mobile Menu */}
       <div
-        className={`site-mobile-menu ${isMenuOpen ? 'is-open' : ''}`}
+        className={`fixed inset-0 z-40 bg-black transition-all duration-500 md:hidden ${
+          isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+        }`}
       >
-        <div className="site-mobile-menu__header">Picarview® / Navigation</div>
-        <div className="site-mobile-menu__links">
+        <div className="flex flex-col items-center justify-center h-full gap-8">
           {navLinks.map((link, index) => (
             <a
               key={link.name}
               href={link.href}
               onClick={() => setIsMenuOpen(false)}
-              className="site-mobile-menu__link"
+              className="text-3xl font-metropolis-black uppercase tracking-tight hover:text-white transition-colors"
               style={{
                 transform: isMenuOpen ? 'translateY(0)' : 'translateY(20px)',
                 opacity: isMenuOpen ? 1 : 0,
                 transition: `all 0.5s ease ${index * 0.1}s`,
               }}
             >
-              <span>{String(index + 1).padStart(2, '0')}</span>
               {link.name}
             </a>
           ))}
         </div>
-        <p className="site-mobile-menu__footer">Create your view · Accra / Worldwide</p>
       </div>
     </>
   )
