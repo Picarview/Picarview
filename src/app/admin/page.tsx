@@ -3,7 +3,25 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, LoaderCircle, LogOut, Plus, Search, Trash2, X } from 'lucide-react'
+import {
+  ArrowLeft,
+  ExternalLink,
+  FileClock,
+  FolderOpen,
+  Handshake,
+  ImageIcon,
+  LayoutDashboard,
+  LoaderCircle,
+  LogOut,
+  Menu,
+  Plus,
+  Search,
+  Settings,
+  Trash2,
+  X,
+} from 'lucide-react'
+
+type AdminView = 'overview' | 'media' | 'projects' | 'partners' | 'drafts' | 'settings'
 
 interface AdminItem {
   id: string
@@ -93,6 +111,8 @@ export default function AdminPage() {
   const [dateFilter, setDateFilter] = useState<'all' | '7' | '30' | '365'>('all')
   const [sort, setSort] = useState<'newest' | 'oldest' | 'title'>('newest')
   const [visibleCount, setVisibleCount] = useState(6)
+  const [activeView, setActiveView] = useState<AdminView>('overview')
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false)
 
   const loadItems = useCallback(async () => {
     const response = await fetch('/api/admin/items', { cache: 'no-store' })
@@ -140,6 +160,29 @@ export default function AdminPage() {
   }, [dateFilter, items, search, sort, statusFilter, typeFilter])
 
   const visibleItems = filteredItems.slice(0, visibleCount)
+  const projectCount = items.filter((item) => item.type === 'project').length
+  const partnerCount = items.filter((item) => item.type === 'partner').length
+  const draftCount = items.filter((item) => !item.published).length
+  const publishedCount = items.length - draftCount
+
+  function navigateTo(view: AdminView) {
+    setActiveView(view)
+    setMobileMoreOpen(false)
+    setSearch('')
+    if (view === 'projects') {
+      setTypeFilter('project')
+      setStatusFilter('all')
+    } else if (view === 'partners') {
+      setTypeFilter('partner')
+      setStatusFilter('all')
+    } else if (view === 'drafts') {
+      setTypeFilter('all')
+      setStatusFilter('draft')
+    } else {
+      setTypeFilter('all')
+      setStatusFilter('all')
+    }
+  }
 
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -280,19 +323,82 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="admin-shell">
-      <header className="admin-header">
-        <div><p>Picarview® CMS</p><h1>Content dashboard</h1></div>
-        <div>
-          <Link href="/">View website</Link>
+    <main className="admin-shell admin-shell--dashboard">
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar__brand"><span>P</span><div><strong>Picarview®</strong><small>Content system</small></div></div>
+        <nav aria-label="Dashboard navigation">
+          <button className={activeView === 'overview' ? 'is-active' : ''} onClick={() => navigateTo('overview')}><LayoutDashboard /> Overview</button>
+          <button className={activeView === 'media' ? 'is-active' : ''} onClick={() => navigateTo('media')}><ImageIcon /> Website media <i>{siteMedia.length}/5</i></button>
+          <button className={activeView === 'projects' ? 'is-active' : ''} onClick={() => navigateTo('projects')}><FolderOpen /> Projects <i>{projectCount}</i></button>
+          <button className={activeView === 'partners' ? 'is-active' : ''} onClick={() => navigateTo('partners')}><Handshake /> Partners <i>{partnerCount}</i></button>
+          <button className={activeView === 'drafts' ? 'is-active' : ''} onClick={() => navigateTo('drafts')}><FileClock /> Drafts <i>{draftCount}</i></button>
+          <button className={activeView === 'settings' ? 'is-active' : ''} onClick={() => navigateTo('settings')}><Settings /> Settings</button>
+        </nav>
+        <div className="admin-sidebar__footer">
+          <Link href="/"><ExternalLink /> View website</Link>
           <button onClick={() => void logout()} disabled={signingOut}>
-            {signingOut ? <LoaderCircle className="admin-spinner h-4 w-4" /> : <LogOut className="h-4 w-4" />}
+            {signingOut ? <LoaderCircle className="admin-spinner" /> : <LogOut />}
             {signingOut ? 'Signing out…' : 'Sign out'}
           </button>
         </div>
-      </header>
+      </aside>
 
-      <section className="admin-site-media">
+      <div className="admin-dashboard">
+        <header className="admin-header">
+          <div>
+            <p>{activeView === 'overview' ? 'Dashboard overview' : `Manage ${activeView}`}</p>
+            <h1>{({
+              overview: 'Good to see you.',
+              media: 'Website media',
+              projects: 'Project library',
+              partners: 'Partner library',
+              drafts: 'Unpublished work',
+              settings: 'CMS settings',
+            } as Record<AdminView, string>)[activeView]}</h1>
+          </div>
+          <div><span className="admin-live-dot"><i /> Live</span></div>
+        </header>
+        {message && <div className="admin-global-message"><span>{message}</span><button onClick={() => setMessage('')}><X className="h-4 w-4" /></button></div>}
+
+        {activeView === 'overview' && (
+          <>
+            <section className="admin-overview-stats">
+              {[
+                { label: 'All content', value: items.length, color: '#ffb000' },
+                { label: 'Published', value: publishedCount, color: '#b9ff32' },
+                { label: 'Drafts', value: draftCount, color: '#ff6b8b' },
+                { label: 'Media overrides', value: siteMedia.length, color: '#22d9ee' },
+              ].map((stat) => (
+                <article style={{ backgroundColor: stat.color }} key={stat.label}><span>{stat.label}</span><strong>{String(stat.value).padStart(2, '0')}</strong></article>
+              ))}
+            </section>
+            <section className="admin-overview-grid">
+              <div className="admin-overview-panel">
+                <header><div><p>Quick actions</p><h2>Keep creating</h2></div></header>
+                <div className="admin-quick-actions">
+                  <button onClick={() => navigateTo('projects')}><FolderOpen /><span><strong>Add a project</strong><small>Publish new work</small></span></button>
+                  <button onClick={() => navigateTo('partners')}><Handshake /><span><strong>Add a partner</strong><small>Upload a new logo</small></span></button>
+                  <button onClick={() => navigateTo('media')}><ImageIcon /><span><strong>Change website media</strong><small>Hero and expressions</small></span></button>
+                </div>
+              </div>
+              <div className="admin-overview-panel">
+                <header><div><p>Latest activity</p><h2>Recent content</h2></div><button onClick={() => navigateTo('projects')}>View library</button></header>
+                <div className="admin-recent-list">
+                  {items.slice().sort((a, b) => new Date(`${b.createdAt}Z`).getTime() - new Date(`${a.createdAt}Z`).getTime()).slice(0, 5).map((item) => (
+                    <article key={item.id}>
+                      <div className="admin-recent-list__image"><Image src={item.imageUrl} alt="" fill sizes="64px" className="object-cover" unoptimized /></div>
+                      <div><span>{item.type} · {item.published ? 'Published' : 'Draft'}</span><strong>{item.title}</strong></div>
+                      <time>{new Date(`${item.createdAt}Z`).toLocaleDateString()}</time>
+                    </article>
+                  ))}
+                  {items.length === 0 && <div className="admin-empty">No CMS activity yet.</div>}
+                </div>
+              </div>
+            </section>
+          </>
+        )}
+
+      {activeView === 'media' && <section className="admin-site-media">
         <header>
           <div><p>Website media</p><h2>Hero + selected expressions</h2></div>
           <span>Original designs remain the automatic fallback</span>
@@ -329,14 +435,13 @@ export default function AdminPage() {
             )
           })}
         </div>
-      </section>
+      </section>}
 
-      <section className="admin-layout">
+      {(activeView === 'projects' || activeView === 'partners' || activeView === 'drafts') && <section className={`admin-layout ${activeView === 'drafts' ? 'admin-layout--library-only' : ''}`}>
+        {activeView !== 'drafts' && (
         <form className="admin-create" onSubmit={createItem}>
-          <header><Plus className="h-5 w-5" /><h2>Add content</h2></header>
-          <label><span>Content type</span>
-            <select name="type"><option value="project">Project</option><option value="partner">Partner logo</option></select>
-          </label>
+          <header><Plus className="h-5 w-5" /><h2>Add {activeView === 'partners' ? 'partner' : 'project'}</h2></header>
+          <input type="hidden" name="type" value={activeView === 'partners' ? 'partner' : 'project'} />
           <label><span>Title</span><input name="title" placeholder="Project or partner name" maxLength={120} required /></label>
           <label><span>Subtitle</span><input name="subtitle" placeholder="Identity, campaign, industry…" maxLength={200} /></label>
           <label><span>Image description</span><input name="altText" placeholder="Accessible description" maxLength={300} required /></label>
@@ -345,8 +450,8 @@ export default function AdminPage() {
           </label>
           <label className="admin-upload"><span>Image or logo · max 10 MB</span><input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/avif" required /></label>
           <button disabled={busy}>{busy ? 'Working…' : 'Upload and save'}</button>
-          {message && <p className="admin-message">{message}</p>}
         </form>
+        )}
 
         <div className="admin-library">
           <header>
@@ -359,11 +464,11 @@ export default function AdminPage() {
               <Search className="h-4 w-4" />
               <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search titles, categories…" />
             </label>
-            <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as typeof typeFilter)} aria-label="Filter by content type">
+            {activeView === 'drafts' && <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as typeof typeFilter)} aria-label="Filter by content type">
               <option value="all">All content</option>
               <option value="project">Projects</option>
               <option value="partner">Partners</option>
-            </select>
+            </select>}
             <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)} aria-label="Filter by publication status">
               <option value="all">All statuses</option>
               <option value="published">Published</option>
@@ -412,7 +517,36 @@ export default function AdminPage() {
             </>
           )}
         </div>
-      </section>
+      </section>}
+
+      {activeView === 'settings' && (
+        <section className="admin-settings-grid">
+          <article><span>Security</span><h2>Protected admin</h2><p>Signed 12-hour sessions, strict same-origin requests, rate-limited login attempts, timing-safe comparisons, CSP, and validated uploads are active.</p><strong>Security layers online</strong></article>
+          <article><span>Cloudflare</span><h2>Storage bindings</h2><p>Content metadata is stored in D1. Images and videos are stored in R2 and served through protected application routes.</p><strong>CMS_DB · CMS_MEDIA</strong></article>
+          <article><span>Website defaults</span><h2>Fallback system</h2><p>Removing CMS media restores the repository hero sequence and original expression images. Empty content never creates a blank section.</p><button onClick={() => navigateTo('media')}>Manage website media</button></article>
+          <article><span>Production</span><h2>Live Worker</h2><p>The active Cloudflare Worker is <strong>picarview-landing</strong>. GitHub pushes and Cloudflare deployments remain separate release steps.</p><Link href="/">Open live website <ExternalLink className="h-4 w-4" /></Link></article>
+        </section>
+      )}
+      </div>
+
+      <nav className="admin-mobile-nav" aria-label="Mobile dashboard navigation">
+        <button className={activeView === 'overview' ? 'is-active' : ''} onClick={() => navigateTo('overview')}><LayoutDashboard /><span>Home</span></button>
+        <button className={activeView === 'media' ? 'is-active' : ''} onClick={() => navigateTo('media')}><ImageIcon /><span>Media</span></button>
+        <button className={activeView === 'projects' ? 'is-active' : ''} onClick={() => navigateTo('projects')}><FolderOpen /><span>Projects</span></button>
+        <button className={activeView === 'partners' ? 'is-active' : ''} onClick={() => navigateTo('partners')}><Handshake /><span>Partners</span></button>
+        <button className={mobileMoreOpen ? 'is-active' : ''} onClick={() => setMobileMoreOpen((open) => !open)}><Menu /><span>More</span></button>
+      </nav>
+
+      {mobileMoreOpen && (
+        <div className="admin-mobile-drawer">
+          <button className="admin-mobile-drawer__close" onClick={() => setMobileMoreOpen(false)}><X /></button>
+          <span>More controls</span>
+          <button onClick={() => navigateTo('drafts')}><FileClock /> Drafts <i>{draftCount}</i></button>
+          <button onClick={() => navigateTo('settings')}><Settings /> Settings</button>
+          <Link href="/"><ExternalLink /> View website</Link>
+          <button onClick={() => void logout()} disabled={signingOut}>{signingOut ? <LoaderCircle className="admin-spinner" /> : <LogOut />} Sign out</button>
+        </div>
+      )}
 
       {upload.open && (
         <div className="admin-progress-modal" role="dialog" aria-modal="true" aria-labelledby="upload-progress-title">

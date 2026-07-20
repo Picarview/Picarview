@@ -1,7 +1,22 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, ArrowUpRight } from 'lucide-react'
 import { ContactForm } from '@/components/ContactForm'
+
+export const metadata: Metadata = {
+  title: 'Start a Project',
+  description: 'Start a conversation with Picarview about brand identity, campaigns, art direction, photography, or visual design.',
+  alternates: {
+    canonical: '/contact',
+  },
+  openGraph: {
+    title: 'Start a Project | Picarview',
+    description: 'Bring Picarview the ambition. We will help shape the strategy, direction, and visual expression.',
+    url: '/contact',
+    type: 'website',
+  },
+}
 
 export default function ContactPage() {
   return (
