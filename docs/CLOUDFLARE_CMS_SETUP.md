@@ -72,10 +72,12 @@ For local development, copy `.dev.vars.example` to `.dev.vars` and replace both 
 
 ```bash
 npm run build
-npx wrangler deploy
+npx opennextjs-cloudflare deploy
 ```
 
 Open `/admin`, sign in, and upload a test partner logo and project image. Published content appears automatically on the website.
+
+`git push` and Cloudflare deployment are separate operations. Push the exact deployed source after verification so GitHub and the Worker do not drift.
 
 ## Storage behavior
 
