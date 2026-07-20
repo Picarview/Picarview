@@ -23,20 +23,51 @@ const bacalisties = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'Picarview | Premium Creative Agency',
-  description: 'Create your view. A creative company focused on shaping how pictures, art, and visual ideas are perceived.',
+  title: {
+    default: 'Picarview | Creative Design & Visual Art Studio',
+    template: '%s | Picarview',
+  },
+  description: 'Picarview is an independent creative practice shaping brand identities, campaigns, art direction, photography, and visual experiences.',
   metadataBase: new URL('https://picarview.com'),
+  applicationName: 'Picarview',
+  creator: 'Picarview',
+  publisher: 'Picarview',
+  category: 'Design',
+  keywords: [
+    'Picarview',
+    'creative agency',
+    'graphic design',
+    'brand identity',
+    'art direction',
+    'photography',
+    'visual design',
+    'creative studio',
+  ],
+  alternates: {
+    canonical: '/',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
   openGraph: {
-    title: 'Picarview | Premium Creative Agency',
-    description: 'Create your view. A creative company focused on shaping how pictures, art, and visual ideas are perceived.',
-    url: 'https://picarview.com',
+    title: 'Picarview | Creative Design & Visual Art Studio',
+    description: 'An independent creative practice shaping identities, campaigns, art direction, photography, and visual experiences.',
+    url: '/',
     siteName: 'Picarview',
     images: [
       {
         url: '/logo-black.png',
-        width: 1200,
-        height: 630,
-        alt: 'Picarview Logo',
+        width: 1327,
+        height: 530,
+        alt: 'Picarview',
       },
     ],
     locale: 'en_US',
@@ -44,8 +75,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Picarview | Premium Creative Agency',
-    description: 'Create your view. A creative company focused on shaping how pictures, art, and visual ideas are perceived.',
+    title: 'Picarview | Creative Design & Visual Art Studio',
+    description: 'An independent creative practice shaping identities, campaigns, art direction, photography, and visual experiences.',
     images: ['/logo-black.png'],
   },
   icons: {
@@ -59,8 +90,52 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ProfessionalService',
+    '@id': 'https://picarview.com/#organization',
+    name: 'Picarview',
+    url: 'https://picarview.com',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://picarview.com/logo-black.png',
+      width: 1327,
+      height: 530,
+    },
+    email: 'create@picarview.com',
+    description: 'An independent creative practice shaping brand identities, campaigns, art direction, photography, and visual experiences.',
+    areaServed: 'Worldwide',
+    knowsAbout: [
+      'Brand identity',
+      'Creative strategy',
+      'Campaign planning',
+      'Art direction',
+      'Photography',
+      'Videography',
+      'Visual art',
+    ],
+  }
+
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': 'https://picarview.com/#website',
+    url: 'https://picarview.com',
+    name: 'Picarview',
+    publisher: { '@id': 'https://picarview.com/#organization' },
+    inLanguage: 'en',
+  }
+
   return (
     <html lang="en" className={`${metropolisBlack.variable} ${metropolisBold.variable} ${bacalisties.variable}`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([organizationSchema, websiteSchema]).replace(/</g, '\\u003c'),
+          }}
+        />
+      </head>
       <body className="bg-background text-foreground antialiased">
         <LenisProvider>
           {children}
