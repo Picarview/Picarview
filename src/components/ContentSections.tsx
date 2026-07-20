@@ -328,13 +328,13 @@ function AboutSection() {
       data-theme="dark"
       className="about-cover-section py-28 md:py-40 px-6 md:px-12 lg:px-24"
     >
-      <div ref={contentRef} className="max-w-5xl mx-auto">
-        <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-8">02 — Page</p>
+      <div ref={contentRef} className="about-cover-section__inner max-w-5xl mx-auto">
+        <p className="section-stamp section-stamp--dark">02 — Studio</p>
         <h2 ref={headingRef} className="stylish-header text-4xl md:text-5xl lg:text-6xl mb-12 soft-mask-reveal">
           <span className="metropolis-upper text-white">GET TO </span>
           <span className="bacalisties-script text-white text-5xl md:text-6xl lg:text-7xl">knowPICARVIEW</span>
         </h2>
-        <div className="space-y-6 text-lg md:text-xl text-zinc-300 leading-relaxed">
+        <div className="about-cover-section__copy space-y-6 text-lg md:text-xl text-zinc-300 leading-relaxed">
           <p className="text-2xl md:text-3xl text-white font-light leading-normal">
             We are your creative team.
           </p>
@@ -531,7 +531,7 @@ function ServicesSection() {
       <div className="service-script__content">
         <header className="service-script__header">
           <div>
-            <p className="service-script__eyebrow">05 — Services</p>
+            <p className="service-script__eyebrow section-stamp">05 — Services</p>
             <h2 className="service-script__title">
               Four pillars. <span>One creative practice.</span>
             </h2>
@@ -653,7 +653,7 @@ function WorksSection() {
       </div>
 
       <header className="aura-work__heading">
-        <p>06 — Project Page</p>
+        <p className="section-stamp section-stamp--dark">06 — Project Page</p>
         <h2><span>Selected</span> work, thoughtfully crafted.</h2>
         <div className="aura-work__counter">{projects.length} projects · Scroll to explore</div>
         <Link href="/projects" className="aura-work__cta">
@@ -733,11 +733,11 @@ function PersonalitySection() {
     <section
       ref={sectionRef}
       data-theme="light"
-      className="py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-white"
+      className="personality-section py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-white"
     >
       <div className="max-w-7xl mx-auto">
         <div className="mb-16">
-          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-4">04 — Personality</p>
+          <p className="section-stamp">04 — Personality</p>
           <h2 ref={headingRef} className="stylish-header text-4xl md:text-5xl lg:text-6xl soft-mask-reveal">
             <span className="bacalisties-script text-black text-5xl md:text-6xl lg:text-7xl">ourPERSONALITY</span>
           </h2>
@@ -747,8 +747,9 @@ function PersonalitySection() {
           ref={cardsRef}
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
-          {traits.map((trait) => (
+          {traits.map((trait, index) => (
             <div key={trait} className="personality-card">
+              <span>{String(index + 1).padStart(2, '0')}</span>
               <p className="text-xl md:text-2xl font-light text-black">
                 {trait}
               </p>
@@ -797,11 +798,11 @@ function PromiseSection() {
     <section
       ref={sectionRef}
       data-theme="dark"
-      className="py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-black"
+      className="promise-section py-28 md:py-40 px-6 md:px-12 lg:px-24 bg-black"
     >
       <div className="max-w-5xl mx-auto">
         <div className="mb-16">
-          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-4">05 — Promise</p>
+          <p className="section-stamp section-stamp--dark">05 — Promise</p>
           <h2 ref={headingRef} className="stylish-header text-4xl md:text-5xl lg:text-6xl soft-mask-reveal">
             <span className="bacalisties-script text-white text-5xl md:text-6xl lg:text-7xl">ourPROMISE</span>
           </h2>
@@ -874,7 +875,7 @@ function ContactSection() {
 
       <div className="contact-portal__inner">
         <div className="contact-portal__copy">
-          <p className="contact-portal__eyebrow">06 — Contact</p>
+          <p className="contact-portal__eyebrow section-stamp section-stamp--dark">06 — Contact</p>
           <h2>Let&apos;s create<br /><span>the next view.</span></h2>
           <p className="contact-portal__intro">
             Bring us the ambition. We&apos;ll help shape the strategy, direction, and expression that make it visible.
@@ -905,9 +906,9 @@ function ContactSection() {
 // Footer
 function Footer() {
   return (
-    <footer data-theme="dark" className="py-12 px-6 md:px-12 lg:px-24 border-t border-white/15 bg-black">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-        <Link href="/" aria-label="Picarview home" className="block transition-opacity hover:opacity-70">
+    <footer data-theme="dark" className="site-footer">
+      <div className="site-footer__top">
+        <Link href="/" aria-label="Picarview home" className="site-footer__logo">
           <Image
             src="/logo-white.png"
             alt="Picarview"
@@ -916,15 +917,18 @@ function Footer() {
             className="h-10 w-auto object-contain"
           />
         </Link>
-        <p className="text-zinc-400 text-sm">© 2026 Picarview. All rights reserved.</p>
-        <div className="flex items-center gap-6">
-          <a href="#" className="text-zinc-400 hover:text-white transition-colors text-sm uppercase tracking-[0.25em]">
-            Privacy
-          </a>
-          <a href="#" className="text-zinc-400 hover:text-white transition-colors text-sm uppercase tracking-[0.25em]">
-            Terms
-          </a>
-        </div>
+        <p>Creative practice · Accra / Worldwide</p>
+        <Link href="/contact" className="site-footer__cta">Start a project <ArrowRight className="h-4 w-4" /></Link>
+      </div>
+      <div className="site-footer__masthead" aria-label="Picarview">PICARVIEW</div>
+      <div className="site-footer__bottom">
+        <p>© 2026 Picarview. All rights reserved.</p>
+        <nav aria-label="Footer navigation">
+          <a href="#about">About</a>
+          <a href="#services">Services</a>
+          <a href="#work">Work</a>
+          <Link href="/contact">Contact</Link>
+        </nav>
       </div>
     </footer>
   )
