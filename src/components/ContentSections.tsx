@@ -381,6 +381,37 @@ function GoalSection() {
           },
         }
       )
+
+      // Give every partner mark its own quiet, continuous rhythm once visible.
+      // Animating the image (rather than the card) keeps the reveal and hover
+      // transforms independent, and pausing off-screen avoids wasted work.
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        gsap.utils
+          .toArray<HTMLImageElement>('.partners-statement__logos img')
+          .forEach((logo, index) => {
+            const motion = gsap.to(logo, {
+              y: index % 2 === 0 ? -9 : 9,
+              rotation: index % 2 === 0 ? 1.4 : -1.4,
+              scale: 1.035,
+              duration: 2.8 + (index % 3) * 0.45,
+              delay: index * -0.55,
+              repeat: -1,
+              yoyo: true,
+              ease: 'sine.inOut',
+              paused: true,
+            })
+
+            ScrollTrigger.create({
+              trigger: logo.closest('figure'),
+              start: 'top 95%',
+              end: 'bottom 5%',
+              onEnter: () => motion.play(),
+              onEnterBack: () => motion.play(),
+              onLeave: () => motion.pause(),
+              onLeaveBack: () => motion.pause(),
+            })
+          })
+      }
     }, sectionRef)
 
     return () => ctx.revert()

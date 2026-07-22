@@ -752,6 +752,12 @@ body {
   max-width: 320px;
   max-height: 120px;
   object-fit: contain;
+  transform-origin: center;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partners-statement__logos img { will-change: auto; }
 }
 
 .partners-statement__logos figcaption {
