@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useLenis } from 'lenis/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft, ArrowUpRight, ChevronLeft, ChevronRight, X } from 'lucide-react'
@@ -10,6 +11,7 @@ const accents = ['#ffb000', '#b9ff32', '#ff4fa3', '#22d9ee']
 const disciplines = ['Identity', 'Campaign', 'Image-making', 'Art direction']
 
 export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }) {
+  const lenis = useLenis()
   const cmsProjects = useCmsItems('project')
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [industry, setIndustry] = useState('All')
@@ -31,8 +33,19 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
 
   useEffect(() => {
     if (activeIndex === null) return
+    const scrollY = window.scrollY
     const previousOverflow = document.body.style.overflow
+    const previousHtmlOverflow = document.documentElement.style.overflow
+    const previousPosition = document.body.style.position
+    const previousTop = document.body.style.top
+    const previousWidth = document.body.style.width
+    lenis?.stop()
+    document.body.classList.add('project-viewer-open')
+    document.documentElement.style.overflow = 'hidden'
     document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
 
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setActiveIndex(null)
@@ -41,10 +54,17 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
     }
     window.addEventListener('keydown', handleKey)
     return () => {
+      document.body.classList.remove('project-viewer-open')
+      document.documentElement.style.overflow = previousHtmlOverflow
       document.body.style.overflow = previousOverflow
+      document.body.style.position = previousPosition
+      document.body.style.top = previousTop
+      document.body.style.width = previousWidth
+      window.scrollTo(0, scrollY)
+      lenis?.start()
       window.removeEventListener('keydown', handleKey)
     }
-  }, [activeIndex, visibleProjects.length])
+  }, [activeIndex, lenis, visibleProjects.length])
 
   const activeProject = activeIndex === null ? null : visibleProjects[activeIndex]
 
@@ -65,6 +85,12 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
 
       <nav className="project-archive__filters" aria-label="Filter projects by industry">
         <span>Filter by industry</span>
+        <label>
+          <span className="sr-only">Choose an industry</span>
+          <select value={industry} onChange={(event) => setIndustry(event.target.value)}>
+            {industries.map((name) => <option value={name} key={name}>{name} ({name === 'All' ? projects.length : projects.filter((project) => (project.industry || 'General') === name).length})</option>)}
+          </select>
+        </label>
         <div>
           {industries.map((name) => (
             <button type="button" className={industry === name ? 'is-active' : ''} onClick={() => setIndustry(name)} aria-pressed={industry === name} key={name}>
@@ -121,7 +147,13 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
-          <article className="project-viewer__card" style={{ '--viewer-accent': accents[activeIndex % accents.length] } as CSSProperties}>
+          <article
+            className="project-viewer__card"
+            data-lenis-prevent
+            data-lenis-prevent-wheel
+            data-lenis-prevent-touch
+            style={{ '--viewer-accent': accents[activeIndex % accents.length] } as CSSProperties}
+          >
             <div className="project-viewer__image">
               <Image
                 src={activeProject.imageUrl}
