@@ -1,16 +1,20 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { getCmsEnv, type CmsLegalPage } from '@/lib/cloudflare-cms'
+import { cookies } from 'next/headers'
+import { getCmsEnv, SESSION_COOKIE, verifyAdminSession, type CmsLegalPage } from '@/lib/cloudflare-cms'
 
 interface LegalSection { heading: string; body: string }
 
-export async function LegalPage({ slug }: { slug: 'privacy' | 'terms' }) {
+export async function LegalPage({ slug, missingTitle, preview = false }: { slug: string; missingTitle?: string; preview?: boolean }) {
   let page: CmsLegalPage | null = null
   try {
-    const { CMS_DB } = getCmsEnv()
-    page = CMS_DB ? await CMS_DB.prepare(
-      'SELECT slug, title, introduction, sections_json, effective_date, published, updated_at FROM legal_pages WHERE slug = ? AND published = 1'
+    const { CMS_DB, ADMIN_SESSION_SECRET } = getCmsEnv()
+    const cookieStore = await cookies()
+    const canPreview = preview && await verifyAdminSession(cookieStore.get(SESSION_COOKIE)?.value, ADMIN_SESSION_SECRET)
+    page = CMS_DB ? await CMS_DB.prepare(canPreview
+      ? 'SELECT slug, title, introduction, sections_json, effective_date, published, updated_at FROM legal_pages WHERE slug = ?'
+      : 'SELECT slug, title, introduction, sections_json, effective_date, published, updated_at FROM legal_pages WHERE slug = ? AND published = 1'
     ).bind(slug).first<CmsLegalPage>() : null
   } catch (error) {
     console.error('Legal page query failed', error)
@@ -24,14 +28,15 @@ export async function LegalPage({ slug }: { slug: 'privacy' | 'terms' }) {
     } catch { sections = [] }
   }
 
-  const fallbackTitle = slug === 'privacy' ? 'Privacy Policy' : 'Terms & Conditions'
+  const fallbackTitle = missingTitle || (slug === 'privacy' ? 'Privacy Policy' : slug === 'terms' ? 'Terms & Conditions' : 'Legal document')
   return (
     <main className="legal-page">
       <nav className="legal-page__nav">
-        <Link href="/" aria-label="Picarview home"><Image src="/images/Black.svg" alt="Picarview" width={170} height={42} priority /></Link>
+        <Link href="/" aria-label="Picarview home"><Image src="/images/Black.png" alt="Picarview" width={2268} height={513} priority /></Link>
         <Link href="/"><ArrowLeft className="h-4 w-4" /> Back home</Link>
       </nav>
       <article className="legal-page__document">
+        {preview && page && !page.published && <div className="legal-page__preview-banner">Admin preview · This document is not public</div>}
         <header>
           <p>Legal · Picarview</p>
           <h1>{page?.title || fallbackTitle}</h1>

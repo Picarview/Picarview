@@ -63,7 +63,7 @@ export interface CmsSiteMedia {
 }
 
 export interface CmsLegalPage {
-  slug: 'privacy' | 'terms'
+  slug: string
   title: string
   introduction: string
   sections_json: string

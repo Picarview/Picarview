@@ -20,7 +20,7 @@ html {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-metropolis-bold), system-ui, sans-serif;
+  font-family: var(--font-urbanist-bold), system-ui, sans-serif;
   overflow-x: hidden;
 }
 
@@ -143,7 +143,7 @@ body {
 
 .hero-sequence__intro h1 {
   max-width: 12ch;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(2.2rem, 5.7vw, 6.4rem);
   line-height: 0.92;
   letter-spacing: -0.055em;
@@ -164,16 +164,15 @@ body {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  perspective: 800px;
-  font-family: var(--font-metropolis-black);
-  font-size: clamp(2.6rem, 9vw, 9rem);
-  line-height: 0.72;
-  letter-spacing: -0.075em;
-  text-transform: uppercase;
-  color: #fff;
-  text-shadow: 0 6px 35px rgba(0, 0, 0, 0.38);
   pointer-events: none;
-  will-change: transform, opacity, letter-spacing;
+  will-change: transform, opacity, clip-path;
+}
+
+.hero-sequence__logo {
+  width: min(82vw, 1080px);
+  height: auto;
+  object-fit: contain;
+  filter: invert(1) drop-shadow(0 8px 28px rgba(0,0,0,0.42));
 }
 
 .hero-sequence__signature {
@@ -237,7 +236,7 @@ body {
 .hero-sequence__label--two {
   right: 7%;
   top: 38%;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(0.62rem, 1vw, 0.95rem);
   font-style: italic;
   letter-spacing: 0.18em;
@@ -246,7 +245,7 @@ body {
 .hero-sequence__label--three {
   left: 11%;
   bottom: 21%;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(0.68rem, 1.15vw, 1.1rem);
   letter-spacing: 0.1em;
   -webkit-text-stroke: 0.35px currentColor;
@@ -277,9 +276,7 @@ body {
     font-size: clamp(2rem, 10vw, 3.7rem);
   }
 
-  .hero-sequence__word {
-    font-size: clamp(2.1rem, 11.7vw, 4.4rem);
-  }
+  .hero-sequence__logo { width: 92vw; }
 
   .hero-sequence__signature {
     right: 1rem;
@@ -343,7 +340,7 @@ body {
 
 /* Hero text styling */
 .hero-title {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   text-transform: uppercase;
   letter-spacing: -0.02em;
   line-height: 0.9;
@@ -578,7 +575,7 @@ body {
   border: 1px solid rgba(0, 0, 0, 0.12);
   padding: 18px 36px;
   border-radius: 12px;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 22px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -611,8 +608,8 @@ body {
   overflow: visible;
 }
 
-.metropolis-upper {
-  font-family: var(--font-metropolis-black);
+.urbanist-upper {
+  font-family: var(--font-urbanist-black);
   text-transform: uppercase;
   letter-spacing: 0.02em;
   display: inline-block;
@@ -640,7 +637,7 @@ body {
     margin-top: 0.2em;
   }
   
-  .metropolis-upper {
+  .urbanist-upper {
     font-size: 1.5rem !important;
     line-height: 1.2 !important;
   }
@@ -652,7 +649,7 @@ body {
     line-height: 1.3 !important;
   }
   
-  .metropolis-upper {
+  .urbanist-upper {
     font-size: 1.25rem !important;
   }
   
@@ -694,7 +691,7 @@ body {
 
 .partners-statement__text {
   max-width: 20ch;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(2.5rem, 6vw, 6.5rem);
   line-height: 0.98;
   letter-spacing: -0.055em;
@@ -713,7 +710,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  font-family: var(--font-metropolis-bold);
+  font-family: var(--font-urbanist-bold);
   font-size: clamp(0.62rem, 0.8vw, 0.78rem);
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -767,14 +764,14 @@ body {
 }
 
 .partners-statement__logos figcaption span {
-  font-family: var(--font-metropolis-bold);
+  font-family: var(--font-urbanist-bold);
   font-size: 0.65rem;
   letter-spacing: 0.14em;
 }
 
 .partners-statement__logos figcaption strong {
   overflow: hidden;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(0.85rem, 1.2vw, 1.05rem);
   text-align: right;
   text-overflow: ellipsis;
@@ -843,14 +840,14 @@ body {
 .service-script__eyebrow {
   margin-bottom: 0.8rem;
   font-size: 0.68rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   letter-spacing: 0.36em;
   text-transform: uppercase;
 }
 
 .service-script__title {
   max-width: 11ch;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(2.35rem, 4.5vw, 5rem);
   line-height: 0.82;
   letter-spacing: -0.06em;
@@ -916,14 +913,14 @@ body {
 
 .service-pillar > header span,
 .service-pillar li {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(0.52rem, 0.62vw, 0.64rem);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .service-pillar h3 {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(1.25rem, 1.75vw, 1.8rem);
   line-height: 0.9;
   text-transform: uppercase;
@@ -1121,7 +1118,7 @@ body {
 .aura-work__heading p,
 .aura-work__counter,
 .aura-work__rail {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(0.52rem, 0.7vw, 0.7rem);
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -1130,7 +1127,7 @@ body {
 .aura-work__heading h2 {
   max-width: 11ch;
   margin-top: 0.65rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(2.5rem, 5.4vw, 5.8rem);
   line-height: 0.84;
   letter-spacing: -0.065em;
@@ -1161,7 +1158,7 @@ body {
   background: #fff;
   box-shadow: 5px 5px 0 #ff4fa3;
   color: #08070b;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(0.58rem, 0.72vw, 0.7rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1225,7 +1222,7 @@ body {
   justify-content: space-between;
   gap: 0.75rem;
   min-height: 2.5rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(0.5rem, 0.7vw, 0.68rem);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1364,7 +1361,7 @@ body {
   justify-content: space-between;
   gap: 1rem;
   font-size: clamp(0.58rem, 0.75vw, 0.75rem);
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
@@ -1411,7 +1408,7 @@ body {
   border: 3px solid #000;
   background: #fff;
   color: #000;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(0.56rem, 0.72vw, 0.7rem);
   line-height: 1;
   letter-spacing: 0.08em;
@@ -1426,7 +1423,7 @@ body {
   transform: translateX(-50%);
   color: transparent;
   -webkit-text-stroke: 2px rgba(0, 0, 0, 0.16);
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(4rem, 14vw, 13rem);
   line-height: 0.75;
   letter-spacing: -0.07em;
@@ -1454,7 +1451,7 @@ body {
 
 .foundation-intro h3 {
   color: #fff;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(2.5rem, 6vw, 6rem);
   line-height: 0.9;
   text-transform: uppercase;
@@ -1727,7 +1724,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.66rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -1739,7 +1736,7 @@ body {
 
 .project-archive__intro > p,
 .project-archive__intro > div span {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.64rem;
   letter-spacing: 0.28em;
   text-transform: uppercase;
@@ -1749,7 +1746,7 @@ body {
 .project-archive__intro h1 {
   margin-top: 1rem;
   max-width: 10ch;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(4rem, 10vw, 10rem);
   line-height: 0.78;
   letter-spacing: -0.075em;
@@ -1832,7 +1829,7 @@ body {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 0.7rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(0.5rem, 0.7vw, 0.68rem);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1891,7 +1888,7 @@ body {
 
 .project-viewer__card footer span,
 .project-viewer__card footer strong {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.62rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1899,7 +1896,7 @@ body {
 
 .project-viewer__card h2 {
   margin-top: 0.2rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(1rem, 2vw, 1.7rem);
   line-height: 1;
   text-transform: uppercase;
@@ -2037,13 +2034,13 @@ body {
   border: 2px solid #fff;
   color: #111;
   background: #b9ff32;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 1.35rem;
   box-shadow: 4px 4px 0 #fff;
 }
 .admin-sidebar__brand div { display: grid; gap: 0.15rem; }
 .admin-sidebar__brand strong {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.78rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2117,7 +2114,7 @@ body {
 .admin-header h1,
 .admin-create h2,
 .admin-library h2 {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   text-transform: uppercase;
 }
 
@@ -2127,7 +2124,7 @@ body {
 .admin-create label > span,
 .admin-login label > span,
 .admin-item span {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.62rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -2160,7 +2157,7 @@ body {
   border: 3px solid #111;
   background: #111;
   color: #fff;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.65rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -2188,7 +2185,7 @@ body {
   align-items: center;
   gap: 0.45rem;
   background: #fff;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.58rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2233,14 +2230,14 @@ body {
 .admin-overview-stats span,
 .admin-overview-panel header p,
 .admin-settings-grid article > span {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.6rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 .admin-overview-stats strong {
   align-self: flex-end;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(2.5rem, 5vw, 4.75rem);
   line-height: 0.7;
 }
@@ -2266,7 +2263,7 @@ body {
   gap: 1rem;
 }
 .admin-overview-panel h2 {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(1.25rem, 2.5vw, 2.2rem);
   text-transform: uppercase;
 }
@@ -2292,7 +2289,7 @@ body {
   background: #b9ff32;
 }
 .admin-quick-actions button span { display: grid; gap: 0.1rem; }
-.admin-quick-actions button strong { font-family: var(--font-metropolis-black); font-size: 0.72rem; text-transform: uppercase; }
+.admin-quick-actions button strong { font-family: var(--font-urbanist-black); font-size: 0.72rem; text-transform: uppercase; }
 .admin-quick-actions button small { color: #666; font-size: 0.68rem; }
 .admin-recent-list { margin-top: 0.65rem; display: grid; }
 .admin-recent-list article {
@@ -2307,7 +2304,7 @@ body {
 .admin-recent-list__image { position: relative; width: 52px; aspect-ratio: 1; border: 2px solid #111; }
 .admin-recent-list article > div:nth-child(2) { min-width: 0; display: grid; }
 .admin-recent-list span { color: #666; font-size: 0.56rem; text-transform: uppercase; }
-.admin-recent-list strong { overflow: hidden; font-family: var(--font-metropolis-black); font-size: 0.72rem; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.admin-recent-list strong { overflow: hidden; font-family: var(--font-urbanist-black); font-size: 0.72rem; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
 .admin-recent-list time { font-size: 0.62rem; }
 
 .admin-settings-grid {
@@ -2330,7 +2327,7 @@ body {
 .admin-settings-grid article:nth-child(2) { background: #22d9ee; }
 .admin-settings-grid article:nth-child(3) { background: #b9ff32; }
 .admin-settings-grid article:nth-child(4) { background: #ffb000; }
-.admin-settings-grid h2 { margin-top: 0.7rem; font-family: var(--font-metropolis-black); font-size: clamp(1.5rem, 3vw, 2.8rem); line-height: 0.9; text-transform: uppercase; }
+.admin-settings-grid h2 { margin-top: 0.7rem; font-family: var(--font-urbanist-black); font-size: clamp(1.5rem, 3vw, 2.8rem); line-height: 0.9; text-transform: uppercase; }
 .admin-settings-grid p { max-width: 55ch; margin-top: 1rem; line-height: 1.6; }
 .admin-settings-grid article > strong,
 .admin-settings-grid button,
@@ -2340,7 +2337,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.65rem;
   text-transform: uppercase;
 }
@@ -2364,13 +2361,13 @@ body {
 .admin-site-media > header p,
 .admin-media-slot label > span,
 .admin-media-slot__heading span {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.58rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 .admin-site-media > header h2 {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(1.5rem, 3vw, 3rem);
   line-height: 0.95;
   text-transform: uppercase;
@@ -2403,13 +2400,13 @@ body {
 .admin-media-slot__preview video,
 .admin-media-slot__preview img { width: 100%; height: 100%; object-fit: cover; }
 .admin-media-slot__preview > span {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.65rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 .admin-media-slot__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
-.admin-media-slot__heading h3 { font-family: var(--font-metropolis-black); font-size: 0.9rem; text-transform: uppercase; }
+.admin-media-slot__heading h3 { font-family: var(--font-urbanist-black); font-size: 0.9rem; text-transform: uppercase; }
 .admin-media-slot__heading button { font-size: 0.58rem; text-decoration: underline; }
 .admin-media-slot label { display: grid; gap: 0.4rem; }
 .admin-media-slot input {
@@ -2427,7 +2424,7 @@ body {
   border: 2px solid #111;
   color: #fff;
   background: #111;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.6rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2461,7 +2458,7 @@ body {
   padding: 0.35rem 0.5rem;
   border: 2px solid #111;
   background: #ffdc4a;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.58rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2510,7 +2507,7 @@ body {
 }
 
 .admin-item__image { position: relative; width: 90px; aspect-ratio: 1; background: #eee; }
-.admin-item h3 { margin-top: 0.25rem; font-family: var(--font-metropolis-black); text-transform: uppercase; }
+.admin-item h3 { margin-top: 0.25rem; font-family: var(--font-urbanist-black); text-transform: uppercase; }
 .admin-item p { margin-top: 0.2rem; color: #666; font-size: 0.8rem; }
 .admin-item button { padding: 0.65rem; border: 2px solid #111; }
 .admin-view-more {
@@ -2524,7 +2521,7 @@ body {
   justify-content: space-between;
   color: #fff;
   background: #111;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.65rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2561,14 +2558,14 @@ body {
 }
 
 .admin-progress-card__topline p {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(1rem, 4vw, 1.45rem);
   line-height: 1;
   text-transform: uppercase;
 }
 
 .admin-progress-card__topline strong {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(2.5rem, 9vw, 4.75rem);
   line-height: 0.75;
 }
@@ -2620,7 +2617,7 @@ body {
 
 .admin-delete-card > span {
   display: block;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.62rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -2629,7 +2626,7 @@ body {
 .admin-delete-card h2 {
   max-width: 430px;
   margin-top: 0.8rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(2.1rem, 8vw, 4.2rem);
   line-height: 0.86;
   text-transform: uppercase;
@@ -2664,7 +2661,7 @@ body {
   min-height: 48px;
   padding: 0.75rem 1rem;
   border: 3px solid #111;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.62rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2716,7 +2713,7 @@ body {
     place-items: center;
     align-content: center;
     gap: 0.2rem;
-    font-family: var(--font-metropolis-black);
+    font-family: var(--font-urbanist-black);
     font-size: 0.48rem;
     text-transform: uppercase;
   }
@@ -2737,7 +2734,7 @@ body {
   }
   .admin-mobile-drawer > span {
     margin-bottom: 0.5rem;
-    font-family: var(--font-metropolis-black);
+    font-family: var(--font-urbanist-black);
     font-size: 0.62rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -2838,7 +2835,7 @@ body {
 .contact-portal__service,
 .contact-portal__card > span,
 .contact-portal__card > div {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(0.56rem, 0.7vw, 0.7rem);
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -2847,7 +2844,7 @@ body {
 .contact-portal__copy h2 {
   max-width: 10ch;
   margin-top: 1rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(4rem, 8vw, 8.5rem);
   line-height: 0.76;
   letter-spacing: -0.075em;
@@ -2903,7 +2900,7 @@ body {
 
 .contact-portal__card strong {
   max-width: 8ch;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(2.2rem, 4vw, 4.8rem);
   line-height: 0.86;
   letter-spacing: -0.055em;
@@ -2956,7 +2953,7 @@ body {
 
 .project-archive__filters > span {
   color: rgba(255,255,255,0.58);
-  font-family: var(--font-metropolis-bold);
+  font-family: var(--font-urbanist-bold);
   font-size: 0.62rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -2979,7 +2976,7 @@ body {
   gap: 0.65rem;
   color: #fff;
   background: rgba(255,255,255,0.05);
-  font-family: var(--font-metropolis-bold);
+  font-family: var(--font-urbanist-bold);
   font-size: 0.64rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -3043,7 +3040,7 @@ body {
   content: 'Project notes';
   display: block;
   margin-bottom: 1.5rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(1.3rem, 2.5vw, 2.2rem);
   line-height: 0.9;
   text-transform: uppercase;
@@ -3101,57 +3098,57 @@ body {
 }
 
 .legal-page__nav img { width: clamp(125px, 13vw, 170px); height: auto; }
-.legal-page__nav > a:last-child { display: inline-flex; align-items: center; gap: 0.55rem; font-family: var(--font-metropolis-bold); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.legal-page__nav > a:last-child { display: inline-flex; align-items: center; gap: 0.55rem; font-family: var(--font-urbanist-bold); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; }
 .legal-page__document { width: min(100%, 1240px); margin: clamp(4rem, 9vw, 9rem) auto 0; }
 .legal-page__document > header { display: grid; gap: 1.25rem; padding-bottom: clamp(2rem, 5vw, 4rem); border-bottom: 4px solid #111; }
 .legal-page__document > header p,
-.legal-page__document > header time { font-family: var(--font-metropolis-bold); font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; }
-.legal-page__document h1 { max-width: 12ch; font-family: var(--font-metropolis-black); font-size: clamp(4rem, 11vw, 10rem); line-height: 0.78; letter-spacing: -0.07em; text-transform: uppercase; }
+.legal-page__document > header time { font-family: var(--font-urbanist-bold); font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; }
+.legal-page__document h1 { max-width: 12ch; font-family: var(--font-urbanist-black); font-size: clamp(4rem, 11vw, 10rem); line-height: 0.78; letter-spacing: -0.07em; text-transform: uppercase; }
 .legal-page__coming-soon { min-height: 46svh; padding: clamp(3rem, 8vw, 8rem) 0; display: grid; align-content: center; justify-items: start; gap: 1rem; }
-.legal-page__coming-soon > span { padding: 0.55rem 0.75rem; border: 2px solid #111; background: #b9ff32; font-family: var(--font-metropolis-bold); font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; box-shadow: 4px 4px 0 #111; }
-.legal-page__coming-soon h2 { font-family: var(--font-metropolis-black); font-size: clamp(3rem, 8vw, 7rem); line-height: 0.85; text-transform: uppercase; }
+.legal-page__coming-soon > span { padding: 0.55rem 0.75rem; border: 2px solid #111; background: #b9ff32; font-family: var(--font-urbanist-bold); font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; box-shadow: 4px 4px 0 #111; }
+.legal-page__coming-soon h2 { font-family: var(--font-urbanist-black); font-size: clamp(3rem, 8vw, 7rem); line-height: 0.85; text-transform: uppercase; }
 .legal-page__coming-soon p { max-width: 55ch; font-size: clamp(1rem, 1.5vw, 1.25rem); line-height: 1.65; }
-.legal-page__coming-soon a { margin-top: 1rem; padding: 0.85rem 1rem; border: 3px solid #111; background: #111; color: #fff; font-family: var(--font-metropolis-bold); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; box-shadow: 6px 6px 0 #ff4fa3; }
+.legal-page__coming-soon a { margin-top: 1rem; padding: 0.85rem 1rem; border: 3px solid #111; background: #111; color: #fff; font-family: var(--font-urbanist-bold); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; box-shadow: 6px 6px 0 #ff4fa3; }
 .legal-page__content { padding-top: clamp(3rem, 7vw, 7rem); }
-.legal-page__intro { max-width: 44ch; margin-bottom: clamp(4rem, 8vw, 8rem); font-family: var(--font-metropolis-bold); font-size: clamp(1.35rem, 2.6vw, 2.5rem); line-height: 1.25; }
+.legal-page__intro { max-width: 44ch; margin-bottom: clamp(4rem, 8vw, 8rem); font-family: var(--font-urbanist-bold); font-size: clamp(1.35rem, 2.6vw, 2.5rem); line-height: 1.25; }
 .legal-page__content > section { padding: clamp(2rem, 5vw, 4.5rem) 0; border-top: 2px solid #111; display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: clamp(1rem, 4vw, 5rem); }
-.legal-page__content > section > span { font-family: var(--font-metropolis-black); }
-.legal-page__content section h2 { max-width: 20ch; margin-bottom: 1.5rem; font-family: var(--font-metropolis-black); font-size: clamp(1.8rem, 4vw, 4rem); line-height: 0.95; text-transform: uppercase; }
+.legal-page__content > section > span { font-family: var(--font-urbanist-black); }
+.legal-page__content section h2 { max-width: 20ch; margin-bottom: 1.5rem; font-family: var(--font-urbanist-black); font-size: clamp(1.8rem, 4vw, 4rem); line-height: 0.95; text-transform: uppercase; }
 .legal-page__content section p { max-width: 75ch; margin-top: 1rem; white-space: pre-line; line-height: 1.75; }
 
 /* Structured legal editor */
 .admin-legal { border: 3px solid #111; background: #f4f1e8; box-shadow: 8px 8px 0 #111; }
 .admin-legal__topbar { padding: clamp(1.25rem, 3vw, 2rem); border-bottom: 3px solid #111; display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; background: #22d9ee; }
 .admin-legal__topbar p { font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; }
-.admin-legal__topbar h2 { margin-top: 0.3rem; font-family: var(--font-metropolis-black); font-size: clamp(2rem, 4vw, 4rem); line-height: 0.85; text-transform: uppercase; }
+.admin-legal__topbar h2 { margin-top: 0.3rem; font-family: var(--font-urbanist-black); font-size: clamp(2rem, 4vw, 4rem); line-height: 0.85; text-transform: uppercase; }
 .admin-legal__tabs { display: flex; border: 2px solid #111; box-shadow: 4px 4px 0 #111; }
-.admin-legal__tabs button { padding: 0.7rem 1rem; background: #fff; font-family: var(--font-metropolis-bold); font-size: 0.67rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.admin-legal__tabs button { padding: 0.7rem 1rem; background: #fff; font-family: var(--font-urbanist-bold); font-size: 0.67rem; letter-spacing: 0.1em; text-transform: uppercase; }
 .admin-legal__tabs button + button { border-left: 2px solid #111; }
 .admin-legal__tabs button.is-active { background: #111; color: #fff; }
 .admin-legal__workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, 0.32fr); }
 .admin-legal__editor { padding: clamp(1.25rem, 3vw, 2.5rem); display: grid; gap: 1.4rem; }
 .admin-legal__editor > label { display: grid; gap: 0.5rem; }
-.admin-legal__editor > label > span { font-family: var(--font-metropolis-bold); font-size: 0.67rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.admin-legal__editor > label > span { font-family: var(--font-urbanist-bold); font-size: 0.67rem; letter-spacing: 0.12em; text-transform: uppercase; }
 .admin-legal input[type='text'],
 .admin-legal input:not([type]),
 .admin-legal textarea { width: 100%; padding: 0.9rem; border: 2px solid #111; background: #fff; color: #111; box-shadow: 4px 4px 0 rgba(0,0,0,0.16); }
 .admin-legal textarea { resize: vertical; line-height: 1.6; }
 .admin-legal__status { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; }
-.admin-legal__status span { width: fit-content; padding: 0.45rem 0.6rem; border: 2px solid #111; background: #ffb000; font-family: var(--font-metropolis-bold); }
+.admin-legal__status span { width: fit-content; padding: 0.45rem 0.6rem; border: 2px solid #111; background: #ffb000; font-family: var(--font-urbanist-bold); }
 .admin-legal__status span.is-live { background: #b9ff32; }
 .admin-legal__sections-heading { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 3px solid #111; display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; }
 .admin-legal__sections-heading div { display: grid; gap: 0.35rem; }
-.admin-legal__sections-heading span { font-family: var(--font-metropolis-black); font-size: 1.2rem; text-transform: uppercase; }
+.admin-legal__sections-heading span { font-family: var(--font-urbanist-black); font-size: 1.2rem; text-transform: uppercase; }
 .admin-legal__sections-heading small { color: rgba(0,0,0,0.58); }
 .admin-legal__sections-heading button,
 .admin-legal__actions button,
-.admin-legal__actions a { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.7rem 0.85rem; border: 2px solid #111; background: #fff; font-family: var(--font-metropolis-bold); font-size: 0.65rem; text-transform: uppercase; box-shadow: 4px 4px 0 #111; }
+.admin-legal__actions a { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.7rem 0.85rem; border: 2px solid #111; background: #fff; font-family: var(--font-urbanist-bold); font-size: 0.65rem; text-transform: uppercase; box-shadow: 4px 4px 0 #111; }
 .admin-legal__sections-heading svg,
 .admin-legal__actions svg { width: 16px; height: 16px; }
 .admin-legal__sections { display: grid; gap: 1.25rem; }
 .admin-legal__sections article { padding: 1rem; border: 2px solid #111; display: grid; gap: 0.8rem; background: #fff; box-shadow: 5px 5px 0 #111; }
 .admin-legal__sections article > header { display: flex; align-items: center; justify-content: space-between; }
-.admin-legal__sections article > header strong { font-family: var(--font-metropolis-black); font-size: 1.25rem; }
+.admin-legal__sections article > header strong { font-family: var(--font-urbanist-black); font-size: 1.25rem; }
 .admin-legal__sections article > header div { display: flex; gap: 0.35rem; }
 .admin-legal__sections article > header button { width: 32px; height: 32px; border: 2px solid #111; display: grid; place-items: center; background: #f4f1e8; }
 .admin-legal__sections article > header button:last-child { background: #ff9eb3; }
@@ -3159,14 +3156,14 @@ body {
 .admin-legal__empty { min-height: 230px; border: 2px dashed #111; display: grid; place-content: center; justify-items: center; gap: 0.5rem; text-align: center; }
 .admin-legal__empty svg { width: 36px; height: 36px; }
 .admin-legal__actions { padding-top: 1.5rem; border-top: 3px solid #111; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.admin-legal__actions > label { display: flex; align-items: center; gap: 0.65rem; font-family: var(--font-metropolis-bold); font-size: 0.75rem; }
+.admin-legal__actions > label { display: flex; align-items: center; gap: 0.65rem; font-family: var(--font-urbanist-bold); font-size: 0.75rem; }
 .admin-legal__actions input { width: 20px; height: 20px; accent-color: #111; }
 .admin-legal__actions > div { display: flex; gap: 0.75rem; }
 .admin-legal__actions button { background: #111; color: #fff; }
 .admin-legal__message { padding: 0.8rem; border: 2px solid #111; background: #b9ff32; font-weight: 700; }
 .admin-legal__guide { padding: clamp(1.5rem, 3vw, 2.5rem); border-left: 3px solid #111; background: #ffb000; }
 .admin-legal__guide > span { font-size: 0.65rem; letter-spacing: 0.16em; text-transform: uppercase; }
-.admin-legal__guide h3 { margin-top: 1rem; font-family: var(--font-metropolis-black); font-size: clamp(1.8rem, 3vw, 3rem); line-height: 0.9; text-transform: uppercase; }
+.admin-legal__guide h3 { margin-top: 1rem; font-family: var(--font-urbanist-black); font-size: clamp(1.8rem, 3vw, 3rem); line-height: 0.9; text-transform: uppercase; }
 .admin-legal__guide ol { margin: 2rem 0; padding-left: 1.2rem; display: grid; gap: 1rem; line-height: 1.4; }
 .admin-legal__guide p { padding-top: 1.5rem; border-top: 2px solid #111; line-height: 1.55; }
 
@@ -3217,7 +3214,7 @@ body {
 
 .about-cover-section strong {
   color: #b9ff32;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   text-transform: uppercase;
 }
 
@@ -3315,7 +3312,7 @@ body {
 .service-pillar__body > p {
   max-width: 32ch;
   margin: 0 0 1.2rem;
-  font-family: var(--font-metropolis-bold);
+  font-family: var(--font-urbanist-bold);
   font-size: clamp(1rem, 1.7vw, 1.55rem);
   line-height: 1.25;
 }
@@ -3359,7 +3356,7 @@ body {
 
 .project-archive__intro h1 {
   max-width: 12ch;
-  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', var(--font-metropolis-black), sans-serif;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', var(--font-urbanist-black), sans-serif;
   font-size: clamp(5.2rem, 14vw, 14rem);
   line-height: 0.69;
   letter-spacing: -0.045em;
@@ -3368,7 +3365,7 @@ body {
 .project-archive__intro h1 span {
   display: block;
   margin-top: 0.35em;
-  font-family: var(--font-metropolis-bold);
+  font-family: var(--font-urbanist-bold);
   font-size: 0.22em;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -3401,7 +3398,7 @@ body {
 }
 
 .project-viewer__description span {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -3451,7 +3448,7 @@ body {
 
 .contact-form__choices legend {
   margin-bottom: 0.7rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(0.56rem, 0.68vw, 0.68rem);
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -3480,7 +3477,7 @@ body {
   background: #fff;
   box-shadow: 3px 3px 0 #111;
   cursor: pointer;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.6rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -3579,7 +3576,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.64rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -3607,7 +3604,7 @@ body {
 .contact-form label > span,
 .contact-form__action p,
 .contact-page__footer {
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(0.56rem, 0.68vw, 0.68rem);
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -3616,7 +3613,7 @@ body {
 .contact-page__story h1 {
   max-width: 9ch;
   margin-top: 1rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(4rem, 8vw, 8.4rem);
   line-height: 0.76;
   letter-spacing: -0.075em;
@@ -3659,7 +3656,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: clamp(0.7rem, 0.9vw, 0.9rem);
   text-transform: uppercase;
 }
@@ -3745,7 +3742,7 @@ body {
   background: #111;
   box-shadow: 5px 5px 0 #ff4fa3;
   color: #fff;
-  font-family: var(--font-metropolis-black);
+  font-family: var(--font-urbanist-black);
   font-size: 0.65rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -3962,7 +3959,7 @@ body {
     border-radius: 0;
     color: #000;
     background: #b9ff32;
-    font-family: var(--font-metropolis-black);
+    font-family: var(--font-urbanist-black);
     font-size: 0.7rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -3985,4 +3982,62 @@ body {
   .project-viewer__card footer strong { font-size: 0.55rem; }
   .project-viewer__close { top: 0.6rem; right: 0.65rem; width: 38px; }
   .project-viewer__nav { width: 42px; }
+}
+
+/* Dynamic legal document library. */
+.admin-legal__create {
+  padding: 0.75rem 0.9rem;
+  border: 2px solid #111;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff;
+  box-shadow: 4px 4px 0 #111;
+  font-family: var(--font-urbanist-bold);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.admin-legal__create svg { width: 16px; height: 16px; }
+.admin-legal__document-list {
+  padding: 1rem;
+  border-bottom: 3px solid #111;
+  display: flex;
+  gap: 0.7rem;
+  overflow-x: auto;
+  background: #111;
+}
+.admin-legal__document-list button {
+  flex: 0 0 auto;
+  min-width: 180px;
+  padding: 0.75rem;
+  border: 2px solid rgba(255,255,255,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: #fff;
+  background: #222;
+  text-align: left;
+}
+.admin-legal__document-list button.is-active { border-color: #111; color: #111; background: #b9ff32; box-shadow: 4px 4px 0 #fff; }
+.admin-legal__document-list button span { max-width: 20ch; overflow: hidden; font-family: var(--font-urbanist-bold); font-size: 0.7rem; text-overflow: ellipsis; white-space: nowrap; }
+.admin-legal__document-list button i { padding: 0.3rem 0.4rem; border-radius: 999px; color: #111; background: #ffb000; font-size: 0.55rem; font-style: normal; text-transform: uppercase; }
+.admin-legal__document-list button i.is-live { background: #b9ff32; }
+.admin-legal__document-list button.is-active i { background: #fff; }
+.admin-legal__slug { border: 2px solid #111; display: flex; align-items: stretch; background: #fff; box-shadow: 4px 4px 0 rgba(0,0,0,0.16); }
+.admin-legal__slug > span { padding: 0.9rem 0 0.9rem 0.9rem; color: rgba(0,0,0,0.52); font-family: monospace; white-space: nowrap; }
+.admin-legal__slug input { min-width: 0; padding-left: 0.15rem !important; border: 0 !important; box-shadow: none !important; font-family: monospace; }
+.admin-legal__editor > label > small { color: rgba(0,0,0,0.6); font-size: 0.7rem; line-height: 1.4; }
+.admin-legal__actions button.is-danger { color: #111; background: #ff9eb3; }
+.admin-legal__empty--page { margin: 2rem; }
+.legal-page__preview-banner { margin-bottom: 1.5rem; padding: 0.7rem 0.9rem; border: 2px solid #111; background: #ffb000; font-family: var(--font-urbanist-bold); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; box-shadow: 4px 4px 0 #111; }
+
+@media (max-width: 650px) {
+  .admin-legal__topbar { align-items: stretch; flex-direction: column; }
+  .admin-legal__create { justify-content: center; }
+  .admin-legal__document-list button { min-width: 155px; }
+  .admin-legal__slug { display: block; }
+  .admin-legal__slug > span { display: block; padding-bottom: 0; white-space: normal; overflow-wrap: anywhere; }
+  .admin-legal__slug input { width: 100%; padding: 0.4rem 0.9rem 0.9rem !important; }
 }

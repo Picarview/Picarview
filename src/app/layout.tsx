@@ -4,15 +4,17 @@ import './globals.css'
 import { LenisProvider } from '@/components/LenisProvider'
 import { FloatingContactButton } from '@/components/FloatingContactButton'
 
-const metropolisBlack = localFont({
-  src: '../../public/fonts/Metropolis-Black.otf',
-  variable: '--font-metropolis-black',
+const urbanistBlack = localFont({
+  src: '../../public/fonts/Primary Font/Primary Font/Urbanist/Urbanist-VariableFont_wght.ttf',
+  variable: '--font-urbanist-black',
+  weight: '900',
   display: 'swap',
 })
 
-const metropolisBold = localFont({
-  src: '../../public/fonts/Metropolis-Bold.otf',
-  variable: '--font-metropolis-bold',
+const urbanistBold = localFont({
+  src: '../../public/fonts/Primary Font/Primary Font/Urbanist/Urbanist-VariableFont_wght.ttf',
+  variable: '--font-urbanist-bold',
+  weight: '700',
   display: 'swap',
 })
 
@@ -81,8 +83,8 @@ export const metadata: Metadata = {
     images: ['/social-preview.png'],
   },
   icons: {
-    icon: '/images/Black.svg',
-    shortcut: '/images/Black.svg',
+    icon: '/images/Black.png',
+    shortcut: '/images/Black.png',
   },
 }
 
@@ -99,9 +101,9 @@ export default function RootLayout({
     url: 'https://picarview.com',
     logo: {
       '@type': 'ImageObject',
-      url: 'https://picarview.com/logo-black.png',
-      width: 1327,
-      height: 530,
+      url: 'https://picarview.com/images/Black.png',
+      width: 2268,
+      height: 513,
     },
     email: 'create@picarview.com',
     description: 'An independent creative practice shaping brand identities, campaigns, art direction, photography, and visual experiences.',
@@ -128,7 +130,7 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en" className={`${metropolisBlack.variable} ${metropolisBold.variable} ${bacalisties.variable}`}>
+    <html lang="en" className={`${urbanistBlack.variable} ${urbanistBold.variable} ${bacalisties.variable}`}>
       <head>
         <script
           type="application/ld+json"

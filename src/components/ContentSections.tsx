@@ -8,6 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ArrowRight } from 'lucide-react'
 import { useCmsItems } from '@/hooks/useCmsItems'
 import { useCmsSiteMedia } from '@/hooks/useCmsSiteMedia'
+import { useLegalPages } from '@/hooks/useLegalPages'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -256,7 +257,7 @@ function ParallaxWindowWorks() {
           <p className="text-white text-sm uppercase tracking-[0.4em] mb-4">
             Portfolio
           </p>
-          <h3 className="font-metropolis-black text-4xl md:text-6xl uppercase text-white">
+          <h3 className="font-urbanist-black text-4xl md:text-6xl uppercase text-white">
             Our Works
           </h3>
         </div>
@@ -325,8 +326,8 @@ function AboutSection() {
       <div ref={contentRef} className="max-w-5xl mx-auto">
         <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-8">02 — Page</p>
         <h2 ref={headingRef} className="stylish-header text-4xl md:text-5xl lg:text-6xl mb-12 soft-mask-reveal">
-          <span className="metropolis-upper text-white">GET TO </span>
-          <span className="bacalisties-script text-white text-5xl md:text-6xl lg:text-7xl">knowPICARVIEW</span>
+          <span className="bacalisties-script text-white text-5xl md:text-6xl lg:text-7xl">know</span>
+          <span className="urbanist-upper text-white">PICARVIEW</span>
         </h2>
         <div className="space-y-6 text-lg md:text-xl text-zinc-300 leading-relaxed">
           <p className="text-2xl md:text-3xl text-white font-light leading-normal max-w-4xl">
@@ -913,26 +914,31 @@ function ContactSection() {
 
 // Footer
 function Footer() {
+  const legalPages = useLegalPages()
+  const coreLinks = [
+    { slug: 'privacy', title: 'Privacy', href: '/privacy' },
+    { slug: 'terms', title: 'Terms', href: '/terms' },
+  ]
+  const links = [...coreLinks, ...legalPages.filter((page) => page.slug !== 'privacy' && page.slug !== 'terms')]
   return (
     <footer data-theme="dark" className="py-12 px-6 md:px-12 lg:px-24 border-t border-white/15 bg-black">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <Link href="/" aria-label="Picarview home" className="block transition-opacity hover:opacity-70">
           <Image
-            src="/images/Black.svg"
+            src="/images/Black.png"
             alt="Picarview"
-            width={150}
-            height={60}
+            width={2268}
+            height={513}
             className="h-10 w-auto object-contain invert"
           />
         </Link>
         <p className="text-zinc-400 text-sm">© 2026 Picarview. All rights reserved.</p>
-        <div className="flex items-center gap-6">
-          <Link href="/privacy" className="text-zinc-400 hover:text-white transition-colors text-sm uppercase tracking-[0.25em]">
-            Privacy
-          </Link>
-          <Link href="/terms" className="text-zinc-400 hover:text-white transition-colors text-sm uppercase tracking-[0.25em]">
-            Terms
-          </Link>
+        <div className="flex flex-wrap items-center justify-center gap-6">
+          {links.map((page) => (
+            <Link href={page.href} className="text-zinc-400 hover:text-white transition-colors text-sm uppercase tracking-[0.25em]" key={page.slug}>
+              {page.title}
+            </Link>
+          ))}
         </div>
       </div>
     </footer>

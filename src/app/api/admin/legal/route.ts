@@ -58,13 +58,20 @@ export async function PUT(request: Request) {
   const introduction = typeof input.introduction === 'string' ? input.introduction.trim() : ''
   const effectiveDate = typeof input.effectiveDate === 'string' ? input.effectiveDate.trim() : ''
   const published = input.published === true ? 1 : 0
+  const creating = input.creating === true
   const sections = Array.isArray(input.sections) ? input.sections : []
 
-  if ((slug !== 'privacy' && slug !== 'terms') || !title) {
+  if (typeof slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 60 || !title) {
     return NextResponse.json({ error: 'A valid page and title are required.' }, { status: 400 })
   }
+  if (['admin', 'api', 'legal'].includes(slug)) return NextResponse.json({ error: 'That URL is reserved.' }, { status: 400 })
   if (title.length > 100 || introduction.length > 1200 || effectiveDate.length > 40 || sections.length > 40) {
     return NextResponse.json({ error: 'The legal document exceeds the allowed length.' }, { status: 400 })
+  }
+
+  if (creating) {
+    const existing = await CMS_DB.prepare('SELECT slug FROM legal_pages WHERE slug = ?').bind(slug).first<{ slug: string }>()
+    if (existing) return NextResponse.json({ error: 'A document already uses that URL.' }, { status: 409 })
   }
   const cleanSections: LegalSection[] = []
   for (const section of sections) {
@@ -86,5 +93,17 @@ export async function PUT(request: Request) {
        published = excluded.published, updated_at = CURRENT_TIMESTAMP`
   ).bind(slug, title, introduction, JSON.stringify(cleanSections), effectiveDate, published).run()
 
+  return NextResponse.json({ ok: true })
+}
+
+export async function DELETE(request: Request) {
+  if (!isSameOrigin(request)) return NextResponse.json({ error: 'Invalid origin.' }, { status: 403 })
+  if (!await authorized(request)) return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
+  const { CMS_DB } = getCmsEnv()
+  if (!CMS_DB) return NextResponse.json({ error: 'D1 is not configured.' }, { status: 503 })
+  const slug = new URL(request.url).searchParams.get('slug') ?? ''
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return NextResponse.json({ error: 'Invalid document.' }, { status: 400 })
+  if (slug === 'privacy' || slug === 'terms') return NextResponse.json({ error: 'Core legal pages cannot be deleted; unpublish them instead.' }, { status: 400 })
+  await CMS_DB.prepare('DELETE FROM legal_pages WHERE slug = ?').bind(slug).run()
   return NextResponse.json({ ok: true })
 }

@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import NextImage from 'next/image'
 import { useCmsSiteMedia } from '@/hooks/useCmsSiteMedia'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -25,11 +26,10 @@ function createHeroTimeline(
   renderFrame?: (frame: number) => void
 ) {
   return gsap.context(() => {
-    const letters = gsap.utils.toArray<HTMLElement>('.hero-sequence__letter')
     const labelElements = gsap.utils.toArray<HTMLElement>('.hero-sequence__label')
     const timelineDriver = sequence ?? { frame: 0 }
 
-    gsap.set(letters, { opacity: 0, yPercent: 115, rotateX: -70 })
+    gsap.set('.hero-sequence__word', { opacity: 0, scale: 0.82, clipPath: 'inset(0 48% 0 48%)' })
     gsap.set(labelElements, { opacity: 0, y: 16 })
     gsap.set('.hero-sequence__signature', { opacity: 0, clipPath: 'inset(0 100% 0 0)' })
 
@@ -53,9 +53,13 @@ function createHeroTimeline(
       onUpdate: () => renderFrame?.(timelineDriver.frame),
     }, 0)
     timeline.to('.hero-sequence__intro', { opacity: 0, yPercent: -24, filter: 'blur(8px)', duration: 0.14 }, 0.03)
-    letters.forEach((letter, index) => {
-      timeline.to(letter, { opacity: 1, yPercent: 0, rotateX: 0, duration: 0.105, ease: 'power3.out' }, 0.18 + index * 0.055)
-    })
+    timeline.to('.hero-sequence__word', {
+      opacity: 1,
+      scale: 1,
+      clipPath: 'inset(0 0% 0 0%)',
+      duration: 0.34,
+      ease: 'power3.out',
+    }, 0.18)
     timeline.to('.hero-sequence__signature', {
       opacity: 1,
       clipPath: 'inset(0 0% 0 0)',
@@ -66,7 +70,7 @@ function createHeroTimeline(
     timeline.to(labelElements, { opacity: 0, y: -12, duration: 0.08, stagger: 0.015 }, 0.79)
     timeline.to('.hero-sequence__card', { scale: 1.06, yPercent: -4, duration: 0.06, ease: 'power2.in' }, 0.94)
     timeline.to('.hero-sequence__word', {
-      letterSpacing: '0.12em',
+      scale: 1.08,
       opacity: 0,
       yPercent: -24,
       duration: 0.06,
@@ -357,11 +361,15 @@ export function Hero({ frames }: HeroProps) {
           </header>
 
           <div className="hero-sequence__word" aria-label="Picarview">
-            {'PICARVIEW'.split('').map((letter, index) => (
-              <span className="hero-sequence__letter" key={`${letter}-${index}`} aria-hidden="true">
-                {letter}
-              </span>
-            ))}
+            <NextImage
+              src="/images/Black.png"
+              alt=""
+              width={2268}
+              height={513}
+              className="hero-sequence__logo"
+              priority
+              aria-hidden="true"
+            />
           </div>
 
           <div className="hero-sequence__signature" aria-hidden="true">
