@@ -362,6 +362,73 @@ npx wrangler d1 migrations apply picarview-cms --remote
 
 Never edit a migration that has already run in production. Add a new numbered migration.
 
+## SEO, Google Search Console, and crawler setup
+
+The application generates its technical SEO files through the Next.js App Router:
+
+| URL | Purpose |
+| --- | --- |
+| `https://picarview.com/robots.txt` | Allows the public site and excludes `/admin` and `/api/` |
+| `https://picarview.com/sitemap.xml` | Lists the home, projects, and contact pages |
+
+Global metadata, canonical URLs, social previews, Google preview permissions, and Organization/WebSite JSON-LD are configured in `src/app/layout.tsx`. Page-specific metadata lives beside the relevant route. The admin layout explicitly uses `noindex` and `nofollow`.
+
+### Fresh Google Search Console setup
+
+1. Open [Google Search Console](https://search.google.com/search-console/) and add `picarview.com` as a **Domain property**.
+2. Select **Domain name provider** verification.
+3. Copy the Google verification TXT value into Cloudflare under **DNS > Records**.
+4. Wait for DNS propagation, then select **Verify** in Search Console.
+5. Keep the TXT record permanently. Removing it can cause the property to lose verification.
+6. Optionally add another method under **Settings > Ownership verification** as a recovery method.
+7. Open **Sitemaps** and submit:
+
+   ```text
+   https://picarview.com/sitemap.xml
+   ```
+
+8. Use **URL Inspection** and request indexing for:
+
+   ```text
+   https://picarview.com
+   https://picarview.com/projects
+   https://picarview.com/contact
+   ```
+
+9. After deployment, monitor Search Console's **Page indexing**, **Sitemaps**, **Core Web Vitals**, **Security issues**, and **Manual actions** reports.
+
+Search indexing is asynchronous. Successful verification and sitemap submission do not guarantee immediate appearance or a particular ranking.
+
+### Adding or removing public pages
+
+Update `src/app/sitemap.ts` whenever an indexable top-level page is added, renamed, or removed. Every public page should have a unique title, description, and canonical URL. Private dashboards and API routes must remain excluded from search.
+
+Do not serve search engines content that differs from what visitors receive. This is search-engine cloaking and can cause ranking penalties or removal from search results. JavaScript fallbacks should remain accessible to both visitors and verified search crawlers.
+
+### Cloudflare crawler configuration
+
+Cloudflare **AI Crawl Control** manages AI crawlers; it is not a replacement for Google Search Console or `robots.txt`.
+
+- Keep verified **Search Engine** crawlers such as Googlebot and Bingbot allowed.
+- Choose allow, block, or charge policies for AI crawlers separately according to the company's content policy.
+- Do not create a broad bot rule that challenges or blocks verified search-engine crawlers.
+- After changing WAF, Bot, or AI Crawl Control settings, use Search Console URL Inspection to confirm Google can still fetch the site.
+
+### Domain and ownership protection
+
+For a fresh Cloudflare account or domain recovery:
+
+- Enable DNSSEC and wait for Cloudflare to show it as active.
+- Keep registrar lock and domain auto-renewal enabled.
+- Require MFA for Cloudflare and registrar accounts.
+- Give each team member an individual account with the minimum required permissions.
+- Store recovery codes offline and keep account recovery details current.
+- Review DNS records, Worker routes, redirects, and account members after any suspicious activity.
+- Use scoped API tokens instead of global API keys.
+- Keep one canonical hostname (`https://picarview.com`) and redirect alternate hostnames such as `www` to it.
+
+The official square Picarview brand mark should be used for the favicon when the design team supplies it. Do not invent or crop a new brand symbol without approval.
+
 ## Security notes
 
 The admin system includes:
