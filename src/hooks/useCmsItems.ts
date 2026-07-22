@@ -12,6 +12,7 @@ export interface PublicCmsItem {
   altText: string
   sortOrder: number
   imageUrl: string
+  images: Array<{ id: string; imageUrl: string; altText: string }>
 }
 
 interface PublicCmsResponse {

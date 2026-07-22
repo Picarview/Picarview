@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useLenis } from 'lenis/react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -14,7 +14,9 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
   const lenis = useLenis()
   const cmsProjects = useCmsItems('project')
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [activeMediaIndex, setActiveMediaIndex] = useState(0)
   const [industry, setIndustry] = useState('All')
+  const galleryTouchStart = useRef<number | null>(null)
   const projects = cmsProjects.length > 0
     ? cmsProjects
     : fallbackImages.map((imageUrl, index) => ({
@@ -25,11 +27,13 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
         description: 'A selected Picarview project shaped with purpose, clarity, and a visual direction designed to connect the idea with its audience.',
         industry: disciplines[index % disciplines.length],
         altText: `Picarview project ${index + 1}`,
+        images: [{ id: `fallback-${index + 1}-cover`, imageUrl, altText: `Picarview project ${index + 1}` }],
       }))
   const industries = useMemo(() => ['All', ...new Set(projects.map((project) => project.industry || 'General'))], [projects])
   const visibleProjects = industry === 'All' ? projects : projects.filter((project) => (project.industry || 'General') === industry)
 
   useEffect(() => { setActiveIndex(null) }, [industry])
+  useEffect(() => { setActiveMediaIndex(0) }, [activeIndex])
 
   useEffect(() => {
     if (activeIndex === null) return
@@ -67,6 +71,17 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
   }, [activeIndex, lenis, visibleProjects.length])
 
   const activeProject = activeIndex === null ? null : visibleProjects[activeIndex]
+  const activeImages = activeProject
+    ? activeProject.images?.length > 0
+      ? activeProject.images
+      : [{ id: `${activeProject.id}-cover`, imageUrl: activeProject.imageUrl, altText: activeProject.altText }]
+    : []
+  const displayedMediaIndex = Math.min(activeMediaIndex, Math.max(0, activeImages.length - 1))
+
+  function moveGallery(direction: -1 | 1) {
+    if (activeImages.length < 2) return
+    setActiveMediaIndex((index) => (index + direction + activeImages.length) % activeImages.length)
+  }
 
   return (
     <main className="project-archive">
@@ -154,16 +169,55 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
             data-lenis-prevent-touch
             style={{ '--viewer-accent': accents[activeIndex % accents.length] } as CSSProperties}
           >
-            <div className="project-viewer__image">
-              <Image
-                src={activeProject.imageUrl}
-                alt={activeProject.altText}
-                fill
-                priority
-                unoptimized={activeProject.imageUrl.startsWith('/api/')}
-                sizes="94vw"
-                className="object-contain"
-              />
+            <div className="project-viewer__gallery">
+              <div
+                className="project-viewer__image"
+                onTouchStart={(event) => { galleryTouchStart.current = event.touches[0]?.clientX ?? null }}
+                onTouchEnd={(event) => {
+                  if (galleryTouchStart.current === null) return
+                  const distance = (event.changedTouches[0]?.clientX ?? galleryTouchStart.current) - galleryTouchStart.current
+                  galleryTouchStart.current = null
+                  if (Math.abs(distance) > 45) moveGallery(distance > 0 ? -1 : 1)
+                }}
+              >
+                <Image
+                  src={activeImages[displayedMediaIndex].imageUrl}
+                  alt={activeImages[displayedMediaIndex].altText}
+                  fill
+                  priority
+                  unoptimized={activeImages[displayedMediaIndex].imageUrl.startsWith('/api/')}
+                  sizes="(max-width: 800px) 96vw, 68vw"
+                  className="object-contain"
+                />
+                {activeImages.length > 1 && (
+                  <>
+                    <span className="project-viewer__image-count">
+                      {String(displayedMediaIndex + 1).padStart(2, '0')} / {String(activeImages.length).padStart(2, '0')}
+                    </span>
+                    <div className="project-viewer__gallery-controls">
+                      <button type="button" onClick={() => moveGallery(-1)} aria-label="Previous image"><ChevronLeft className="h-5 w-5" /></button>
+                      <button type="button" onClick={() => moveGallery(1)} aria-label="Next image"><ChevronRight className="h-5 w-5" /></button>
+                    </div>
+                  </>
+                )}
+              </div>
+              {activeImages.length > 1 && (
+                <div className="project-viewer__thumbnails" aria-label="Project image gallery">
+                  {activeImages.map((image, index) => (
+                    <button
+                      type="button"
+                      className={displayedMediaIndex === index ? 'is-active' : ''}
+                      onClick={() => setActiveMediaIndex(index)}
+                      aria-label={`View project image ${index + 1} of ${activeImages.length}`}
+                      aria-current={displayedMediaIndex === index ? 'true' : undefined}
+                      key={image.id}
+                    >
+                      <Image src={image.imageUrl} alt="" fill unoptimized={image.imageUrl.startsWith('/api/')} sizes="90px" className="object-cover" />
+                      <span>{String(index + 1).padStart(2, '0')}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <footer>
               <div><span>{String(activeIndex + 1).padStart(2, '0')} / {String(visibleProjects.length).padStart(2, '0')}</span><h2>{activeProject.title}</h2></div>

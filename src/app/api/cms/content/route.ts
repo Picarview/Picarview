@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getCmsEnv, publicCmsItem, type CmsItem } from '@/lib/cloudflare-cms'
+import { getCmsEnv, publicCmsItem, type CmsItem, type CmsProjectMedia } from '@/lib/cloudflare-cms'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,8 +20,21 @@ export async function GET(request: Request) {
        ORDER BY sort_order ASC, created_at DESC`
     ).bind(type).all<CmsItem>()
 
+    const mediaQuery = type === 'project'
+      ? await CMS_DB.prepare(
+        `SELECT id, project_id, alt_text, object_key, sort_order, created_at
+         FROM project_media ORDER BY project_id ASC, sort_order ASC, created_at ASC`
+      ).all<CmsProjectMedia>()
+      : { results: [] as CmsProjectMedia[], success: true }
+    const mediaByProject = new Map<string, CmsProjectMedia[]>()
+    for (const media of mediaQuery.results ?? []) {
+      const projectMedia = mediaByProject.get(media.project_id) ?? []
+      projectMedia.push(media)
+      mediaByProject.set(media.project_id, projectMedia)
+    }
+
     return NextResponse.json({
-      items: (query.results ?? []).map(publicCmsItem),
+      items: (query.results ?? []).map((item) => publicCmsItem(item, mediaByProject.get(item.id))),
       configured: true,
     })
   } catch (error) {

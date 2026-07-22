@@ -35,6 +35,7 @@ interface AdminItem {
   altText: string
   sortOrder: number
   imageUrl: string
+  images: Array<{ id: string; imageUrl: string; altText: string }>
   published: boolean
   createdAt: string
 }
@@ -74,7 +75,7 @@ function uploadContent(
     const request = new XMLHttpRequest()
     request.open('POST', endpoint)
     request.responseType = 'json'
-    request.timeout = 120_000
+    request.timeout = 300_000
 
     request.upload.addEventListener('progress', (event) => {
       if (!event.lengthComputable) return
@@ -120,6 +121,7 @@ export default function AdminPage() {
   const [visibleCount, setVisibleCount] = useState(6)
   const [activeView, setActiveView] = useState<AdminView>('overview')
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false)
+  const [selectedProjectFiles, setSelectedProjectFiles] = useState<File[]>([])
 
   const loadItems = useCallback(async () => {
     const response = await fetch('/api/admin/items', { cache: 'no-store' })
@@ -223,14 +225,26 @@ export default function AdminPage() {
     const form = event.currentTarget
     setBusy(true)
     setMessage('')
-    setUpload({ open: true, progress: 0, status: 'Preparing upload…' })
+    const formData = new FormData(form)
+    const isProject = formData.get('type') === 'project'
+    const imageCount = isProject
+      ? formData.getAll('images').filter((entry) => entry instanceof File && entry.size > 0).length
+      : 1
+    setUpload({ open: true, progress: 0, status: imageCount > 1 ? `Preparing ${imageCount} project images…` : 'Preparing upload…' })
 
     try {
-      await uploadContent(new FormData(form), (progress) => {
-        setUpload({ open: true, progress, status: progress >= 92 ? 'Saving to the content library…' : 'Uploading image…' })
+      await uploadContent(formData, (progress) => {
+        setUpload({
+          open: true,
+          progress,
+          status: progress >= 92
+            ? 'Building the project gallery…'
+            : imageCount > 1 ? `Uploading ${imageCount} project images…` : 'Uploading image…',
+        })
       })
-      setUpload({ open: true, progress: 100, status: 'Published successfully' })
+      setUpload({ open: true, progress: 100, status: imageCount > 1 ? 'Project gallery published successfully' : 'Published successfully' })
       form.reset()
+      setSelectedProjectFiles([])
       window.setTimeout(() => {
         setUpload((current) => ({ ...current, open: false }))
       }, 650)
@@ -477,7 +491,33 @@ export default function AdminPage() {
           <label><span>Status</span>
             <select name="published" defaultValue="true"><option value="true">Published</option><option value="false">Draft</option></select>
           </label>
-          <label className="admin-upload"><span>Image or logo · max 10 MB</span><input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/avif" required /></label>
+          {activeView === 'projects' ? (
+            <label className="admin-upload admin-upload--gallery">
+              <span>Project gallery · up to 8 images</span>
+              <input
+                name="images"
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/avif"
+                multiple
+                required
+                onChange={(event) => setSelectedProjectFiles(Array.from(event.target.files ?? []).slice(0, 8))}
+              />
+              <small>The first image becomes the project cover. Each image can be up to 10 MB; combined gallery maximum is 48 MB.</small>
+              {selectedProjectFiles.length > 0 && (
+                <ol className="admin-upload__selection">
+                  {selectedProjectFiles.map((file, index) => (
+                    <li key={`${file.name}-${file.lastModified}`}>
+                      <strong>{index === 0 ? 'Cover' : String(index + 1).padStart(2, '0')}</strong>
+                      <span>{file.name}</span>
+                      <i>{(file.size / 1024 / 1024).toFixed(1)} MB</i>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </label>
+          ) : (
+            <label className="admin-upload"><span>Partner logo · max 10 MB</span><input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/avif" required /></label>
+          )}
           <button disabled={busy}>{busy ? 'Working…' : 'Upload and save'}</button>
         </form>
         )}
@@ -526,6 +566,7 @@ export default function AdminPage() {
                   <article className="admin-item" key={item.id}>
                     <div className="admin-item__image">
                       <Image src={item.imageUrl} alt={item.altText} fill sizes="120px" className="object-cover" unoptimized />
+                      {item.type === 'project' && item.images.length > 1 && <span className="admin-item__media-count">{item.images.length} images</span>}
                     </div>
                     <div>
                       <span>{item.type} · {item.published ? 'Published' : 'Draft'}</span>

@@ -52,6 +52,15 @@ export interface CmsItem {
   created_at: string
 }
 
+export interface CmsProjectMedia {
+  id: string
+  project_id: string
+  alt_text: string
+  object_key: string
+  sort_order: number
+  created_at: string
+}
+
 export interface CmsSiteMedia {
   slot: 'hero' | 'expression-1' | 'expression-2' | 'expression-3' | 'expression-4'
   media_type: 'image' | 'video'
@@ -76,7 +85,13 @@ export function getCmsEnv(): CmsEnv {
   return getCloudflareContext().env as unknown as CmsEnv
 }
 
-export function publicCmsItem(item: CmsItem) {
+export function publicCmsItem(item: CmsItem, additionalMedia: CmsProjectMedia[] = []) {
+  const cover = {
+    id: `${item.id}-cover`,
+    altText: item.alt_text,
+    imageUrl: `/api/cms/media?key=${encodeURIComponent(item.object_key)}`,
+  }
+
   return {
     id: item.id,
     type: item.type,
@@ -87,7 +102,15 @@ export function publicCmsItem(item: CmsItem) {
     altText: item.alt_text,
     sortOrder: item.sort_order,
     createdAt: item.created_at,
-    imageUrl: `/api/cms/media?key=${encodeURIComponent(item.object_key)}`,
+    imageUrl: cover.imageUrl,
+    images: [
+      cover,
+      ...additionalMedia.map((media) => ({
+        id: media.id,
+        altText: media.alt_text,
+        imageUrl: `/api/cms/media?key=${encodeURIComponent(media.object_key)}`,
+      })),
+    ],
   }
 }
 
