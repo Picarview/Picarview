@@ -8,6 +8,7 @@ export interface PublicCmsItem {
   title: string
   subtitle: string
   description: string
+  industry: string
   altText: string
   sortOrder: number
   imageUrl: string

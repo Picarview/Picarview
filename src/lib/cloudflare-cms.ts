@@ -44,6 +44,7 @@ export interface CmsItem {
   title: string
   subtitle: string
   description: string
+  industry: string
   alt_text: string
   object_key: string
   sort_order: number
@@ -82,6 +83,7 @@ export function publicCmsItem(item: CmsItem) {
     title: item.title,
     subtitle: item.subtitle,
     description: item.description,
+    industry: item.industry,
     altText: item.alt_text,
     sortOrder: item.sort_order,
     createdAt: item.created_at,

@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     if (!CMS_DB) return NextResponse.json({ items: [], configured: false })
 
     const query = await CMS_DB.prepare(
-      `SELECT id, type, title, subtitle, description, alt_text, object_key, sort_order, published, created_at
+      `SELECT id, type, title, subtitle, description, industry, alt_text, object_key, sort_order, published, created_at
        FROM content_items
        WHERE type = ? AND published = 1
        ORDER BY sort_order ASC, created_at DESC`

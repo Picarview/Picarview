@@ -31,6 +31,7 @@ interface AdminItem {
   title: string
   subtitle: string
   description: string
+  industry: string
   altText: string
   sortOrder: number
   imageUrl: string
@@ -41,6 +42,7 @@ interface AdminItem {
 interface AdminResponse {
   error?: string
   items?: AdminItem[]
+  industries?: string[]
 }
 
 interface AdminSiteMedia {
@@ -99,6 +101,7 @@ function uploadContent(
 
 export default function AdminPage() {
   const [items, setItems] = useState<AdminItem[]>([])
+  const [industries, setIndustries] = useState<string[]>([])
   const [siteMedia, setSiteMedia] = useState<AdminSiteMedia[]>([])
   const [legalPages, setLegalPages] = useState<AdminLegalPage[]>([])
   const [authenticated, setAuthenticated] = useState<boolean | null>(null)
@@ -131,6 +134,7 @@ export default function AdminPage() {
       return
     }
     setItems(Array.isArray(data.items) ? data.items : [])
+    setIndustries(Array.isArray(data.industries) ? data.industries : [])
     setAuthenticated(true)
   }, [])
 
@@ -336,7 +340,7 @@ export default function AdminPage() {
   return (
     <main className="admin-shell admin-shell--dashboard">
       <aside className="admin-sidebar">
-        <div className="admin-sidebar__brand"><span>P</span><div><strong>Picarview®</strong><small>Content system</small></div></div>
+        <div className="admin-sidebar__brand"><span>P</span><div><strong>Picarview®</strong><small>Workspace</small></div></div>
         <nav aria-label="Dashboard navigation">
           <button className={activeView === 'overview' ? 'is-active' : ''} onClick={() => navigateTo('overview')}><LayoutDashboard /> Overview</button>
           <button className={activeView === 'media' ? 'is-active' : ''} onClick={() => navigateTo('media')}><ImageIcon /> Website media <i>{siteMedia.length}/5</i></button>
@@ -459,7 +463,15 @@ export default function AdminPage() {
           <label><span>Title</span><input name="title" placeholder="Project or partner name" maxLength={120} required /></label>
           <label><span>Subtitle</span><input name="subtitle" placeholder="Identity, campaign, industry…" maxLength={200} /></label>
           {activeView === 'projects' && (
-            <label><span>Project description</span><textarea name="description" placeholder="The idea, approach, and outcome of the project…" maxLength={1500} rows={5} /></label>
+            <>
+              <label>
+                <span>Industry</span>
+                <input name="industry" list="project-industries" placeholder="Choose or type a new industry" maxLength={80} required />
+                <small>Choose an existing industry or type a new one to create it.</small>
+              </label>
+              <datalist id="project-industries">{industries.map((industry) => <option value={industry} key={industry} />)}</datalist>
+              <label><span>Project description</span><textarea name="description" placeholder="The idea, approach, and outcome of the project…" maxLength={1500} rows={5} /></label>
+            </>
           )}
           <label><span>Image description</span><input name="altText" placeholder="Accessible description" maxLength={300} required /></label>
           <label><span>Status</span>
@@ -518,7 +530,7 @@ export default function AdminPage() {
                     <div>
                       <span>{item.type} · {item.published ? 'Published' : 'Draft'}</span>
                       <h3>{item.title}</h3>
-                      <p>{item.subtitle || 'No subtitle'} · {new Date(`${item.createdAt}Z`).toLocaleDateString()}</p>
+                      <p>{item.type === 'project' && item.industry ? `${item.industry} · ` : ''}{item.subtitle || 'No subtitle'} · {new Date(`${item.createdAt}Z`).toLocaleDateString()}</p>
                     </div>
                     <button onClick={() => setDeleteTarget(item)} disabled={busy} aria-label={`Delete ${item.title}`}>
                       {deletingId === item.id ? <LoaderCircle className="admin-spinner h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
