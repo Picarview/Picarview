@@ -6,6 +6,7 @@ import Link from 'next/link'
 import {
   ArrowLeft,
   ExternalLink,
+  FileText,
   FileClock,
   FolderOpen,
   Handshake,
@@ -20,14 +21,17 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
+import { AdminLegalEditor, type AdminLegalPage } from '@/components/AdminLegalEditor'
 
-type AdminView = 'overview' | 'media' | 'projects' | 'partners' | 'drafts' | 'settings'
+type AdminView = 'overview' | 'media' | 'projects' | 'partners' | 'drafts' | 'legal' | 'settings'
 
 interface AdminItem {
   id: string
   type: 'partner' | 'project'
   title: string
   subtitle: string
+  description: string
+  industry: string
   altText: string
   sortOrder: number
   imageUrl: string
@@ -38,6 +42,7 @@ interface AdminItem {
 interface AdminResponse {
   error?: string
   items?: AdminItem[]
+  industries?: string[]
 }
 
 interface AdminSiteMedia {
@@ -96,7 +101,9 @@ function uploadContent(
 
 export default function AdminPage() {
   const [items, setItems] = useState<AdminItem[]>([])
+  const [industries, setIndustries] = useState<string[]>([])
   const [siteMedia, setSiteMedia] = useState<AdminSiteMedia[]>([])
+  const [legalPages, setLegalPages] = useState<AdminLegalPage[]>([])
   const [authenticated, setAuthenticated] = useState<boolean | null>(null)
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
@@ -127,6 +134,7 @@ export default function AdminPage() {
       return
     }
     setItems(Array.isArray(data.items) ? data.items : [])
+    setIndustries(Array.isArray(data.industries) ? data.industries : [])
     setAuthenticated(true)
   }, [])
 
@@ -140,7 +148,14 @@ export default function AdminPage() {
     }
   }, [])
 
-  useEffect(() => { void Promise.all([loadItems(), loadSiteMedia()]) }, [loadItems, loadSiteMedia])
+  const loadLegalPages = useCallback(async () => {
+    const response = await fetch('/api/admin/legal', { cache: 'no-store' })
+    if (!response.ok) return
+    const data = await response.json() as { pages?: AdminLegalPage[] }
+    setLegalPages(Array.isArray(data.pages) ? data.pages : [])
+  }, [])
+
+  useEffect(() => { void Promise.all([loadItems(), loadSiteMedia(), loadLegalPages()]) }, [loadItems, loadSiteMedia, loadLegalPages])
   useEffect(() => { setVisibleCount(6) }, [search, typeFilter, statusFilter, dateFilter, sort])
 
   const filteredItems = useMemo(() => {
@@ -151,7 +166,7 @@ export default function AdminPage() {
       .filter((item) => typeFilter === 'all' || item.type === typeFilter)
       .filter((item) => statusFilter === 'all' || (statusFilter === 'published' ? item.published : !item.published))
       .filter((item) => !cutoff || new Date(`${item.createdAt}Z`).getTime() >= cutoff)
-      .filter((item) => !query || `${item.title} ${item.subtitle} ${item.altText}`.toLowerCase().includes(query))
+      .filter((item) => !query || `${item.title} ${item.subtitle} ${item.description} ${item.altText}`.toLowerCase().includes(query))
       .sort((a, b) => {
         if (sort === 'title') return a.title.localeCompare(b.title)
         const difference = new Date(`${b.createdAt}Z`).getTime() - new Date(`${a.createdAt}Z`).getTime()
@@ -200,7 +215,7 @@ export default function AdminPage() {
       setMessage(data.error ?? 'Unable to sign in.')
       return
     }
-    await Promise.all([loadItems(), loadSiteMedia()])
+    await Promise.all([loadItems(), loadSiteMedia(), loadLegalPages()])
   }
 
   async function createItem(event: FormEvent<HTMLFormElement>) {
@@ -325,13 +340,14 @@ export default function AdminPage() {
   return (
     <main className="admin-shell admin-shell--dashboard">
       <aside className="admin-sidebar">
-        <div className="admin-sidebar__brand"><span>P</span><div><strong>Picarview®</strong><small>Content system</small></div></div>
+        <div className="admin-sidebar__brand"><span>P</span><div><strong>Picarview®</strong><small>Workspace</small></div></div>
         <nav aria-label="Dashboard navigation">
           <button className={activeView === 'overview' ? 'is-active' : ''} onClick={() => navigateTo('overview')}><LayoutDashboard /> Overview</button>
           <button className={activeView === 'media' ? 'is-active' : ''} onClick={() => navigateTo('media')}><ImageIcon /> Website media <i>{siteMedia.length}/5</i></button>
           <button className={activeView === 'projects' ? 'is-active' : ''} onClick={() => navigateTo('projects')}><FolderOpen /> Projects <i>{projectCount}</i></button>
           <button className={activeView === 'partners' ? 'is-active' : ''} onClick={() => navigateTo('partners')}><Handshake /> Partners <i>{partnerCount}</i></button>
           <button className={activeView === 'drafts' ? 'is-active' : ''} onClick={() => navigateTo('drafts')}><FileClock /> Drafts <i>{draftCount}</i></button>
+          <button className={activeView === 'legal' ? 'is-active' : ''} onClick={() => navigateTo('legal')}><FileText /> Legal pages <i>{legalPages.filter((page) => page.published).length}/2</i></button>
           <button className={activeView === 'settings' ? 'is-active' : ''} onClick={() => navigateTo('settings')}><Settings /> Settings</button>
         </nav>
         <div className="admin-sidebar__footer">
@@ -353,6 +369,7 @@ export default function AdminPage() {
               projects: 'Project library',
               partners: 'Partner library',
               drafts: 'Unpublished work',
+              legal: 'Legal documents',
               settings: 'CMS settings',
             } as Record<AdminView, string>)[activeView]}</h1>
           </div>
@@ -379,6 +396,7 @@ export default function AdminPage() {
                   <button onClick={() => navigateTo('projects')}><FolderOpen /><span><strong>Add a project</strong><small>Publish new work</small></span></button>
                   <button onClick={() => navigateTo('partners')}><Handshake /><span><strong>Add a partner</strong><small>Upload a new logo</small></span></button>
                   <button onClick={() => navigateTo('media')}><ImageIcon /><span><strong>Change website media</strong><small>Hero and expressions</small></span></button>
+                  <button onClick={() => navigateTo('legal')}><FileText /><span><strong>Edit legal pages</strong><small>Privacy and terms</small></span></button>
                 </div>
               </div>
               <div className="admin-overview-panel">
@@ -444,6 +462,17 @@ export default function AdminPage() {
           <input type="hidden" name="type" value={activeView === 'partners' ? 'partner' : 'project'} />
           <label><span>Title</span><input name="title" placeholder="Project or partner name" maxLength={120} required /></label>
           <label><span>Subtitle</span><input name="subtitle" placeholder="Identity, campaign, industry…" maxLength={200} /></label>
+          {activeView === 'projects' && (
+            <>
+              <label>
+                <span>Industry</span>
+                <input name="industry" list="project-industries" placeholder="Choose or type a new industry" maxLength={80} required />
+                <small>Choose an existing industry or type a new one to create it.</small>
+              </label>
+              <datalist id="project-industries">{industries.map((industry) => <option value={industry} key={industry} />)}</datalist>
+              <label><span>Project description</span><textarea name="description" placeholder="The idea, approach, and outcome of the project…" maxLength={1500} rows={5} /></label>
+            </>
+          )}
           <label><span>Image description</span><input name="altText" placeholder="Accessible description" maxLength={300} required /></label>
           <label><span>Status</span>
             <select name="published" defaultValue="true"><option value="true">Published</option><option value="false">Draft</option></select>
@@ -501,7 +530,7 @@ export default function AdminPage() {
                     <div>
                       <span>{item.type} · {item.published ? 'Published' : 'Draft'}</span>
                       <h3>{item.title}</h3>
-                      <p>{item.subtitle || 'No subtitle'} · {new Date(`${item.createdAt}Z`).toLocaleDateString()}</p>
+                      <p>{item.type === 'project' && item.industry ? `${item.industry} · ` : ''}{item.subtitle || 'No subtitle'} · {new Date(`${item.createdAt}Z`).toLocaleDateString()}</p>
                     </div>
                     <button onClick={() => setDeleteTarget(item)} disabled={busy} aria-label={`Delete ${item.title}`}>
                       {deletingId === item.id ? <LoaderCircle className="admin-spinner h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
@@ -527,6 +556,8 @@ export default function AdminPage() {
           <article><span>Production</span><h2>Live Worker</h2><p>The active Cloudflare Worker is <strong>picarview-landing</strong>. GitHub pushes and Cloudflare deployments remain separate release steps.</p><Link href="/">Open live website <ExternalLink className="h-4 w-4" /></Link></article>
         </section>
       )}
+
+      {activeView === 'legal' && <AdminLegalEditor pages={legalPages} onSaved={loadLegalPages} />}
       </div>
 
       <nav className="admin-mobile-nav" aria-label="Mobile dashboard navigation">
@@ -542,6 +573,7 @@ export default function AdminPage() {
           <button className="admin-mobile-drawer__close" onClick={() => setMobileMoreOpen(false)}><X /></button>
           <span>More controls</span>
           <button onClick={() => navigateTo('drafts')}><FileClock /> Drafts <i>{draftCount}</i></button>
+          <button onClick={() => navigateTo('legal')}><FileText /> Legal pages</button>
           <button onClick={() => navigateTo('settings')}><Settings /> Settings</button>
           <Link href="/"><ExternalLink /> View website</Link>
           <button onClick={() => void logout()} disabled={signingOut}>{signingOut ? <LoaderCircle className="admin-spinner" /> : <LogOut />} Sign out</button>

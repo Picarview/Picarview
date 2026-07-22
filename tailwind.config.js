@@ -24,8 +24,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        'metropolis-black': ['var(--font-metropolis-black)'],
-        'metropolis-bold': ['var(--font-metropolis-bold)'],
+        'urbanist-black': ['var(--font-urbanist-black)'],
+        'urbanist-bold': ['var(--font-urbanist-bold)'],
         'bacalisties': ['var(--font-bacalisties)'],
       },
       backgroundImage: {

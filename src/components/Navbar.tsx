@@ -78,11 +78,11 @@ export function Navbar() {
       >
         <div className="relative h-8 w-32 md:h-10 md:w-36">
           <Image
-            src="/logo-white.png"
+            src="/images/Black.png"
             alt="Picarview Logo"
             fill
             sizes="(max-width: 768px) 128px, 144px"
-            className="object-contain"
+            className="object-contain invert"
             priority
           />
         </div>
@@ -139,7 +139,7 @@ export function Navbar() {
               key={link.name}
               href={link.href}
               onClick={() => setIsMenuOpen(false)}
-              className="text-3xl font-metropolis-black uppercase tracking-tight hover:text-white transition-colors"
+              className="text-3xl font-urbanist-black uppercase tracking-tight hover:text-white transition-colors"
               style={{
                 transform: isMenuOpen ? 'translateY(0)' : 'translateY(20px)',
                 opacity: isMenuOpen ? 1 : 0,

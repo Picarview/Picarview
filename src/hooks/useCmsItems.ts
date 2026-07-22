@@ -7,6 +7,8 @@ export interface PublicCmsItem {
   type: 'partner' | 'project'
   title: string
   subtitle: string
+  description: string
+  industry: string
   altText: string
   sortOrder: number
   imageUrl: string

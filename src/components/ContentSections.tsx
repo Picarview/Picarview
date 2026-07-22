@@ -8,6 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ArrowRight } from 'lucide-react'
 import { useCmsItems } from '@/hooks/useCmsItems'
 import { useCmsSiteMedia } from '@/hooks/useCmsSiteMedia'
+import { useLegalPages } from '@/hooks/useLegalPages'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -189,8 +190,8 @@ function InteractiveCardsTransition() {
     <>
       <section ref={containerRef} data-theme="light" className="cards-section">
         <div className="cards-section__heading">
-          <span>Selected expressions</span>
-          <span>Arriving together · 01—04</span>
+          <span>We create and build great ideas</span>
+          <span>01—04</span>
         </div>
 
         <div className="cards-section__deck">
@@ -204,12 +205,6 @@ function InteractiveCardsTransition() {
           ))}
         </div>
 
-        <span className="cards-section__index" aria-hidden="true">PICARVIEW®</span>
-      </section>
-
-      <section data-theme="dark" className="foundation-intro">
-        <p>Unveiling Excellence</p>
-        <h3>Our Foundation</h3>
       </section>
     </>
   )
@@ -262,7 +257,7 @@ function ParallaxWindowWorks() {
           <p className="text-white text-sm uppercase tracking-[0.4em] mb-4">
             Portfolio
           </p>
-          <h3 className="font-metropolis-black text-4xl md:text-6xl uppercase text-white">
+          <h3 className="font-urbanist-black text-4xl md:text-6xl uppercase text-white">
             Our Works
           </h3>
         </div>
@@ -331,20 +326,13 @@ function AboutSection() {
       <div ref={contentRef} className="max-w-5xl mx-auto">
         <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-8">02 — Page</p>
         <h2 ref={headingRef} className="stylish-header text-4xl md:text-5xl lg:text-6xl mb-12 soft-mask-reveal">
-          <span className="metropolis-upper text-white">GET TO </span>
-          <span className="bacalisties-script text-white text-5xl md:text-6xl lg:text-7xl">knowPICARVIEW</span>
+          <span className="bacalisties-script text-white text-5xl md:text-6xl lg:text-7xl">know</span>
+          <span className="urbanist-upper text-white">PICARVIEW</span>
         </h2>
         <div className="space-y-6 text-lg md:text-xl text-zinc-300 leading-relaxed">
-          <p className="text-2xl md:text-3xl text-white font-light leading-normal">
-            We are your creative team.
-          </p>
-          <p className="text-xl md:text-2xl italic text-zinc-400 max-w-4xl">
-            Focused on combining creativity, innovation, and design to shape visual experiences that go beyond
-            appearance delivering depth, clarity, and lasting impact.
-          </p>
-          <p className="max-w-4xl">
-            We go beyond aesthetics, bringing your ideas to life in ways that allow them to evolve across multiple
-            dimensions, connect with their environment, and leave a lasting impression.
+          <p className="text-2xl md:text-3xl text-white font-light leading-normal max-w-4xl">
+            We are your creative team, and our goal is to connect <strong>you</strong> with your audience through
+            creativity, innovation, and design.
           </p>
         </div>
       </div>
@@ -352,7 +340,7 @@ function AboutSection() {
   )
 }
 
-// Partners statement — logo wall will be added beneath this later.
+// Partners statement and CMS-powered collaboration showcase.
 function GoalSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLHeadingElement>(null)
@@ -376,10 +364,59 @@ function GoalSection() {
           },
         }
       )
+
+      gsap.fromTo(
+        '.partners-statement__logos figure',
+        { opacity: 0, y: 42, rotate: (index) => index % 2 === 0 ? -2 : 2 },
+        {
+          opacity: 1,
+          y: 0,
+          rotate: 0,
+          duration: 0.8,
+          stagger: 0.12,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '.partners-statement__logos',
+            start: 'top 82%',
+          },
+        }
+      )
+
+      // Give every partner mark its own quiet, continuous rhythm once visible.
+      // Animating the image (rather than the card) keeps the reveal and hover
+      // transforms independent, and pausing off-screen avoids wasted work.
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        gsap.utils
+          .toArray<HTMLImageElement>('.partners-statement__logos img')
+          .forEach((logo, index) => {
+            const motion = gsap.to(logo, {
+              x: index % 2 === 0 ? 4 : -4,
+              y: index % 2 === 0 ? -8 : 8,
+              rotation: index % 2 === 0 ? 1 : -1,
+              scale: 1.025,
+              duration: 3.2 + (index % 3) * 0.5,
+              delay: index * -0.55,
+              repeat: -1,
+              yoyo: true,
+              ease: 'sine.inOut',
+              paused: true,
+            })
+
+            ScrollTrigger.create({
+              trigger: logo.closest('figure'),
+              start: 'top 95%',
+              end: 'bottom 5%',
+              onEnter: () => motion.play(),
+              onEnterBack: () => motion.play(),
+              onLeave: () => motion.pause(),
+              onLeaveBack: () => motion.pause(),
+            })
+          })
+      }
     }, sectionRef)
 
     return () => ctx.revert()
-  }, [])
+  }, [partners.length])
 
   return (
     <section
@@ -392,17 +429,29 @@ function GoalSection() {
           ref={textRef}
           className="partners-statement__text soft-mask-reveal"
         >
-          We partner with brands that play a role in the environment today and tomorrow, creating ideas and connecting
-          with their audience through pictures and arts innovation.
+          We believe the best brands don&apos;t simply exist — they contribute. They inspire, solve problems, and create
+          lasting value. That&apos;s why we partner with purpose-driven brands to shape ideas, refine every detail, and
+          bring meaningful visions to life through creativity, innovation, and design.
         </h2>
         {partners.length > 0 && (
-          <div className="partners-statement__logos" aria-label="Picarview partners">
-            {partners.map((partner) => (
-              <figure key={partner.id}>
-                <img src={partner.imageUrl} alt={partner.altText} loading="lazy" />
-                <figcaption className="sr-only">{partner.title}</figcaption>
-              </figure>
-            ))}
+          <div className="partners-statement__showcase">
+            <header>
+              <span>Selected partners</span>
+              <span>{String(partners.length).padStart(2, '0')} collaborations</span>
+            </header>
+            <div className="partners-statement__logos" aria-label="Picarview partners">
+              {partners.map((partner, index) => (
+                <figure key={partner.id}>
+                  <div className="partners-statement__logo-frame">
+                    <img src={partner.imageUrl} alt={partner.altText} loading="lazy" />
+                  </div>
+                  <figcaption>
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    <strong>{partner.title}</strong>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -468,7 +517,7 @@ function ServicesSection() {
 
       media.add('(prefers-reduced-motion: reduce)', () => {
         gsap.set(
-          '.service-script__eyebrow, .service-script__title, .service-script__intro, .service-pillar, .service-pillar li',
+          '.service-script__eyebrow, .service-script__title, .service-pillar, .service-pillar li',
           { opacity: 1, x: 0, y: 0, rotate: 0 }
         )
       })
@@ -484,7 +533,7 @@ function ServicesSection() {
         })
 
         timeline.fromTo(
-          '.service-script__eyebrow, .service-script__title, .service-script__intro',
+          '.service-script__eyebrow, .service-script__title',
           { opacity: 0, x: 35 },
           { opacity: 1, x: 0, duration: 0.5, stagger: 0.1, ease: 'power2.out' }
         )
@@ -525,20 +574,10 @@ function ServicesSection() {
       data-theme="light"
       className="service-script"
     >
-      <img className="service-script__background" src="/images/img5.png" alt="Editorial fashion composition" />
-      <div className="service-script__wash" aria-hidden="true" />
-
       <div className="service-script__content">
         <header className="service-script__header">
-          <div>
-            <p className="service-script__eyebrow">05 — Services</p>
-            <h2 className="service-script__title">
-              Four pillars. <span>One creative practice.</span>
-            </h2>
-          </div>
-          <p className="service-script__intro">
-            From the first question to the final expression, our services connect thinking, making, and meaningful visual impact.
-          </p>
+          <p className="service-script__eyebrow">05 — Services</p>
+          <h2 className="service-script__title">Our services</h2>
         </header>
 
         <div className="service-pillars">
@@ -548,12 +587,14 @@ function ServicesSection() {
                 <span>{service.number}</span>
                 <h3>{service.title}</h3>
               </header>
-              <p>{service.statement}</p>
-              <ul>
-                {service.offerings.map((offering) => (
-                  <li key={offering}>{offering}</li>
-                ))}
-              </ul>
+              <div className="service-pillar__body">
+                <p>{service.statement}</p>
+                <ul>
+                  {service.offerings.map((offering) => (
+                    <li key={offering}>{offering}</li>
+                  ))}
+                </ul>
+              </div>
             </article>
           ))}
         </div>
@@ -654,7 +695,8 @@ function WorksSection() {
 
       <header className="aura-work__heading">
         <p>06 — Project Page</p>
-        <h2><span>Selected</span> work, thoughtfully crafted.</h2>
+        <h2>Our <span>Work</span></h2>
+        <div className="aura-work__subheading">Check what we have built.</div>
         <div className="aura-work__counter">{projects.length} projects · Scroll to explore</div>
         <Link href="/projects" className="aura-work__cta">
           View all projects
@@ -875,13 +917,13 @@ function ContactSection() {
       <div className="contact-portal__inner">
         <div className="contact-portal__copy">
           <p className="contact-portal__eyebrow">06 — Contact</p>
-          <h2>Let&apos;s create<br /><span>the next view.</span></h2>
+          <h2>Let&apos;s create<br /><span>your view.</span></h2>
           <p className="contact-portal__intro">
-            Bring us the ambition. We&apos;ll help shape the strategy, direction, and expression that make it visible.
+            Only a message away. We will build your idea with purpose, innovation, and make it fit.
           </p>
 
           <div className="contact-portal__services" aria-label="Selected services">
-            {['Identity', 'Campaigns', 'Art direction', 'Image-making'].map((item, index) => (
+            {['Discovery', 'Strategy', 'Innovation', 'Expression'].map((item, index) => (
               <span className="contact-portal__service" key={item}>
                 {String(index + 1).padStart(2, '0')} / {item}
               </span>
@@ -904,26 +946,31 @@ function ContactSection() {
 
 // Footer
 function Footer() {
+  const legalPages = useLegalPages()
+  const coreLinks = [
+    { slug: 'privacy', title: 'Privacy', href: '/privacy' },
+    { slug: 'terms', title: 'Terms', href: '/terms' },
+  ]
+  const links = [...coreLinks, ...legalPages.filter((page) => page.slug !== 'privacy' && page.slug !== 'terms')]
   return (
     <footer data-theme="dark" className="py-12 px-6 md:px-12 lg:px-24 border-t border-white/15 bg-black">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <Link href="/" aria-label="Picarview home" className="block transition-opacity hover:opacity-70">
           <Image
-            src="/logo-white.png"
+            src="/images/Black.png"
             alt="Picarview"
-            width={150}
-            height={60}
-            className="h-10 w-auto object-contain"
+            width={2268}
+            height={513}
+            className="h-10 w-auto object-contain invert"
           />
         </Link>
         <p className="text-zinc-400 text-sm">© 2026 Picarview. All rights reserved.</p>
-        <div className="flex items-center gap-6">
-          <a href="#" className="text-zinc-400 hover:text-white transition-colors text-sm uppercase tracking-[0.25em]">
-            Privacy
-          </a>
-          <a href="#" className="text-zinc-400 hover:text-white transition-colors text-sm uppercase tracking-[0.25em]">
-            Terms
-          </a>
+        <div className="flex flex-wrap items-center justify-center gap-6">
+          {links.map((page) => (
+            <Link href={page.href} className="text-zinc-400 hover:text-white transition-colors text-sm uppercase tracking-[0.25em]" key={page.slug}>
+              {page.title}
+            </Link>
+          ))}
         </div>
       </div>
     </footer>
@@ -946,8 +993,6 @@ export function ContentSections() {
       <GoalSection />
       <ServicesSection />
       <WorksSection />
-      <PersonalitySection />
-      <PromiseSection />
       <ContactSection />
       <Footer />
     </div>

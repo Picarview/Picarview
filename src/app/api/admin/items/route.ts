@@ -25,12 +25,16 @@ export async function GET(request: Request) {
   if (!CMS_DB) return NextResponse.json({ error: 'D1 is not configured.' }, { status: 503 })
 
   const query = await CMS_DB.prepare(
-    `SELECT id, type, title, subtitle, alt_text, object_key, sort_order, published, created_at
+    `SELECT id, type, title, subtitle, description, industry, alt_text, object_key, sort_order, published, created_at
      FROM content_items ORDER BY type ASC, sort_order ASC, created_at DESC`
   ).all<CmsItem>()
 
+  const items = (query.results ?? []).map((item) => ({ ...publicCmsItem(item), published: Boolean(item.published) }))
+  const industries = [...new Set(items.filter((item) => item.type === 'project').map((item) => item.industry).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b))
+
   return NextResponse.json(
-    { items: (query.results ?? []).map((item) => ({ ...publicCmsItem(item), published: Boolean(item.published) })) },
+    { items, industries },
     { headers: { 'Cache-Control': 'no-store' } }
   )
 }
@@ -53,16 +57,18 @@ export async function POST(request: Request) {
   const type = form.get('type')
   const title = String(form.get('title') ?? '').trim()
   const subtitle = String(form.get('subtitle') ?? '').trim()
+  const description = String(form.get('description') ?? '').trim()
+  const industry = type === 'project' ? String(form.get('industry') ?? '').trim().replace(/\s+/g, ' ') : ''
   const altText = String(form.get('altText') ?? '').trim()
   const published = form.get('published') === 'true' ? 1 : 0
   const file = form.get('image')
 
-  if ((type !== 'partner' && type !== 'project') || !title || !altText || !(file instanceof File)) {
-    return NextResponse.json({ error: 'Type, title, alt text, and image are required.' }, { status: 400 })
+  if ((type !== 'partner' && type !== 'project') || !title || !altText || (type === 'project' && !industry) || !(file instanceof File)) {
+    return NextResponse.json({ error: 'Type, title, industry, alt text, and image are required for projects.' }, { status: 400 })
   }
-  if (title.length > 120 || subtitle.length > 200 || altText.length > 300) {
+  if (title.length > 120 || subtitle.length > 200 || description.length > 1500 || industry.length > 80 || altText.length > 300) {
     return NextResponse.json(
-      { error: 'Title must be 120 characters or fewer, subtitle 200, and description 300.' },
+      { error: 'Title must be 120 characters or fewer, subtitle 200, project description 1,500, and image description 300.' },
       { status: 400 }
     )
   }
@@ -88,9 +94,9 @@ export async function POST(request: Request) {
   try {
     await CMS_DB.prepare(
       `INSERT INTO content_items
-       (id, type, title, subtitle, alt_text, object_key, sort_order, published)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(id, type, title, subtitle, altText, objectKey, sortOrder, published).run()
+       (id, type, title, subtitle, description, industry, alt_text, object_key, sort_order, published)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(id, type, title, subtitle, description, industry, altText, objectKey, sortOrder, published).run()
   } catch (error) {
     await CMS_MEDIA.delete(objectKey)
     throw error

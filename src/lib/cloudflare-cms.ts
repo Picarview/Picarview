@@ -43,6 +43,8 @@ export interface CmsItem {
   type: 'partner' | 'project'
   title: string
   subtitle: string
+  description: string
+  industry: string
   alt_text: string
   object_key: string
   sort_order: number
@@ -60,6 +62,16 @@ export interface CmsSiteMedia {
   updated_at: string
 }
 
+export interface CmsLegalPage {
+  slug: string
+  title: string
+  introduction: string
+  sections_json: string
+  effective_date: string
+  published: number
+  updated_at: string
+}
+
 export function getCmsEnv(): CmsEnv {
   return getCloudflareContext().env as unknown as CmsEnv
 }
@@ -70,6 +82,8 @@ export function publicCmsItem(item: CmsItem) {
     type: item.type,
     title: item.title,
     subtitle: item.subtitle,
+    description: item.description,
+    industry: item.industry,
     altText: item.alt_text,
     sortOrder: item.sort_order,
     createdAt: item.created_at,
