@@ -156,6 +156,14 @@ body {
   color: rgba(255, 255, 255, 0.48);
 }
 
+.hero-sequence__intro .hero-sequence__headline {
+  max-width: 9ch;
+  font-family: var(--font-urbanist-black);
+  font-size: clamp(3.8rem, 10.5vw, 11rem);
+  line-height: 0.75;
+  letter-spacing: -0.075em;
+}
+
 .hero-sequence__word {
   position: absolute;
   z-index: 3;
@@ -274,6 +282,11 @@ body {
 
   .hero-sequence__intro h1 {
     font-size: clamp(2rem, 10vw, 3.7rem);
+  }
+
+  .hero-sequence__intro .hero-sequence__headline {
+    font-size: clamp(3.7rem, 18vw, 6.2rem);
+    line-height: 0.78;
   }
 
   .hero-sequence__logo { width: 92vw; }

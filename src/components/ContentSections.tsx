@@ -390,10 +390,11 @@ function GoalSection() {
           .toArray<HTMLImageElement>('.partners-statement__logos img')
           .forEach((logo, index) => {
             const motion = gsap.to(logo, {
-              y: index % 2 === 0 ? -9 : 9,
-              rotation: index % 2 === 0 ? 1.4 : -1.4,
-              scale: 1.035,
-              duration: 2.8 + (index % 3) * 0.45,
+              x: index % 2 === 0 ? 4 : -4,
+              y: index % 2 === 0 ? -8 : 8,
+              rotation: index % 2 === 0 ? 1 : -1,
+              scale: 1.025,
+              duration: 3.2 + (index % 3) * 0.5,
               delay: index * -0.55,
               repeat: -1,
               yoyo: true,

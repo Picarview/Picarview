@@ -356,8 +356,12 @@ export function Hero({ frames }: HeroProps) {
           <div className="hero-sequence__shade" aria-hidden="true" />
 
           <header className="hero-sequence__intro">
-            <p>Great ideas are timeless.</p>
-            <h1>Picarview</h1>
+            <p>Independent creative practice</p>
+            <h1 className="hero-sequence__headline">
+              Imagination
+              <br />
+              made visible.
+            </h1>
           </header>
 
           <div className="hero-sequence__word" aria-label="Picarview">
