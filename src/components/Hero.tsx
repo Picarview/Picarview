@@ -8,9 +8,9 @@ import { useCmsSiteMedia } from '@/hooks/useCmsSiteMedia'
 gsap.registerPlugin(ScrollTrigger)
 
 const labels = [
-  { text: 'Ideas, made visible', className: 'hero-sequence__label--one' },
-  { text: 'Visuals with intention', className: 'hero-sequence__label--two' },
-  { text: 'Designed to be remembered', className: 'hero-sequence__label--three' },
+  { text: 'Great ideas are timeless', className: 'hero-sequence__label--one' },
+  { text: 'Connect with your audience', className: 'hero-sequence__label--two' },
+  { text: 'We create great ideas', className: 'hero-sequence__label--three' },
 ]
 
 interface HeroProps {
@@ -352,8 +352,8 @@ export function Hero({ frames }: HeroProps) {
           <div className="hero-sequence__shade" aria-hidden="true" />
 
           <header className="hero-sequence__intro">
-            <p>Every idea deserves a visual voice</p>
-            <h1>Imagine boldly. <span>Design</span> with purpose.</h1>
+            <p>Great ideas are timeless.</p>
+            <h1>Picarview</h1>
           </header>
 
           <div className="hero-sequence__word" aria-label="Picarview">
@@ -377,7 +377,6 @@ export function Hero({ frames }: HeroProps) {
           </div>
 
           <div className="hero-sequence__meta" aria-hidden="true">
-            <span>001 — {String(frames.length).padStart(3, '0')}</span>
             <span>Scroll to compose</span>
           </div>
         </div>

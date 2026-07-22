@@ -24,7 +24,7 @@ const bacalisties = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Picarview | Creative Design & Visual Art Studio',
+    default: 'Create your view',
     template: '%s | Picarview',
   },
   description: 'Picarview is an independent creative practice shaping brand identities, campaigns, art direction, photography, and visual experiences.',
@@ -58,16 +58,17 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Picarview | Creative Design & Visual Art Studio',
+    title: 'Create your view | Picarview',
     description: 'An independent creative practice shaping identities, campaigns, art direction, photography, and visual experiences.',
     url: '/',
     siteName: 'Picarview',
     images: [
       {
-        url: '/logo-black.png',
-        width: 1327,
-        height: 530,
-        alt: 'Picarview',
+        url: '/social-preview.png',
+        width: 1200,
+        height: 630,
+        alt: 'Picarview — Create your view',
+        type: 'image/png',
       },
     ],
     locale: 'en_US',
@@ -75,13 +76,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Picarview | Creative Design & Visual Art Studio',
+    title: 'Create your view | Picarview',
     description: 'An independent creative practice shaping identities, campaigns, art direction, photography, and visual experiences.',
-    images: ['/logo-black.png'],
+    images: ['/social-preview.png'],
   },
   icons: {
-    icon: '/favicon.ico',
-    apple: '/logo-black.png',
+    icon: '/images/Black.svg',
+    shortcut: '/images/Black.svg',
   },
 }
 

@@ -78,11 +78,11 @@ export function Navbar() {
       >
         <div className="relative h-8 w-32 md:h-10 md:w-36">
           <Image
-            src="/logo-white.png"
+            src="/images/Black.svg"
             alt="Picarview Logo"
             fill
             sizes="(max-width: 768px) 128px, 144px"
-            className="object-contain"
+            className="object-contain invert"
             priority
           />
         </div>

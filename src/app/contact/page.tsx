@@ -25,7 +25,7 @@ export default function ContactPage() {
 
       <nav className="contact-page__nav">
         <Link href="/" aria-label="Picarview home">
-          <Image src="/logo-white.png" alt="Picarview" width={150} height={60} className="h-10 w-auto" priority />
+          <Image src="/images/Black.svg" alt="Picarview" width={150} height={60} className="h-10 w-auto invert" priority />
         </Link>
         <Link href="/" className="contact-page__back">
           <ArrowLeft className="h-4 w-4" />
@@ -36,12 +36,20 @@ export default function ContactPage() {
       <section className="contact-page__layout">
         <div className="contact-page__story">
           <div>
-            <p className="contact-page__eyebrow">Start a project · 2026</p>
-            <h1>Let&apos;s make<br /><span>the idea visible.</span></h1>
+            <p className="contact-page__eyebrow">Have an idea?</p>
+            <h1>Let&apos;s create something<br /><span>worth remembering.</span></h1>
           </div>
 
           <p className="contact-page__lead">
-            Share the ambition. We&apos;ll bring clarity, direction, and a visual language built to last.
+            Every great project starts with a conversation. Whether you have a fully developed vision or just the
+            beginning of an idea, we&apos;d love to hear about it. Tell us a little about yourself and your project, and
+            we&apos;ll get back to you with the best next steps for you.
+          </p>
+
+          <p className="contact-page__note">
+            The questions we ask might seem vague, but they are designed to help us see your project through your eyes
+            so we can build it. Don&apos;t worry if you don&apos;t have all the answers yet. Answer as best as you can and
+            leave the rest to us. That&apos;s what we&apos;re here for.
           </p>
 
           <div className="contact-page__details">

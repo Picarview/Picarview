@@ -19,6 +19,7 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
         imageUrl,
         title: `Picarview project ${index + 1}`,
         subtitle: disciplines[index % disciplines.length],
+        description: 'A selected Picarview project shaped with purpose, clarity, and a visual direction designed to connect the idea with its audience.',
         altText: `Picarview project ${index + 1}`,
       }))
 
@@ -119,6 +120,12 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
               <div><span>{String(activeIndex + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}</span><h2>{activeProject.title}</h2></div>
               <strong>{activeProject.subtitle || 'Selected work'}</strong>
             </footer>
+            <div className="project-viewer__description">
+              <span>About the project</span>
+              <p>
+                {activeProject.description || 'A Picarview project shaped with purpose, clarity, and a visual direction designed to connect the idea with its audience.'}
+              </p>
+            </div>
           </article>
           <button
             className="project-viewer__nav project-viewer__nav--next"
