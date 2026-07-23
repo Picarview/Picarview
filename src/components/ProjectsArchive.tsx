@@ -14,12 +14,14 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
   const lenis = useLenis()
   const cmsProjects = useCmsItems('project')
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [industry, setIndustry] = useState('All')
   const projects = cmsProjects.length > 0
     ? cmsProjects
     : fallbackImages.map((imageUrl, index) => ({
         id: `fallback-${index + 1}`,
         imageUrl,
+        images: [{ id: `fallback-image-${index + 1}`, imageUrl, altText: `Picarview project ${index + 1}`, sortOrder: 0 }],
         title: `Picarview project ${index + 1}`,
         subtitle: disciplines[index % disciplines.length],
         description: 'A selected Picarview project shaped with purpose, clarity, and a visual direction designed to connect the idea with its audience.',
@@ -29,7 +31,8 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
   const industries = useMemo(() => ['All', ...new Set(projects.map((project) => project.industry || 'General'))], [projects])
   const visibleProjects = industry === 'All' ? projects : projects.filter((project) => (project.industry || 'General') === industry)
 
-  useEffect(() => { setActiveIndex(null) }, [industry])
+  useEffect(() => { setActiveIndex(null); setActiveImageIndex(0) }, [industry])
+  useEffect(() => { setActiveImageIndex(0) }, [activeIndex])
 
   useEffect(() => {
     if (activeIndex === null) return
@@ -67,6 +70,8 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
   }, [activeIndex, lenis, visibleProjects.length])
 
   const activeProject = activeIndex === null ? null : visibleProjects[activeIndex]
+  const activeProjectImages = activeProject?.images?.length ? activeProject.images : activeProject ? [{ id: `${activeProject.id}-cover`, imageUrl: activeProject.imageUrl, altText: activeProject.altText, sortOrder: 0 }] : []
+  const activeProjectImage = activeProjectImages[activeImageIndex] ?? activeProjectImages[0]
 
   return (
     <main className="project-archive">
@@ -156,11 +161,11 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
           >
             <div className="project-viewer__image">
               <Image
-                src={activeProject.imageUrl}
-                alt={activeProject.altText}
+                src={activeProjectImage.imageUrl}
+                alt={activeProjectImage.altText || activeProject.altText}
                 fill
                 priority
-                unoptimized={activeProject.imageUrl.startsWith('/api/')}
+                unoptimized={activeProjectImage.imageUrl.startsWith('/api/')}
                 sizes="94vw"
                 className="object-contain"
               />
@@ -174,6 +179,16 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
               <p>
                 {activeProject.description || 'A Picarview project shaped with purpose, clarity, and a visual direction designed to connect the idea with its audience.'}
               </p>
+              {activeProjectImages.length > 1 && (
+                <div className="project-viewer__gallery" aria-label="Project image gallery">
+                  {activeProjectImages.map((projectImage, imageIndex) => (
+                    <button type="button" className={activeImageIndex === imageIndex ? 'is-active' : ''} onClick={() => setActiveImageIndex(imageIndex)} aria-label={`Show project image ${imageIndex + 1}`} key={projectImage.id}>
+                      <Image src={projectImage.imageUrl} alt="" fill sizes="90px" className="object-cover" unoptimized={projectImage.imageUrl.startsWith('/api/')} />
+                      <span>{String(imageIndex + 1).padStart(2, '0')}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </article>
           <button

@@ -21,5 +21,25 @@
       "binding": "CMS_MEDIA",
       "bucket_name": "picarview-media"
     }
-  ]
+  ],
+  "env": {
+    "remote": {
+      "d1_databases": [
+        {
+          "binding": "CMS_DB",
+          "database_name": "picarview-cms",
+          "database_id": "cda7b0c9-275c-4c47-8b1c-bd6b4abdce52",
+          "migrations_dir": "migrations",
+          "remote": true
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "CMS_MEDIA",
+          "bucket_name": "picarview-media",
+          "remote": true
+        }
+      ]
+    }
+  }
 }

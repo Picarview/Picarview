@@ -18,6 +18,29 @@ const urbanistBold = localFont({
   display: 'swap',
 })
 
+const urbanistItalic = localFont({
+  src: '../../public/fonts/Primary Font/Primary Font/Urbanist/Urbanist-Italic-VariableFont_wght.ttf',
+  variable: '--font-urbanist-italic',
+  weight: '700 900',
+  style: 'italic',
+  display: 'swap',
+})
+
+const lora = localFont({
+  src: [
+    {
+      path: '../../public/fonts/Secondary Fonts/Secondary Fonts/Lora/Lora-VariableFont_wght.ttf',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/Secondary Fonts/Secondary Fonts/Lora/Lora-Italic-VariableFont_wght.ttf',
+      style: 'italic',
+    },
+  ],
+  variable: '--font-lora',
+  display: 'swap',
+})
+
 const bacalisties = localFont({
   src: '../../public/fonts/Bacalisties.ttf',
   variable: '--font-bacalisties',
@@ -130,7 +153,7 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en" className={`${urbanistBlack.variable} ${urbanistBold.variable} ${bacalisties.variable}`}>
+    <html lang="en" className={`${urbanistBlack.variable} ${urbanistBold.variable} ${urbanistItalic.variable} ${lora.variable} ${bacalisties.variable}`}>
       <head>
         <script
           type="application/ld+json"

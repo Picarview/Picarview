@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import {
   createAdminSession,
+  ADMIN_ABSOLUTE_TIMEOUT_MS,
   getCmsEnv,
   isSameOrigin,
   SESSION_COOKIE,
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
     )
   }
 
-  if (!timingSafeTextEqual(password, ADMIN_PASSWORD)) {
+  if (!await timingSafeTextEqual(password, ADMIN_PASSWORD)) {
     await CMS_DB.prepare(
       `INSERT INTO admin_login_attempts (client_key, attempts, window_started)
        VALUES (?, 1, ?)
@@ -62,7 +63,7 @@ export async function POST(request: Request) {
     secure: new URL(request.url).protocol === 'https:',
     sameSite: 'strict',
     path: '/',
-    maxAge: 60 * 60 * 12,
+    maxAge: ADMIN_ABSOLUTE_TIMEOUT_MS / 1000,
   })
   return response
 }

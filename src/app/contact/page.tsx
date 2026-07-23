@@ -37,7 +37,15 @@ export default function ContactPage() {
         <div className="contact-page__story">
           <div>
             <p className="contact-page__eyebrow">Have an idea?</p>
-            <h1>Let&apos;s create something<br /><span>worth remembering.</span></h1>
+            <h1 className="contact-page__title" aria-label="Let's create something worth remembering">
+              <span className="contact-page__title-line">
+                <strong>Let&apos;s</strong><em className="contact-page__title-create">create</em>
+              </span>
+              <span className="contact-page__title-line">
+                <strong>something</strong><em className="contact-page__title-worth">worth</em>
+              </span>
+              <span className="contact-page__title-line contact-page__title-remembering">remembering</span>
+            </h1>
           </div>
 
           <p className="contact-page__lead">
@@ -54,15 +62,11 @@ export default function ContactPage() {
 
           <div className="contact-page__details">
             <div>
-              <span>New business</span>
+              <span>Email</span>
               <a href="mailto:create@picarview.com">
                 create@picarview.com
                 <ArrowUpRight className="h-4 w-4" />
               </a>
-            </div>
-            <div>
-              <span>Working across</span>
-              <p>Identity · Campaigns<br />Art direction · Image-making</p>
             </div>
           </div>
         </div>
@@ -79,7 +83,6 @@ export default function ContactPage() {
       <footer className="contact-page__footer">
         <span>Picarview®</span>
         <p>Independent creative practice</p>
-        <span>Available worldwide</span>
       </footer>
     </main>
   )

@@ -129,6 +129,43 @@ pnpm run dev
 
 Open <http://localhost:3000/admin>.
 
+### Local UI with live CMS content
+
+There are two development modes:
+
+- `pnpm run dev` uses the private database and media storage on this computer.
+- `pnpm run dev:remote` connects the local website to Picarview's live
+  Cloudflare database and media bucket. Content uploaded or deleted in this
+  mode also changes the live website.
+
+For remote mode, first sign in to Cloudflare once:
+
+```bash
+pnpm exec wrangler login
+```
+
+Create `.dev.vars` from the example file:
+
+```bash
+cp .dev.vars.example .dev.vars
+```
+
+Generate the 32-byte local session secret:
+
+```bash
+openssl rand -hex 32
+```
+
+Paste the generated value after `ADMIN_SESSION_SECRET=` in `.dev.vars`, and put
+the intended admin password after `ADMIN_PASSWORD=`. Then start remote mode:
+
+```bash
+pnpm run dev:remote
+```
+
+The session secret may be different from production. The admin password must be
+the password you want the local admin login to accept. Never commit `.dev.vars`.
+
 `.dev.vars`, `.wrangler`, `.next`, and `.open-next` are ignored by Git. Never commit passwords, session secrets, or generated Cloudflare credentials.
 
 ### GitHub Codespaces
@@ -136,7 +173,7 @@ Open <http://localhost:3000/admin>.
 To use a specific preview port:
 
 ```bash
-pnpm run dev -- --hostname 0.0.0.0 --port 8976
+pnpm run dev --hostname 0.0.0.0 --port 8976
 ```
 
 Set port `8976` to **Public** in the Codespaces Ports panel if the preview must be accessible outside your account. An `app.github.dev` URL is only a proxy to the running Codespace; the development server must remain active.
@@ -436,7 +473,7 @@ The official square Picarview brand mark should be used for the favicon when the
 
 The admin system includes:
 
-- Signed 12-hour session cookies
+- Signed admin sessions with a 30-minute inactivity timeout and an 8-hour absolute lifetime
 - `HttpOnly`, `Secure`, and `SameSite=Strict` cookie settings
 - Five-attempt, 15-minute login lockout per client IP
 - Timing-safe password and signature comparison

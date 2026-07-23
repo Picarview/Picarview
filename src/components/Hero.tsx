@@ -3,16 +3,9 @@
 import { useLayoutEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import NextImage from 'next/image'
 import { useCmsSiteMedia } from '@/hooks/useCmsSiteMedia'
 
 gsap.registerPlugin(ScrollTrigger)
-
-const labels = [
-  { text: 'Great ideas are timeless', className: 'hero-sequence__label--one' },
-  { text: 'Connect with your audience', className: 'hero-sequence__label--two' },
-  { text: 'We create great ideas', className: 'hero-sequence__label--three' },
-]
 
 interface HeroProps {
   frames: string[]
@@ -26,12 +19,16 @@ function createHeroTimeline(
   renderFrame?: (frame: number) => void
 ) {
   return gsap.context(() => {
-    const labelElements = gsap.utils.toArray<HTMLElement>('.hero-sequence__label')
     const timelineDriver = sequence ?? { frame: 0 }
 
-    gsap.set('.hero-sequence__word', { opacity: 0, scale: 0.82, clipPath: 'inset(0 48% 0 48%)' })
-    gsap.set(labelElements, { opacity: 0, y: 16 })
-    gsap.set('.hero-sequence__signature', { opacity: 0, clipPath: 'inset(0 100% 0 0)' })
+    gsap.set('.hero-sequence__word', { opacity: 1 })
+    gsap.set('.hero-sequence__letter', {
+      opacity: 0,
+      yPercent: 115,
+      rotateX: -92,
+      transformOrigin: '50% 100%',
+    })
+    gsap.set('.hero-sequence__signature', { opacity: 0, y: 36, scale: 0.9, clipPath: 'inset(0 50% 0 50%)' })
 
     const timeline = gsap.timeline({
       defaults: { ease: 'none' },
@@ -52,22 +49,24 @@ function createHeroTimeline(
       duration: 1,
       onUpdate: () => renderFrame?.(timelineDriver.frame),
     }, 0)
-    timeline.to('.hero-sequence__intro', { opacity: 0, yPercent: -24, filter: 'blur(8px)', duration: 0.14 }, 0.03)
-    timeline.to('.hero-sequence__word', {
+    timeline.to('.hero-sequence__intro', { opacity: 0, yPercent: -24, filter: 'blur(8px)', duration: 0.16 }, 0.08)
+    timeline.to('.hero-sequence__letter', {
       opacity: 1,
-      scale: 1,
-      clipPath: 'inset(0 0% 0 0%)',
-      duration: 0.34,
-      ease: 'power3.out',
-    }, 0.18)
+      yPercent: 0,
+      rotateX: 0,
+      duration: 0.32,
+      stagger: 0.035,
+      ease: 'back.out(1.15)',
+    }, 0.2)
+    timeline.to('.hero-sequence__word', { scale: 1.025, duration: 0.16, ease: 'power1.inOut' }, 0.58)
     timeline.to('.hero-sequence__signature', {
       opacity: 1,
+      y: 0,
+      scale: 1,
       clipPath: 'inset(0 0% 0 0)',
-      duration: 0.12,
-      ease: 'power2.out',
-    }, 0.53)
-    timeline.to(labelElements, { opacity: 1, y: 0, duration: 0.08, stagger: 0.025, ease: 'power2.out' }, 0.61)
-    timeline.to(labelElements, { opacity: 0, y: -12, duration: 0.08, stagger: 0.015 }, 0.79)
+      duration: 0.2,
+      ease: 'power3.out',
+    }, 0.64)
     timeline.to('.hero-sequence__card', { scale: 1.06, yPercent: -4, duration: 0.06, ease: 'power2.in' }, 0.94)
     timeline.to('.hero-sequence__word', {
       scale: 1.08,
@@ -356,40 +355,22 @@ export function Hero({ frames }: HeroProps) {
           <div className="hero-sequence__shade" aria-hidden="true" />
 
           <header className="hero-sequence__intro">
-            <p>Independent creative practice</p>
             <h1 className="hero-sequence__headline">
-              Imagination
-              <br />
-              made visible.
+              Great!!!
+              <span>you found us</span>
             </h1>
           </header>
 
           <div className="hero-sequence__word" aria-label="Picarview">
-            <NextImage
-              src="/images/Black.png"
-              alt=""
-              width={2268}
-              height={513}
-              className="hero-sequence__logo"
-              priority
-              aria-hidden="true"
-            />
+            <span className="hero-sequence__letters" aria-hidden="true">
+              {'PICARVIEW'.split('').map((letter, index) => (
+                <span className="hero-sequence__letter" key={`${letter}-${index}`}>{letter}</span>
+              ))}
+            </span>
           </div>
 
-          <div className="hero-sequence__signature" aria-hidden="true">
+          <div className="hero-sequence__signature">
             Create your view
-          </div>
-
-          <div className="hero-sequence__labels" aria-hidden="true">
-            {labels.map((label) => (
-              <span className={`hero-sequence__label ${label.className}`} key={label.text}>
-                <i />{label.text}
-              </span>
-            ))}
-          </div>
-
-          <div className="hero-sequence__meta" aria-hidden="true">
-            <span>Scroll to compose</span>
           </div>
         </div>
       </div>

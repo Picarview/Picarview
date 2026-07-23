@@ -65,7 +65,7 @@ export function Navbar() {
   const navLinks = [
     { name: 'About', href: '#about' },
     { name: 'Services', href: '#services' },
-    { name: 'Work', href: '#work' },
+    { name: 'Our Works', href: '#work' },
     { name: 'Contact', href: '/contact' },
   ]
 

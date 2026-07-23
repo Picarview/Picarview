@@ -49,6 +49,17 @@ export interface CmsItem {
   object_key: string
   sort_order: number
   published: number
+  archived: number
+  pinned: number
+  created_at: string
+}
+
+export interface CmsProjectImage {
+  id: string
+  project_id: string
+  object_key: string
+  alt_text: string
+  sort_order: number
   created_at: string
 }
 
@@ -92,6 +103,8 @@ export function publicCmsItem(item: CmsItem) {
 }
 
 export const SESSION_COOKIE = 'picarview_admin'
+export const ADMIN_IDLE_TIMEOUT_MS = 30 * 60 * 1000
+export const ADMIN_ABSOLUTE_TIMEOUT_MS = 8 * 60 * 60 * 1000
 const encoder = new TextEncoder()
 
 function bytesToBase64Url(bytes: Uint8Array) {
@@ -111,31 +124,51 @@ async function sign(value: string, secret: string) {
   return bytesToBase64Url(new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(value))))
 }
 
-export function timingSafeTextEqual(value: string, expected: string) {
-  const valueBytes = encoder.encode(value)
-  const expectedBytes = encoder.encode(expected)
-  const subtle = crypto.subtle as SubtleCrypto & {
-    timingSafeEqual(a: ArrayBufferView, b: ArrayBufferView): boolean
+export async function timingSafeTextEqual(value: string, expected: string) {
+  // Compare fixed-length hashes so this works in both Cloudflare workerd and
+  // local Node.js, whose Web Crypto implementation has no timingSafeEqual().
+  const [valueHash, expectedHash] = await Promise.all([
+    crypto.subtle.digest('SHA-256', encoder.encode(value)),
+    crypto.subtle.digest('SHA-256', encoder.encode(expected)),
+  ])
+  const valueBytes = new Uint8Array(valueHash)
+  const expectedBytes = new Uint8Array(expectedHash)
+  let difference = 0
+  for (let index = 0; index < valueBytes.length; index += 1) {
+    difference |= valueBytes[index] ^ expectedBytes[index]
   }
-  if (valueBytes.byteLength !== expectedBytes.byteLength) {
-    // Perform a same-length comparison even when returning false.
-    subtle.timingSafeEqual(expectedBytes, expectedBytes)
-    return false
-  }
-  return subtle.timingSafeEqual(valueBytes, expectedBytes)
+  return difference === 0
 }
 
-export async function createAdminSession(secret: string) {
-  const expires = Date.now() + 1000 * 60 * 60 * 12
-  const payload = String(expires)
+interface AdminSession {
+  absoluteExpires: number
+  idleExpires: number
+}
+
+export async function createAdminSession(secret: string, absoluteExpires = Date.now() + ADMIN_ABSOLUTE_TIMEOUT_MS) {
+  const idleExpires = Math.min(absoluteExpires, Date.now() + ADMIN_IDLE_TIMEOUT_MS)
+  const payload = `${absoluteExpires}.${idleExpires}`
   return `${payload}.${await sign(payload, secret)}`
 }
 
+export async function readAdminSession(token: string | undefined, secret: string | undefined): Promise<AdminSession | null> {
+  if (!token || !secret) return null
+  const [absoluteValue, idleValue, signature] = token.split('.')
+  const absoluteExpires = Number(absoluteValue)
+  const idleExpires = Number(idleValue)
+  const now = Date.now()
+  if (
+    !absoluteValue || !idleValue || !signature ||
+    !Number.isFinite(absoluteExpires) || !Number.isFinite(idleExpires) ||
+    absoluteExpires < now || idleExpires < now || idleExpires > absoluteExpires
+  ) return null
+  const payload = `${absoluteValue}.${idleValue}`
+  if (!await timingSafeTextEqual(signature, await sign(payload, secret))) return null
+  return { absoluteExpires, idleExpires }
+}
+
 export async function verifyAdminSession(token: string | undefined, secret: string | undefined) {
-  if (!token || !secret) return false
-  const [payload, signature] = token.split('.')
-  if (!payload || !signature || Number(payload) < Date.now()) return false
-  return timingSafeTextEqual(signature, await sign(payload, secret))
+  return Boolean(await readAdminSession(token, secret))
 }
 
 export function readCookie(request: Request, name: string) {
@@ -146,7 +179,36 @@ export function readCookie(request: Request, name: string) {
 export function isSameOrigin(request: Request) {
   const origin = request.headers.get('origin')
   const fetchSite = request.headers.get('sec-fetch-site')
-  return origin === new URL(request.url).origin && (!fetchSite || fetchSite === 'same-origin')
+  if (!origin || (fetchSite && fetchSite !== 'same-origin')) return false
+
+  const requestUrl = new URL(request.url)
+  let originUrl: URL
+  try {
+    originUrl = new URL(origin)
+  } catch {
+    return false
+  }
+  if (originUrl.protocol !== 'http:' && originUrl.protocol !== 'https:') return false
+
+  const allowedOrigins = new Set([requestUrl.origin])
+  const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim()
+  const directHost = request.headers.get('host')?.trim()
+  const host = forwardedHost || directHost
+  const forwardedProtocol = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim()
+  const protocol = forwardedProtocol === 'http' || forwardedProtocol === 'https'
+    ? forwardedProtocol
+    : requestUrl.protocol.slice(0, -1)
+
+  // Reverse proxies such as GitHub Codespaces terminate HTTPS before forwarding
+  // the request to the local Next.js server. Trust only a syntactically valid host
+  // supplied for this request, and still require the browser's same-origin signal.
+  if (host && /^[a-z0-9.-]+(?::\d+)?$/i.test(host)) {
+    allowedOrigins.add(`${protocol}://${host}`)
+  }
+
+  return allowedOrigins.has(origin)
+    || originUrl.host === forwardedHost
+    || originUrl.host === directHost
 }
 
 export function safeImageType(file: File) {

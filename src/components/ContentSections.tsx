@@ -324,15 +324,16 @@ function AboutSection() {
       className="about-cover-section py-28 md:py-40 px-6 md:px-12 lg:px-24"
     >
       <div ref={contentRef} className="max-w-5xl mx-auto">
-        <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-8">02 — Page</p>
         <h2 ref={headingRef} className="stylish-header text-4xl md:text-5xl lg:text-6xl mb-12 soft-mask-reveal">
           <span className="bacalisties-script text-white text-5xl md:text-6xl lg:text-7xl">know</span>
-          <span className="urbanist-upper text-white">PICARVIEW</span>
+          <span className="about-brand-word text-white">picarview</span>
         </h2>
-        <div className="space-y-6 text-lg md:text-xl text-zinc-300 leading-relaxed">
-          <p className="text-2xl md:text-3xl text-white font-light leading-normal max-w-4xl">
-            We are your creative team, and our goal is to connect <strong>you</strong> with your audience through
-            creativity, innovation, and design.
+        <div className="space-y-6 text-zinc-300 leading-relaxed">
+          <p className="about-statement max-w-4xl">
+            We are your <em className="about-statement__accent about-statement__accent--creative">creative team</em>, and our goal is to connect{' '}
+            <em className="about-statement__accent about-statement__accent--you">you</em> with your{' '}
+            <em className="about-statement__accent about-statement__accent--audience">audience</em> through{' '}
+            <strong>creativity</strong>, <strong>innovation</strong>, and <strong>design</strong>.
           </p>
         </div>
       </div>
@@ -345,6 +346,14 @@ function GoalSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLHeadingElement>(null)
   const partners = useCmsItems('partner')
+  const partnerRowsBase = partners.length >= 6
+    ? [partners.slice(0, Math.ceil(partners.length / 2)), partners.slice(Math.ceil(partners.length / 2))]
+    : [partners]
+  const partnerRows = partnerRowsBase.map((row) => (
+    row.length === 0 || row.length >= 4
+      ? row
+      : Array.from({ length: Math.ceil(4 / row.length) }, () => row).flat()
+  ))
 
   useSoftMaskReveal(textRef, false)
 
@@ -366,53 +375,21 @@ function GoalSection() {
       )
 
       gsap.fromTo(
-        '.partners-statement__logos figure',
+        '.partners-statement__marquee',
         { opacity: 0, y: 42, rotate: (index) => index % 2 === 0 ? -2 : 2 },
         {
           opacity: 1,
           y: 0,
           rotate: 0,
           duration: 0.8,
-          stagger: 0.12,
+          stagger: 0.16,
           ease: 'power3.out',
           scrollTrigger: {
-            trigger: '.partners-statement__logos',
+            trigger: '.partners-statement__marquees',
             start: 'top 82%',
           },
         }
       )
-
-      // Give every partner mark its own quiet, continuous rhythm once visible.
-      // Animating the image (rather than the card) keeps the reveal and hover
-      // transforms independent, and pausing off-screen avoids wasted work.
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        gsap.utils
-          .toArray<HTMLImageElement>('.partners-statement__logos img')
-          .forEach((logo, index) => {
-            const motion = gsap.to(logo, {
-              x: index % 2 === 0 ? 4 : -4,
-              y: index % 2 === 0 ? -8 : 8,
-              rotation: index % 2 === 0 ? 1 : -1,
-              scale: 1.025,
-              duration: 3.2 + (index % 3) * 0.5,
-              delay: index * -0.55,
-              repeat: -1,
-              yoyo: true,
-              ease: 'sine.inOut',
-              paused: true,
-            })
-
-            ScrollTrigger.create({
-              trigger: logo.closest('figure'),
-              start: 'top 95%',
-              end: 'bottom 5%',
-              onEnter: () => motion.play(),
-              onEnterBack: () => motion.play(),
-              onLeave: () => motion.pause(),
-              onLeaveBack: () => motion.pause(),
-            })
-          })
-      }
     }, sectionRef)
 
     return () => ctx.revert()
@@ -425,31 +402,42 @@ function GoalSection() {
       className="partners-statement"
     >
       <div className="partners-statement__inner">
+        <p className="partners-statement__eyebrow">We are creative team</p>
         <h2
           ref={textRef}
           className="partners-statement__text soft-mask-reveal"
         >
-          We believe the best brands don&apos;t simply exist — they contribute. They inspire, solve problems, and create
-          lasting value. That&apos;s why we partner with purpose-driven brands to shape ideas, refine every detail, and
-          bring meaningful visions to life through creativity, innovation, and design.
+          We partner with purpose-driven brands to shape ideas, refine every detail.<br />
+          And bring meaningful visions to life through creativity.<br />
+          Innovation, and design.
         </h2>
         {partners.length > 0 && (
           <div className="partners-statement__showcase">
             <header>
-              <span>Selected partners</span>
+              <span>Partners</span>
               <span>{String(partners.length).padStart(2, '0')} collaborations</span>
             </header>
-            <div className="partners-statement__logos" aria-label="Picarview partners">
-              {partners.map((partner, index) => (
-                <figure key={partner.id}>
-                  <div className="partners-statement__logo-frame">
-                    <img src={partner.imageUrl} alt={partner.altText} loading="lazy" />
+            <div className="partners-statement__marquees" aria-label="Picarview partners">
+              {partnerRows.map((row, rowIndex) => (
+                <div className={`partners-statement__marquee partners-statement__marquee--${rowIndex % 2 === 0 ? 'left' : 'right'}`} key={`row-${rowIndex}`}>
+                  <div className="partners-statement__track">
+                    {[0, 1].map((copy) => (
+                      <div className="partners-statement__group" aria-hidden={copy === 1} key={`copy-${copy}`}>
+                        {row.map((partner, index) => (
+                          <figure key={`${copy}-${partner.id}-${index}`}>
+                            <div className="partners-statement__logo-frame">
+                              <img src={partner.imageUrl} alt={copy === 0 ? partner.altText : ''} loading="lazy" />
+                            </div>
+                            <figcaption>
+                              <span>{String(partners.findIndex((item) => item.id === partner.id) + 1).padStart(2, '0')}</span>
+                              <strong>{partner.title}</strong>
+                            </figcaption>
+                          </figure>
+                        ))}
+                      </div>
+                    ))}
                   </div>
-                  <figcaption>
-                    <span>{String(index + 1).padStart(2, '0')}</span>
-                    <strong>{partner.title}</strong>
-                  </figcaption>
-                </figure>
+                </div>
               ))}
             </div>
           </div>
@@ -916,8 +904,13 @@ function ContactSection() {
 
       <div className="contact-portal__inner">
         <div className="contact-portal__copy">
-          <p className="contact-portal__eyebrow">06 — Contact</p>
-          <h2>Let&apos;s create<br /><span>your view.</span></h2>
+          <h2 className="contact-portal__title" aria-label="Let's create your view">
+            <span className="contact-portal__title-line contact-portal__title-line--lets">Let&apos;s</span>
+            <span className="contact-portal__title-line contact-portal__title-line--create">create</span>
+            <span className="contact-portal__title-line contact-portal__title-line--your">
+              <span>your</span><em>view</em>
+            </span>
+          </h2>
           <p className="contact-portal__intro">
             Only a message away. We will build your idea with purpose, innovation, and make it fit.
           </p>

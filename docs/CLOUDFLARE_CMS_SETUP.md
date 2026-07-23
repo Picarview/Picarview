@@ -87,7 +87,7 @@ Open `/admin`, sign in, and upload a test partner logo and project image. Publis
 - The upload endpoint accepts PNG, JPG, WebP, and AVIF files up to 10 MB.
 - File signatures are checked server-side; changing an unsafe file's extension or MIME type is not sufficient.
 - Login attempts are limited to five failures per client IP in a 15-minute window.
-- Admin sessions use signed, `HttpOnly`, `Secure`, `SameSite=Strict` cookies with a 12-hour lifetime.
+- Admin sessions use signed, `HttpOnly`, `Secure`, `SameSite=Strict` cookies with a 30-minute inactivity timeout and an 8-hour absolute lifetime.
 - Global CSP, clickjacking, MIME-sniffing, referrer, browser-permission, and HTTPS headers are enabled.
 - The hero slot accepts a validated image up to 10 MB or MP4/WebM video up to 40 MB.
 - Hero videos are served with byte-range support and native browser streaming.
