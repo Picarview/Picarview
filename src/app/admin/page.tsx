@@ -274,6 +274,24 @@ export default function AdminPage() {
     await loadItems()
   }
 
+  async function changePublicationState(item: AdminItem, publish: boolean) {
+    setBusy(true)
+    setMessage('')
+    const response = await fetch('/api/admin/items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: item.id, action: publish ? 'publish' : 'unpublish' }),
+    })
+    const data = await readAdminResponse(response)
+    setBusy(false)
+    if (!response.ok) {
+      setMessage(data.error ?? `Unable to ${publish ? 'publish' : 'move'} this entry.`)
+      return
+    }
+    setMessage(publish ? `${item.title} is now published.` : `${item.title} moved to drafts.`)
+    await loadItems()
+  }
+
   async function updateProject(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!editTarget) return
@@ -709,6 +727,7 @@ export default function AdminPage() {
                         </>
                       ) : item.type === 'project' ? (
                         <>
+                          {!item.published && <button className="is-publish" onClick={() => void changePublicationState(item, true)} disabled={busy}>Publish now</button>}
                           {activeView === 'project-library' && (
                             <button className={item.pinned ? 'is-pinned' : ''} onClick={() => void changeProjectState(item, item.pinned ? 'unpin' : 'pin')} disabled={busy}>
                               {item.pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
@@ -719,7 +738,10 @@ export default function AdminPage() {
                           <button onClick={() => void changeProjectState(item, 'archive')} disabled={busy}><Archive className="h-4 w-4" /> Archive project</button>
                         </>
                       ) : (
-                        <button className="is-danger" onClick={() => setDeleteTarget(item)} disabled={busy}><Trash2 className="h-4 w-4" /> Delete</button>
+                        <>
+                          {!item.published && <button className="is-publish" onClick={() => void changePublicationState(item, true)} disabled={busy}>Publish now</button>}
+                          <button className="is-danger" onClick={() => setDeleteTarget(item)} disabled={busy}><Trash2 className="h-4 w-4" /> Delete</button>
+                        </>
                       )}
                     </div>
                   </article>

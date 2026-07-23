@@ -2648,6 +2648,7 @@ body {
   text-transform: uppercase;
 }
 .admin-item__actions button:hover { background: #b9ff32; }
+.admin-item__actions button.is-publish { background: #b9ff32; }
 .admin-item__actions button.is-pinned { background: #ffdc4a; }
 .admin-item__actions button.is-danger:hover { color: #fff; background: #111; }
 .admin-view-more {
@@ -3625,30 +3626,49 @@ body {
 
 .project-archive__aura i {
   opacity: 0.38;
-  animation: archive-aura-drift 16s ease-in-out infinite alternate;
+  will-change: transform, opacity;
 }
 
-.project-archive__aura i:last-child { animation-delay: -7s; }
+.project-archive__aura i:first-child {
+  animation: archive-aura-drift-left 18s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
 
-@keyframes archive-aura-drift {
-  to { transform: translate3d(8vw, 5vh, 0) scale(1.12); }
+.project-archive__aura i:last-child {
+  animation: archive-aura-drift-right 22s cubic-bezier(0.45, 0.05, 0.55, 0.95) -9s infinite alternate;
+}
+
+@keyframes archive-aura-drift-left {
+  0% { opacity: 0.3; transform: translate3d(-5vw, -4vh, 0) scale(0.92) rotate(-6deg); }
+  48% { opacity: 0.48; transform: translate3d(7vw, 8vh, 0) scale(1.12) rotate(5deg); }
+  100% { opacity: 0.34; transform: translate3d(13vw, -1vh, 0) scale(1.02) rotate(10deg); }
+}
+
+@keyframes archive-aura-drift-right {
+  0% { opacity: 0.32; transform: translate3d(7vw, 7vh, 0) scale(1.08) rotate(7deg); }
+  52% { opacity: 0.5; transform: translate3d(-8vw, -5vh, 0) scale(0.94) rotate(-5deg); }
+  100% { opacity: 0.36; transform: translate3d(-13vw, 4vh, 0) scale(1.14) rotate(-10deg); }
 }
 
 .project-archive__intro h1 {
-  max-width: 12ch;
+  margin-top: 0;
+  max-width: none;
   font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', var(--font-urbanist-black), sans-serif;
-  font-size: clamp(5.2rem, 14vw, 14rem);
-  line-height: 0.69;
+  font-size: clamp(4.4rem, 9.4vw, 9.5rem);
+  line-height: 0.78;
   letter-spacing: -0.045em;
+  white-space: nowrap;
 }
 
 .project-archive__intro h1 span {
   display: block;
-  margin-top: 0.35em;
-  font-family: var(--font-urbanist-bold);
-  font-size: 0.22em;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  margin-top: 0.3em;
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 0.34em;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  text-transform: none;
 }
 
 .project-archive__grid {
@@ -4282,14 +4302,15 @@ body {
   .project-archive { padding: 1rem; }
   .project-archive__intro { margin-top: 4rem; }
   .project-archive__intro h1 {
-    max-width: 7ch;
-    font-size: clamp(3.6rem, 17vw, 4.7rem);
-    line-height: 0.75;
+    max-width: 9ch;
+    font-size: clamp(3.1rem, 15vw, 4.4rem);
+    line-height: 0.82;
+    white-space: normal;
   }
   .project-archive__intro h1 span {
-    margin-top: 0.55rem;
-    font-size: 0.2em;
-    line-height: 1.1;
+    margin-top: 0.7rem;
+    font-size: 0.36em;
+    line-height: 1;
     white-space: nowrap;
   }
   .project-archive__intro > div { margin-top: 1.5rem; font-size: 0.82rem; }

@@ -95,6 +95,11 @@ export async function PATCH(request: Request) {
       .bind(action === 'pin' ? 1 : 0, id, 'project').run()
     return NextResponse.json({ ok: true })
   }
+  if (action === 'publish' || action === 'unpublish') {
+    await CMS_DB.prepare('UPDATE content_items SET published = ? WHERE id = ? AND archived = 0')
+      .bind(action === 'publish' ? 1 : 0, id).run()
+    return NextResponse.json({ ok: true })
+  }
   if (action === 'add-images') {
     if (!submittedForm || !CMS_MEDIA) return NextResponse.json({ error: 'Media storage is not configured.' }, { status: 503 })
     const files = submittedForm.getAll('images').filter((entry): entry is File => entry instanceof File && entry.size > 0)

@@ -79,10 +79,9 @@ export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }
       <header className="project-archive__header">
         <Link href="/#work" className="project-archive__back"><ArrowLeft className="h-4 w-4" />Back to Picarview</Link>
         <div className="project-archive__intro">
-          <p>Project archive · {String(projects.length).padStart(2, '0')}</p>
-          <h1>Every view.<br /><span>One archive.</span></h1>
+          <h1>Welcome to our studio<span>get inspired</span></h1>
           <div>
-            <p>A growing collection of identities, campaigns, visual systems, and images created with intention.</p>
+            <p>Selected work shaped through creativity, innovation, and design.</p>
             <span>{projects.length} projects and counting</span>
           </div>
         </div>
