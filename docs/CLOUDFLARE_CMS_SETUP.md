@@ -9,15 +9,15 @@ The CMS uses:
 ## 1. Authenticate Wrangler
 
 ```bash
-npx wrangler login
-npx wrangler whoami
+pnpm exec wrangler login
+pnpm exec wrangler whoami
 ```
 
 ## 2. Create the Cloudflare resources
 
 ```bash
-npx wrangler d1 create picarview-cms
-npx wrangler r2 bucket create picarview-media
+pnpm exec wrangler d1 create picarview-cms
+pnpm exec wrangler r2 bucket create picarview-media
 ```
 
 Copy the `database_id` returned by the D1 command into `wrangler.jsonc`:
@@ -44,20 +44,20 @@ Never invent or reuse a database ID. Use the exact ID returned by Cloudflare.
 ## 3. Apply the database migration
 
 ```bash
-npx wrangler d1 migrations apply picarview-cms --remote
+pnpm exec wrangler d1 migrations apply picarview-cms --remote
 ```
 
 For local-only testing:
 
 ```bash
-npx wrangler d1 migrations apply picarview-cms --local
+pnpm exec wrangler d1 migrations apply picarview-cms --local
 ```
 
 ## 4. Set production secrets
 
 ```bash
-npx wrangler secret put ADMIN_PASSWORD
-npx wrangler secret put ADMIN_SESSION_SECRET
+pnpm exec wrangler secret put ADMIN_PASSWORD
+pnpm exec wrangler secret put ADMIN_SESSION_SECRET
 ```
 
 Use a unique admin password. Generate the session secret with a password manager or:
@@ -71,8 +71,8 @@ For local development, copy `.dev.vars.example` to `.dev.vars` and replace both 
 ## 5. Build and deploy
 
 ```bash
-npm run build
-npx opennextjs-cloudflare deploy
+pnpm run build
+pnpm exec opennextjs-cloudflare deploy
 ```
 
 Open `/admin`, sign in, and upload a test partner logo and project image. Published content appears automatically on the website.

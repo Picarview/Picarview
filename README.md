@@ -69,22 +69,25 @@ Picarview/
 ## Prerequisites
 
 - Node.js 20 or newer
-- npm
+- pnpm 10.32.1
 - A Cloudflare account with Workers, D1, and R2 enabled
 - Wrangler authentication for production operations
 
 Install dependencies:
 
 ```bash
-npm install
+pnpm install --frozen-lockfile
 ```
+
+The repository is pnpm-only: its pnpm version is pinned in `package.json`, its
+lockfile is committed, and installation with another package manager is rejected.
 
 ## Local development
 
 ### Public website only
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Open <http://localhost:3000>.
@@ -115,13 +118,13 @@ openssl rand -hex 32
 Apply the D1 migrations to local Wrangler storage:
 
 ```bash
-npx wrangler d1 migrations apply picarview-cms --local
+pnpm exec wrangler d1 migrations apply picarview-cms --local
 ```
 
 Then start the app:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Open <http://localhost:3000/admin>.
@@ -133,7 +136,7 @@ Open <http://localhost:3000/admin>.
 To use a specific preview port:
 
 ```bash
-npm run dev -- --hostname 0.0.0.0 --port 8976
+pnpm run dev -- --hostname 0.0.0.0 --port 8976
 ```
 
 Set port `8976` to **Public** in the Codespaces Ports panel if the preview must be accessible outside your account. An `app.github.dev` URL is only a proxy to the running Codespace; the development server must remain active.
@@ -145,7 +148,7 @@ An HTTP 504 from a Codespaces preview normally means nothing is listening on the
 Do not manually maintain the generated JSON lists.
 
 ```bash
-npm run generate:manifests
+pnpm run generate:manifests
 ```
 
 This scans:
@@ -153,7 +156,7 @@ This scans:
 - `public/hero/` and writes `src/generated/hero-frames.json`
 - repository project images and writes `src/generated/project-images.json`
 
-`npm run dev` and `npm run build` run this automatically.
+`pnpm run dev` and `pnpm run build` run this automatically.
 
 ## CMS behavior
 
@@ -204,15 +207,15 @@ The production resources already exist. These commands are only for a fresh Clou
 Authenticate:
 
 ```bash
-npx wrangler login
-npx wrangler whoami
+pnpm exec wrangler login
+pnpm exec wrangler whoami
 ```
 
 Create storage:
 
 ```bash
-npx wrangler d1 create picarview-cms
-npx wrangler r2 bucket create picarview-media
+pnpm exec wrangler d1 create picarview-cms
+pnpm exec wrangler r2 bucket create picarview-media
 ```
 
 Copy the exact D1 `database_id` returned by Cloudflare into `wrangler.jsonc`. Never invent or copy an ID from another account.
@@ -220,14 +223,14 @@ Copy the exact D1 `database_id` returned by Cloudflare into `wrangler.jsonc`. Ne
 Apply all production migrations:
 
 ```bash
-npx wrangler d1 migrations apply picarview-cms --remote
+pnpm exec wrangler d1 migrations apply picarview-cms --remote
 ```
 
 Set production secrets interactively:
 
 ```bash
-npx wrangler secret put ADMIN_PASSWORD
-npx wrangler secret put ADMIN_SESSION_SECRET
+pnpm exec wrangler secret put ADMIN_PASSWORD
+pnpm exec wrangler secret put ADMIN_SESSION_SECRET
 ```
 
 Do not put secret values in command arguments, GitHub commits, screenshots, or chat messages.
@@ -235,7 +238,7 @@ Do not put secret values in command arguments, GitHub commits, screenshots, or c
 Generate Cloudflare binding types after changing `wrangler.jsonc`:
 
 ```bash
-npx wrangler types --env-interface CloudflareEnv
+pnpm exec wrangler types --env-interface CloudflareEnv
 ```
 
 ## Build and validation workflow
@@ -243,13 +246,13 @@ npx wrangler types --env-interface CloudflareEnv
 Run the type check:
 
 ```bash
-npx tsc --noEmit --pretty false
+pnpm exec tsc --noEmit --pretty false
 ```
 
 Run the complete production build:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 The build performs:
@@ -262,11 +265,11 @@ The build performs:
 Useful scripts:
 
 ```bash
-npm run dev
-npm run build
-npm run build:cloudflare
-npm run preview:cloudflare
-npm run deploy:cloudflare
+pnpm run dev
+pnpm run build
+pnpm run build:cloudflare
+pnpm run preview:cloudflare
+pnpm run deploy:cloudflare
 ```
 
 ## Production deployment
@@ -274,13 +277,13 @@ npm run deploy:cloudflare
 ### Full build and deployment
 
 ```bash
-npm run deploy:cloudflare
+pnpm run deploy:cloudflare
 ```
 
 ### Deploy an already verified `.open-next` build
 
 ```bash
-npx opennextjs-cloudflare deploy
+pnpm exec opennextjs-cloudflare deploy
 ```
 
 Prefer the OpenNext deployment command. It uploads static assets, the Worker bundle, routes, and bindings in the format expected by the adapter.
@@ -330,8 +333,8 @@ Before pushing:
 ```bash
 git status
 git diff --check
-npx tsc --noEmit --pretty false
-npm run build
+pnpm exec tsc --noEmit --pretty false
+pnpm run build
 ```
 
 Commit and push:
@@ -355,9 +358,9 @@ Migration history:
 When adding a schema change:
 
 ```bash
-npx wrangler d1 migrations create picarview-cms descriptive_name
-npx wrangler d1 migrations apply picarview-cms --local
-npx wrangler d1 migrations apply picarview-cms --remote
+pnpm exec wrangler d1 migrations create picarview-cms descriptive_name
+pnpm exec wrangler d1 migrations apply picarview-cms --local
+pnpm exec wrangler d1 migrations apply picarview-cms --remote
 ```
 
 Never edit a migration that has already run in production. Add a new numbered migration.
@@ -462,17 +465,17 @@ Stop the development server, remove the stale `.next` build output, and restart.
 Check:
 
 ```bash
-npx wrangler whoami
-npx wrangler d1 list
-npx wrangler r2 bucket list
-npx wrangler secret list
+pnpm exec wrangler whoami
+pnpm exec wrangler d1 list
+pnpm exec wrangler r2 bucket list
+pnpm exec wrangler secret list
 ```
 
 Confirm the binding names remain exactly `CMS_DB` and `CMS_MEDIA`.
 
 ### Admin works live but not locally
 
-Create `.dev.vars`, apply migrations with `--local`, and restart `npm run dev`. Production secrets are not copied into local development automatically.
+Create `.dev.vars`, apply migrations with `--local`, and restart `pnpm run dev`. Production secrets are not copied into local development automatically.
 
 ### Upload appears slow
 
