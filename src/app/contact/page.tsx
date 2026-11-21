@@ -25,7 +25,7 @@ export default function ContactPage() {
 
       <nav className="contact-page__nav">
         <Link href="/" aria-label="Picarview home">
-          <Image src="/images/Black.png" alt="Picarview" width={2268} height={513} className="h-10 w-auto invert" priority />
+          <Image src="/images/logo.webp" alt="Picarview" width={900} height={204} className="h-10 w-auto invert" priority />
         </Link>
         <Link href="/" className="contact-page__back">
           <ArrowLeft className="h-4 w-4" />

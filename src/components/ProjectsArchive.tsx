@@ -1,204 +1,147 @@
 'use client'
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { useLenis } from 'lenis/react'
+import { useMemo, useRef, useState, type CSSProperties, type MouseEvent } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, ArrowUpRight, ChevronLeft, ChevronRight, X } from 'lucide-react'
-import { useCmsItems } from '@/hooks/useCmsItems'
+import { ArrowUpRight, LayoutGrid, List } from 'lucide-react'
+import type { Project } from '@/data/projects'
+import { SiteFooter } from '@/components/SiteFooter'
+import { ProjectCard } from '@/components/ProjectDetail'
 
-const accents = ['#ffb000', '#b9ff32', '#ff4fa3', '#22d9ee']
-const disciplines = ['Identity', 'Campaign', 'Image-making', 'Art direction']
+type View = 'grid' | 'list'
 
-export function ProjectsArchive({ fallbackImages }: { fallbackImages: string[] }) {
-  const lenis = useLenis()
-  const cmsProjects = useCmsItems('project')
-  const [activeIndex, setActiveIndex] = useState<number | null>(null)
-  const [activeImageIndex, setActiveImageIndex] = useState(0)
+export function ProjectsArchive({ projects }: { projects: Project[] }) {
   const [industry, setIndustry] = useState('All')
-  const projects = cmsProjects.length > 0
-    ? cmsProjects
-    : fallbackImages.map((imageUrl, index) => ({
-        id: `fallback-${index + 1}`,
-        imageUrl,
-        images: [{ id: `fallback-image-${index + 1}`, imageUrl, altText: `Picarview project ${index + 1}`, sortOrder: 0 }],
-        title: `Picarview project ${index + 1}`,
-        subtitle: disciplines[index % disciplines.length],
-        description: 'A selected Picarview project shaped with purpose, clarity, and a visual direction designed to connect the idea with its audience.',
-        industry: disciplines[index % disciplines.length],
-        altText: `Picarview project ${index + 1}`,
-      }))
-  const industries = useMemo(() => ['All', ...new Set(projects.map((project) => project.industry || 'General'))], [projects])
-  const visibleProjects = industry === 'All' ? projects : projects.filter((project) => (project.industry || 'General') === industry)
+  const [view, setView] = useState<View>('grid')
+  const [preview, setPreview] = useState<Project | null>(null)
+  const previewRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => { setActiveIndex(null); setActiveImageIndex(0) }, [industry])
-  useEffect(() => { setActiveImageIndex(0) }, [activeIndex])
+  const industries = useMemo(() => {
+    const counts = new Map<string, number>()
+    projects.forEach((project) => counts.set(project.industry, (counts.get(project.industry) ?? 0) + 1))
+    return [['All', projects.length] as const, ...[...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]))]
+  }, [projects])
 
-  useEffect(() => {
-    if (activeIndex === null) return
-    const scrollY = window.scrollY
-    const previousOverflow = document.body.style.overflow
-    const previousHtmlOverflow = document.documentElement.style.overflow
-    const previousPosition = document.body.style.position
-    const previousTop = document.body.style.top
-    const previousWidth = document.body.style.width
-    lenis?.stop()
-    document.body.classList.add('project-viewer-open')
-    document.documentElement.style.overflow = 'hidden'
-    document.body.style.overflow = 'hidden'
-    document.body.style.position = 'fixed'
-    document.body.style.top = `-${scrollY}px`
-    document.body.style.width = '100%'
+  const visible = industry === 'All' ? projects : projects.filter((project) => project.industry === industry)
 
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setActiveIndex(null)
-      if (event.key === 'ArrowLeft') setActiveIndex((index) => index === null ? null : (index - 1 + visibleProjects.length) % visibleProjects.length)
-      if (event.key === 'ArrowRight') setActiveIndex((index) => index === null ? null : (index + 1) % visibleProjects.length)
-    }
-    window.addEventListener('keydown', handleKey)
-    return () => {
-      document.body.classList.remove('project-viewer-open')
-      document.documentElement.style.overflow = previousHtmlOverflow
-      document.body.style.overflow = previousOverflow
-      document.body.style.position = previousPosition
-      document.body.style.top = previousTop
-      document.body.style.width = previousWidth
-      window.scrollTo(0, scrollY)
-      lenis?.start()
-      window.removeEventListener('keydown', handleKey)
-    }
-  }, [activeIndex, lenis, visibleProjects.length])
-
-  const activeProject = activeIndex === null ? null : visibleProjects[activeIndex]
-  const activeProjectImages = activeProject?.images?.length ? activeProject.images : activeProject ? [{ id: `${activeProject.id}-cover`, imageUrl: activeProject.imageUrl, altText: activeProject.altText, sortOrder: 0 }] : []
-  const activeProjectImage = activeProjectImages[activeImageIndex] ?? activeProjectImages[0]
+  // The list view's floating preview follows the pointer without re-rendering.
+  const movePreview = (event: MouseEvent) => {
+    const node = previewRef.current
+    if (!node) return
+    node.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0) translate(-50%, -50%)`
+  }
 
   return (
-    <main className="project-archive">
-      <div className="project-archive__aura" aria-hidden="true"><i /><i /></div>
-      <header className="project-archive__header">
-        <Link href="/#work" className="project-archive__back"><ArrowLeft className="h-4 w-4" />Back to Picarview</Link>
-        <div className="project-archive__intro">
-          <h1>Welcome to our studio<span>get inspired</span></h1>
-          <div>
-            <p>Selected work shaped through creativity, innovation, and design.</p>
-            <span>{projects.length} projects and counting</span>
-          </div>
+    <main className="work-index">
+      <header className="work-index__header">
+        <p className="work-index__eyebrow">
+          <span>Our work</span>
+          <span>({String(projects.length).padStart(2, '0')})</span>
+        </p>
+        <h1 className="work-index__title">
+          Selected <em>work</em>
+        </h1>
+        <div className="work-index__intro">
+          <p>
+            Identities, campaigns and image-making for brands that want to be <em>seen</em> — and remembered.
+          </p>
+          <Link href="/contact" className="work-index__intro-link">
+            Start a project <ArrowUpRight className="h-4 w-4" />
+          </Link>
         </div>
       </header>
 
-      <nav className="project-archive__filters" aria-label="Filter projects by industry">
-        <span>Filter by industry</span>
-        <label>
-          <span className="sr-only">Choose an industry</span>
-          <select value={industry} onChange={(event) => setIndustry(event.target.value)}>
-            {industries.map((name) => <option value={name} key={name}>{name} ({name === 'All' ? projects.length : projects.filter((project) => (project.industry || 'General') === name).length})</option>)}
-          </select>
-        </label>
-        <div>
-          {industries.map((name) => (
-            <button type="button" className={industry === name ? 'is-active' : ''} onClick={() => setIndustry(name)} aria-pressed={industry === name} key={name}>
-              {name}<i>{name === 'All' ? projects.length : projects.filter((project) => (project.industry || 'General') === name).length}</i>
-            </button>
+      <div className="work-index__toolbar">
+        <nav className="work-index__filters" aria-label="Filter projects by industry">
+          <span className="work-index__filters-label">Filter by industry</span>
+          <div className="work-index__chips">
+            {industries.map(([name, count]) => (
+              <button
+                type="button"
+                key={name}
+                className={industry === name ? 'is-active' : ''}
+                aria-pressed={industry === name}
+                onClick={() => setIndustry(name)}
+              >
+                {name}<sup>{count}</sup>
+              </button>
+            ))}
+          </div>
+          <label className="work-index__select">
+            <span className="sr-only">Choose an industry</span>
+            <select value={industry} onChange={(event) => setIndustry(event.target.value)}>
+              {industries.map(([name, count]) => <option value={name} key={name}>{name} ({count})</option>)}
+            </select>
+          </label>
+        </nav>
+        <div className="work-index__views" role="group" aria-label="Layout">
+          <button type="button" className={view === 'grid' ? 'is-active' : ''} aria-pressed={view === 'grid'} onClick={() => setView('grid')}>
+            <LayoutGrid className="h-4 w-4" /><span>Grid</span>
+          </button>
+          <button type="button" className={view === 'list' ? 'is-active' : ''} aria-pressed={view === 'list'} onClick={() => setView('list')}>
+            <List className="h-4 w-4" /><span>Index</span>
+          </button>
+        </div>
+      </div>
+
+      {view === 'grid' ? (
+        <div className="work-index__wrap">
+          {industry === 'All' && visible.length > 2 && (
+            <section className="work-featured" aria-label="Featured projects">
+              {visible.slice(0, 2).map((project) => <ProjectCard project={project} feature priority key={project.slug} />)}
+            </section>
+          )}
+          <section className="work-grid" aria-label="Projects">
+            {(industry === 'All' && visible.length > 2 ? visible.slice(2) : visible).map((project, index) => (
+              <ProjectCard project={project} priority={index < 3} key={project.slug} />
+            ))}
+          </section>
+        </div>
+      ) : (
+        <section className="work-list" aria-label="Projects" onMouseMove={movePreview} onMouseLeave={() => setPreview(null)}>
+          <div className="work-list__head" aria-hidden="true">
+            <span>No.</span><span>Project</span><span>Industry</span><span>Services</span><span>Year</span>
+          </div>
+          {visible.map((project, index) => (
+            <Link
+              href={`/projects/${project.slug}`}
+              className="work-list__row"
+              style={{ '--accent': project.accent } as CSSProperties}
+              onMouseEnter={() => setPreview(project)}
+              onFocus={() => setPreview(project)}
+              key={project.slug}
+            >
+              <span className="work-list__index">{String(index + 1).padStart(2, '0')}</span>
+              <span className="work-list__title">{project.title}<em>{project.client}</em></span>
+              <span className="work-list__industry">{project.industry}</span>
+              <span className="work-list__services">{project.services.slice(0, 2).join(', ')}</span>
+              <span className="work-list__year">{project.year}<ArrowUpRight className="h-4 w-4" /></span>
+            </Link>
           ))}
-        </div>
-      </nav>
-
-      <section className="project-archive__grid" aria-label="All Picarview projects">
-        {visibleProjects.map((project, index) => (
-          <button
-            type="button"
-            className="project-archive__card"
-            style={{ backgroundColor: accents[index % accents.length] }}
-            onClick={() => setActiveIndex(index)}
-            aria-label={`View ${project.title}`}
-            key={project.id}
+          <div
+            ref={previewRef}
+            className={`work-list__preview ${preview ? 'is-visible' : ''}`}
+            style={{ '--surface': preview?.surface ?? '#111' } as CSSProperties}
+            aria-hidden="true"
           >
-            <div className="project-archive__image">
-              <Image src={project.imageUrl} alt={project.altText} fill unoptimized={project.imageUrl.startsWith('/api/')} sizes="(max-width: 560px) 45vw, (max-width: 900px) 44vw, 30vw" className="object-cover" />
-            </div>
-            <div className="project-archive__card-footer">
-              <span>{String(index + 1).padStart(2, '0')} / {String(visibleProjects.length).padStart(2, '0')}</span>
-              <strong>{project.industry || 'General'}</strong>
-              <ArrowUpRight className="h-4 w-4" />
-            </div>
-          </button>
-        ))}
-      </section>
-
-      <footer className="project-archive__footer">
-        <span>Picarview®</span><p>The archive grows with the practice.</p>
-        <Link href="/contact">Start a project <ArrowUpRight className="h-4 w-4" /></Link>
-      </footer>
-
-      {activeProject && activeIndex !== null && (
-        <div
-          className="project-viewer"
-          role="dialog"
-          aria-modal="true"
-          aria-label={`${activeProject.title} project viewer`}
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setActiveIndex(null)
-          }}
-        >
-          <button className="project-viewer__close" onClick={() => setActiveIndex(null)} aria-label="Close project viewer">
-            <X className="h-5 w-5" />
-          </button>
-          <button
-            className="project-viewer__nav project-viewer__nav--previous"
-            onClick={() => setActiveIndex((activeIndex - 1 + visibleProjects.length) % visibleProjects.length)}
-            aria-label="Previous project"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-          <article
-            className="project-viewer__card"
-            data-lenis-prevent
-            data-lenis-prevent-wheel
-            data-lenis-prevent-touch
-            style={{ '--viewer-accent': accents[activeIndex % accents.length] } as CSSProperties}
-          >
-            <div className="project-viewer__image">
+            {visible.map((project) => (
               <Image
-                src={activeProjectImage.imageUrl}
-                alt={activeProjectImage.altText || activeProject.altText}
+                key={project.slug}
+                src={project.cover}
+                alt=""
                 fill
-                priority
-                unoptimized={activeProjectImage.imageUrl.startsWith('/api/')}
-                sizes="94vw"
-                className="object-contain"
+                sizes="320px"
+                unoptimized={project.cover.startsWith('/api/')}
+                className={`${preview?.slug === project.slug ? 'is-active' : ''} work-list__preview-img--${project.coverFit}`}
               />
-            </div>
-            <footer>
-              <div><span>{String(activeIndex + 1).padStart(2, '0')} / {String(visibleProjects.length).padStart(2, '0')}</span><h2>{activeProject.title}</h2></div>
-              <strong>{activeProject.industry || 'General'}</strong>
-            </footer>
-            <div className="project-viewer__description">
-              <span>About the project</span>
-              <p>
-                {activeProject.description || 'A Picarview project shaped with purpose, clarity, and a visual direction designed to connect the idea with its audience.'}
-              </p>
-              {activeProjectImages.length > 1 && (
-                <div className="project-viewer__gallery" aria-label="Project image gallery">
-                  {activeProjectImages.map((projectImage, imageIndex) => (
-                    <button type="button" className={activeImageIndex === imageIndex ? 'is-active' : ''} onClick={() => setActiveImageIndex(imageIndex)} aria-label={`Show project image ${imageIndex + 1}`} key={projectImage.id}>
-                      <Image src={projectImage.imageUrl} alt="" fill sizes="90px" className="object-cover" unoptimized={projectImage.imageUrl.startsWith('/api/')} />
-                      <span>{String(imageIndex + 1).padStart(2, '0')}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </article>
-          <button
-            className="project-viewer__nav project-viewer__nav--next"
-            onClick={() => setActiveIndex((activeIndex + 1) % visibleProjects.length)}
-            aria-label="Next project"
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
-        </div>
+            ))}
+          </div>
+        </section>
       )}
+
+      {visible.length === 0 && <p className="work-index__empty">No projects in this industry yet.</p>}
+
+      <SiteFooter />
     </main>
   )
 }

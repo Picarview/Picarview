@@ -32,7 +32,7 @@ export async function LegalPage({ slug, missingTitle, preview = false }: { slug:
   return (
     <main className="legal-page">
       <nav className="legal-page__nav">
-        <Link href="/" aria-label="Picarview home"><Image src="/images/Black.png" alt="Picarview" width={2268} height={513} priority /></Link>
+        <Link href="/" aria-label="Picarview home"><Image src="/images/logo.webp" alt="Picarview" width={900} height={204} priority /></Link>
         <Link href="/"><ArrowLeft className="h-4 w-4" /> Back home</Link>
       </nav>
       <article className="legal-page__document">
