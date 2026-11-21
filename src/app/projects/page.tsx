@@ -1,21 +1,30 @@
 import type { Metadata } from 'next'
-import projectImages from '@/generated/project-images.json'
+import { Navbar } from '@/components/Navbar'
 import { ProjectsArchive } from '@/components/ProjectsArchive'
+import { getSiteProjects } from '@/lib/site-projects'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Selected Projects',
-  description: 'Explore the complete Picarview archive of visual design, campaigns, and image-making.',
+  title: 'Our Work',
+  description: 'Selected Picarview projects across brand identity, campaigns, art direction and image-making.',
   alternates: {
     canonical: '/projects',
   },
   openGraph: {
-    title: 'Selected Projects | Picarview',
-    description: 'Explore Picarview projects across visual design, campaigns, brand expression, and image-making.',
+    title: 'Our Work | Picarview',
+    description: 'Selected Picarview projects across brand identity, campaigns, art direction and image-making.',
     url: '/projects',
     type: 'website',
   },
 }
 
-export default function ProjectsPage() {
-  return <ProjectsArchive fallbackImages={projectImages} />
+export default async function ProjectsPage() {
+  const projects = await getSiteProjects()
+  return (
+    <>
+      <Navbar />
+      <ProjectsArchive projects={projects} />
+    </>
+  )
 }

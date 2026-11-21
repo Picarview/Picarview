@@ -499,7 +499,7 @@ export default function AdminPage() {
       <main className="admin-shell admin-shell--center">
         <form className="admin-login" onSubmit={login}>
           <Link href="/" className="admin-login__logo" aria-label="Picarview home">
-            <Image src="/images/Black.png" alt="Picarview" width={2268} height={513} priority />
+            <Image src="/images/logo.webp" alt="Picarview" width={900} height={204} priority />
           </Link>
           <h1>Workspace access</h1>
           <label>
@@ -518,7 +518,7 @@ export default function AdminPage() {
     <main className="admin-shell admin-shell--dashboard">
       <aside className="admin-sidebar">
         <div className="admin-sidebar__brand">
-          <Image src="/images/Black.png" alt="Picarview" width={2268} height={513} className="admin-sidebar__logo" priority />
+          <Image src="/images/logo.webp" alt="Picarview" width={900} height={204} className="admin-sidebar__logo" priority />
           <div><strong>Workspace</strong><small>Content management</small></div>
         </div>
         <nav aria-label="Dashboard navigation">

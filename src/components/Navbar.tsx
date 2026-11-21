@@ -1,155 +1,138 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Menu, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useLenis } from 'lenis/react'
+import { ArrowUpRight } from 'lucide-react'
 
-gsap.registerPlugin(ScrollTrigger)
+const menuLinks = [
+  { name: 'Home', href: '/', image: '/images/work1.webp', note: 'Create your view' },
+  { name: 'Work', href: '/projects', image: '/images/work3.webp', note: 'Selected projects' },
+  { name: 'About', href: '/#about', image: '/images/img3.webp', note: 'The studio' },
+  { name: 'Services', href: '/#services', image: '/images/img1.webp', note: 'What we make' },
+  { name: 'Contact', href: '/contact', image: '/images/img4.webp', note: 'Start a project' },
+]
+
+const quickLinks = [
+  { name: 'Start a project', href: '/contact' },
+  { name: 'All projects', href: '/projects' },
+]
 
 export function Navbar() {
-  const navRef = useRef<HTMLElement>(null)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [navTheme, setNavTheme] = useState<'dark' | 'light'>('dark')
+  const [isOpen, setIsOpen] = useState(false)
+  const [hovered, setHovered] = useState(0)
+  const pathname = usePathname()
+  const lenis = useLenis()
+  const toggleRef = useRef<HTMLButtonElement>(null)
+
+  // Close on route change.
+  useEffect(() => { setIsOpen(false) }, [pathname])
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Fade in navbar
-      gsap.fromTo(
-        navRef.current,
-        { y: -100, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, ease: 'power3.out', delay: 0.3 }
-      )
-
-    }, navRef)
-
-    return () => ctx.revert()
-  }, [])
-
-  // Separate effect for theme switching - runs after content is mounted
-  useEffect(() => {
-    // Delay to ensure all sections are rendered
-    const timer = setTimeout(() => {
-      const sections = document.querySelectorAll('[data-theme]')
-      
-      console.log('Found sections with data-theme:', sections.length)
-      
-      sections.forEach((section) => {
-        ScrollTrigger.create({
-          trigger: section as HTMLElement,
-          start: 'top top',
-          end: 'bottom top',
-          onEnter: () => {
-            const theme = section.getAttribute('data-theme')
-            console.log('Entering section with theme:', theme)
-            setNavTheme(theme === 'light' ? 'light' : 'dark')
-          },
-          onEnterBack: () => {
-            const theme = section.getAttribute('data-theme')
-            console.log('Entering back section with theme:', theme)
-            setNavTheme(theme === 'light' ? 'light' : 'dark')
-          },
-        })
-      })
-    }, 1000)
-
-    return () => {
-      clearTimeout(timer)
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+    if (!isOpen) return
+    lenis?.stop()
+    const previousOverflow = document.documentElement.style.overflow
+    document.documentElement.style.overflow = 'hidden'
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false)
+        toggleRef.current?.focus()
+      }
     }
-  }, [])
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.documentElement.style.overflow = previousOverflow
+      lenis?.start()
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [isOpen, lenis])
 
-  const navLinks = [
-    { name: 'About', href: '#about' },
-    { name: 'Services', href: '#services' },
-    { name: 'Our Works', href: '#work' },
-    { name: 'Contact', href: '/contact' },
-  ]
+  const activeIndex = menuLinks.findIndex((link) => link.href === pathname || (link.href === '/projects' && pathname.startsWith('/projects')))
 
   return (
     <>
-      <Link
-        href="/"
-        className="fixed left-6 top-4 z-50 mix-blend-difference"
-        aria-label="Picarview home"
-      >
-        <div className="relative h-8 w-32 md:h-10 md:w-36">
-          <Image
-            src="/images/Black.png"
-            alt="Picarview Logo"
-            fill
-            sizes="(max-width: 768px) 128px, 144px"
-            className="object-contain invert"
-            priority
-          />
-        </div>
-      </Link>
-
-      <nav
-        ref={navRef}
-        className="fixed top-4 right-6 z-50 rounded-full border border-white/15 bg-white/10 backdrop-blur-md px-4 md:px-6 py-2.5 md:py-3"
-      >
-        <div className="flex items-center justify-between">
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className={`text-[0.65rem] uppercase tracking-[0.22em] transition-colors duration-300 ease-in-out ${
-                  navTheme === 'light' 
-                    ? 'text-zinc-700 hover:text-black' 
-                    : 'text-zinc-200 hover:text-white'
-                }`}
-              >
-                {link.name}
-              </a>
-            ))}
-          </div>
-
-          {/* Mobile Menu Button */}
+      <header className={`site-header ${isOpen ? 'is-open' : ''}`}>
+        <Link href="/" className="site-header__logo" aria-label="Picarview home">
+          <Image src="/images/logo.webp" alt="Picarview" width={900} height={204} priority />
+        </Link>
+        <div className="site-header__actions">
+          <Link href="/contact" className="site-header__talk">Let&apos;s talk</Link>
           <button
-            className={`md:hidden p-2 transition-colors duration-300 ease-in-out ${
-              navTheme === 'light' ? 'text-black' : 'text-white'
-            }`}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
+            ref={toggleRef}
+            type="button"
+            className="site-header__toggle"
+            onClick={() => setIsOpen((open) => !open)}
+            aria-expanded={isOpen}
+            aria-controls="site-menu"
           >
-            {isMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
+            <span className="site-header__toggle-label">{isOpen ? 'Close' : 'Menu'}</span>
+            <span className="site-header__burger" aria-hidden="true"><i /><i /></span>
           </button>
         </div>
-      </nav>
+      </header>
 
-      {/* Mobile Menu */}
       <div
-        className={`fixed inset-0 z-40 bg-black transition-all duration-500 md:hidden ${
-          isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-        }`}
+        id="site-menu"
+        className={`site-menu ${isOpen ? 'is-open' : ''}`}
+        aria-hidden={!isOpen}
+        inert={!isOpen}
+        data-lenis-prevent
       >
-        <div className="flex flex-col items-center justify-center h-full gap-8">
-          {navLinks.map((link, index) => (
-            <a
-              key={link.name}
-              href={link.href}
-              onClick={() => setIsMenuOpen(false)}
-              className="text-3xl font-urbanist-black uppercase tracking-tight hover:text-white transition-colors"
-              style={{
-                transform: isMenuOpen ? 'translateY(0)' : 'translateY(20px)',
-                opacity: isMenuOpen ? 1 : 0,
-                transition: `all 0.5s ease ${index * 0.1}s`,
-              }}
-            >
-              {link.name}
-            </a>
-          ))}
+        <div className="site-menu__inner">
+          <nav className="site-menu__links" aria-label="Main">
+            {menuLinks.map((link, index) => (
+              <Link
+                href={link.href}
+                key={link.name}
+                className={`site-menu__link ${index === activeIndex ? 'is-current' : ''}`}
+                style={{ transitionDelay: isOpen ? `${0.18 + index * 0.06}s` : '0s' }}
+                onMouseEnter={() => setHovered(index)}
+                onFocus={() => setHovered(index)}
+                onClick={() => setIsOpen(false)}
+              >
+                <span className="site-menu__index">{String(index + 1).padStart(2, '0')}</span>
+                <span className="site-menu__word" data-text={link.name}>{link.name}</span>
+                <span className="site-menu__note">{link.note}</span>
+              </Link>
+            ))}
+          </nav>
+
+          <aside className="site-menu__aside">
+            <div className="site-menu__preview" aria-hidden="true">
+              {menuLinks.map((link, index) => (
+                <Image
+                  key={link.image}
+                  src={link.image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 900px) 0px, 30vw"
+                  className={index === hovered ? 'is-visible' : ''}
+                />
+              ))}
+            </div>
+
+            <div className="site-menu__contact">
+              <span>Say hello</span>
+              <a href="mailto:create@picarview.com">create@picarview.com</a>
+              <ul>
+                {quickLinks.map((link) => (
+                  <li key={link.name}>
+                    <Link href={link.href} onClick={() => setIsOpen(false)}>
+                      {link.name}<ArrowUpRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </aside>
         </div>
+
+        <footer className="site-menu__footer">
+          <span>Picarview® — independent creative practice</span>
+          <span className="site-menu__tagline">Create <em>your</em> view</span>
+        </footer>
       </div>
     </>
   )

@@ -9,6 +9,7 @@ import { ArrowRight } from 'lucide-react'
 import { useCmsItems } from '@/hooks/useCmsItems'
 import { useCmsSiteMedia } from '@/hooks/useCmsSiteMedia'
 import { useLegalPages } from '@/hooks/useLegalPages'
+import { projects as showcaseProjects } from '@/data/projects'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -73,10 +74,10 @@ function useSoftMaskReveal<T extends HTMLElement>(elementRef: React.RefObject<T 
 }
 
 const showcaseCards = [
-  { image: '/images/img1.png', label: '01 / BRANDING', color: '#ffb000', alt: 'Picarview branding work' },
-  { image: '/images/img2.png', label: '02 / 3D ART', color: '#b9ff32', alt: 'Picarview 3D artwork' },
-  { image: '/images/img3.png', label: '03 / DIRECTION', color: '#ff4fa3', alt: 'Picarview art direction' },
-  { image: '/images/img4.png', label: '04 / VISUALS', color: '#22d9ee', alt: 'Picarview visual design' },
+  { image: '/images/img1.webp', label: '01 / BRANDING', color: '#ffb000', alt: 'Picarview branding work' },
+  { image: '/images/img2.webp', label: '02 / 3D ART', color: '#b9ff32', alt: 'Picarview 3D artwork' },
+  { image: '/images/img3.webp', label: '03 / DIRECTION', color: '#ff4fa3', alt: 'Picarview art direction' },
+  { image: '/images/img4.webp', label: '04 / VISUALS', color: '#22d9ee', alt: 'Picarview visual design' },
 ]
 
 // Neo-brutalist collection that assembles automatically when it enters view.
@@ -599,13 +600,14 @@ function WorksSection() {
   const trackRef = useRef<HTMLDivElement>(null)
   const cmsProjects = useCmsItems('project')
   const projects = cmsProjects.length > 0
-    ? cmsProjects.slice(0, 12)
-    : Array.from({ length: 12 }, (_, index) => ({
-        id: `fallback-${index + 1}`,
-        imageUrl: `/images/work${index + 1}.png`,
-        title: `Picarview selected work ${index + 1}`,
-        subtitle: ['Identity', 'Campaign', 'Image-making', 'Art direction'][index % 4],
-        altText: `Picarview selected work ${index + 1}`,
+    ? cmsProjects.slice(0, 12).map((project) => ({ ...project, href: `/projects/${project.id}` }))
+    : showcaseProjects.slice(0, 12).map((project) => ({
+        id: project.slug,
+        href: `/projects/${project.slug}`,
+        imageUrl: project.cover,
+        title: project.title,
+        subtitle: project.industry,
+        altText: project.coverAlt,
       }))
   const projectsKey = projects.map((project) => project.id).join(',')
 
@@ -694,19 +696,21 @@ function WorksSection() {
 
       <div ref={trackRef} className="aura-work__track">
         {projects.map((project, index) => (
-          <article
+          <Link
+            href={project.href}
             className="aura-work__card"
             style={{ backgroundColor: workAccents[index % workAccents.length] }}
+            aria-label={`View ${project.title}`}
             key={project.id}
           >
             <div className="aura-work__image-wrap">
-              <img src={project.imageUrl} alt={project.altText} />
+              <img src={project.imageUrl} alt={project.altText} loading="lazy" decoding="async" />
             </div>
             <footer>
               <span>{String(index + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}</span>
-              <strong>{project.subtitle || 'Selected work'}</strong>
+              <strong>{project.title}</strong>
             </footer>
-          </article>
+          </Link>
         ))}
       </div>
 
@@ -950,10 +954,10 @@ function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <Link href="/" aria-label="Picarview home" className="block transition-opacity hover:opacity-70">
           <Image
-            src="/images/Black.png"
+            src="/images/logo.webp"
             alt="Picarview"
-            width={2268}
-            height={513}
+            width={900}
+            height={204}
             className="h-10 w-auto object-contain invert"
           />
         </Link>

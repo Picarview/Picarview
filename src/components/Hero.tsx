@@ -1,379 +1,110 @@
 'use client'
 
-import { useLayoutEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
+import Link from 'next/link'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { ArrowRight } from 'lucide-react'
 import { useCmsSiteMedia } from '@/hooks/useCmsSiteMedia'
 
 gsap.registerPlugin(ScrollTrigger)
 
-interface HeroProps {
-  frames: string[]
-}
-
-function createHeroTimeline(
-  section: HTMLElement,
-  stage: HTMLDivElement,
-  sequence?: { frame: number },
-  frameCount = 1,
-  renderFrame?: (frame: number) => void
-) {
-  return gsap.context(() => {
-    const timelineDriver = sequence ?? { frame: 0 }
-
-    gsap.set('.hero-sequence__word', { opacity: 1 })
-    gsap.set('.hero-sequence__letter', {
-      opacity: 0,
-      yPercent: 115,
-      rotateX: -92,
-      transformOrigin: '50% 100%',
-    })
-    gsap.set('.hero-sequence__signature', { opacity: 0, y: 36, scale: 0.9, clipPath: 'inset(0 50% 0 50%)' })
-
-    const timeline = gsap.timeline({
-      defaults: { ease: 'none' },
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: 0.15,
-        pin: stage,
-        pinSpacing: false,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-      },
-    })
-
-    timeline.to(timelineDriver, {
-      frame: frameCount - 1,
-      duration: 1,
-      onUpdate: () => renderFrame?.(timelineDriver.frame),
-    }, 0)
-    timeline.to('.hero-sequence__intro', { opacity: 0, yPercent: -24, filter: 'blur(8px)', duration: 0.16 }, 0.08)
-    timeline.to('.hero-sequence__letter', {
-      opacity: 1,
-      yPercent: 0,
-      rotateX: 0,
-      duration: 0.32,
-      stagger: 0.035,
-      ease: 'back.out(1.15)',
-    }, 0.2)
-    timeline.to('.hero-sequence__word', { scale: 1.025, duration: 0.16, ease: 'power1.inOut' }, 0.58)
-    timeline.to('.hero-sequence__signature', {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      clipPath: 'inset(0 0% 0 0)',
-      duration: 0.2,
-      ease: 'power3.out',
-    }, 0.64)
-    timeline.to('.hero-sequence__card', { scale: 1.06, yPercent: -4, duration: 0.06, ease: 'power2.in' }, 0.94)
-    timeline.to('.hero-sequence__word', {
-      scale: 1.08,
-      opacity: 0,
-      yPercent: -24,
-      duration: 0.06,
-    }, 0.94)
-  }, section)
-}
-
-export function Hero({ frames }: HeroProps) {
-  const sectionRef = useRef<HTMLElement>(null)
-  const stageRef = useRef<HTMLDivElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { items: siteMedia, loading: siteMediaLoading } = useCmsSiteMedia()
+/**
+ * Full-bleed studio reel with no text on top, followed by an intro band:
+ * a small label on the left and a large statement with italic accents on the right.
+ */
+export function Hero() {
+  const rootRef = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const { items: siteMedia } = useCmsSiteMedia()
   const heroMedia = siteMedia.find((item) => item.slot === 'hero')
 
-  useLayoutEffect(() => {
-    const section = sectionRef.current
-    const stage = stageRef.current
-    const canvas = canvasRef.current
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+    if ((reduceMotion || connection?.saveData) && videoRef.current) videoRef.current.pause()
+    if (reduceMotion) return
 
-    if (!section || !stage || siteMediaLoading) return
-    if (heroMedia) {
-      const ctx = createHeroTimeline(section, stage)
-      return () => ctx.revert()
-    }
+    const ctx = gsap.context(() => {
+      gsap.fromTo('.hero-reel__media', { scale: 1.08, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.6, ease: 'power3.out' })
 
-    if (!canvas) return
-    const context = canvas.getContext('2d', { alpha: false })
-    if (!context) return
-
-    type DeviceNavigator = Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string }
-      deviceMemory?: number
-    }
-
-    const device = navigator as DeviceNavigator
-    const isMobile = window.matchMedia('(max-width: 767px)').matches
-    const prefersDataSavings = Boolean(device.connection?.saveData)
-    const hasSlowConnection = /(^|-)2g$/.test(device.connection?.effectiveType ?? '')
-    const isLowMemory = typeof device.deviceMemory === 'number' && device.deviceMemory <= 4
-    const hasFewCpuCores = navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4
-    const isConstrained = prefersDataSavings || hasSlowConnection || isLowMemory || hasFewCpuCores
-
-    // Mobile and constrained devices keep every second or third source frame. Progress
-    // still spans the entire sequence, but decoded-image RAM and network work are reduced.
-    const frameStride = prefersDataSavings || hasSlowConnection
-      ? 3
-      : isMobile || isLowMemory
-        ? 2
-        : 1
-    const sequenceFrames = frames.filter(
-      (_, index) => index % frameStride === 0 || index === frames.length - 1
-    )
-    const frameCount = sequenceFrames.length
-    if (!frameCount) return
-
-    const images: Array<HTMLImageElement | undefined> = new Array(frameCount)
-    const decodedFrames = new Set<number>()
-    const sequence = { frame: 0 }
-    const loadQueue: number[] = []
-    const queuedFrames = new Set<number>()
-    const loadingFrames = new Set<number>()
-    const preloadRadius = isMobile ? 5 : 10
-    const maxConcurrentLoads = prefersDataSavings ? 4 : isMobile ? 6 : 10
-    let activeLoads = 0
-    let lastDrawnFrame = -1
-    let requestedFrame = 0
-    let renderRequest = 0
-    let isDisposed = false
-
-    // Draw only decoded images, preserving object-fit: cover without DOM layout work.
-    const render = () => {
-      renderRequest = 0
-      const frame = Math.max(0, Math.min(frameCount - 1, requestedFrame))
-      let drawableFrame = frame
-      let image = images[drawableFrame]
-
-      // Keep the last nearby decoded image visible if the exact frame is still loading.
-      if (!image || !decodedFrames.has(drawableFrame)) {
-        for (let offset = 1; offset < frameCount; offset += 1) {
-          const previous = images[frame - offset]
-          const next = images[frame + offset]
-          if (previous && decodedFrames.has(frame - offset)) {
-            image = previous
-            drawableFrame = frame - offset
-            break
-          }
-          if (next && decodedFrames.has(frame + offset)) {
-            image = next
-            drawableFrame = frame + offset
-            break
-          }
-        }
-      }
-
-      if (!image?.naturalWidth || drawableFrame === lastDrawnFrame) return
-
-      const canvasRatio = canvas.width / canvas.height
-      const imageRatio = image.naturalWidth / image.naturalHeight
-      let sourceX = 0
-      let sourceY = 0
-      let sourceWidth = image.naturalWidth
-      let sourceHeight = image.naturalHeight
-
-      if (imageRatio > canvasRatio) {
-        sourceWidth = image.naturalHeight * canvasRatio
-        sourceX = (image.naturalWidth - sourceWidth) / 2
-      } else {
-        sourceHeight = image.naturalWidth / canvasRatio
-        sourceY = (image.naturalHeight - sourceHeight) / 2
-      }
-
-      context.drawImage(
-        image,
-        sourceX,
-        sourceY,
-        sourceWidth,
-        sourceHeight,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      )
-      lastDrawnFrame = drawableFrame
-    }
-
-    // Scroll, decode, and resize events can happen together. Coalesce them into one paint.
-    const requestRender = (force = false) => {
-      if (force) lastDrawnFrame = -1
-      if (renderRequest) return
-      renderRequest = window.requestAnimationFrame(render)
-    }
-
-    const waitForImageLoad = (image: HTMLImageElement) =>
-      new Promise<void>((resolve, reject) => {
-        if (image.complete) {
-          image.naturalWidth ? resolve() : reject(new Error('Frame failed to load'))
-          return
-        }
-        image.onload = () => resolve()
-        image.onerror = () => reject(new Error('Frame failed to load'))
+      // Parallax: the reel drifts at half speed as the intro band scrolls over it.
+      gsap.to('.hero-reel__media', {
+        yPercent: 30,
+        ease: 'none',
+        scrollTrigger: { trigger: '.hero-reel', start: 'top top', end: 'bottom top', scrub: true },
       })
 
-    const loadFrame = async (index: number) => {
-      const image = new Image()
-      image.decoding = 'async'
-      image.fetchPriority = index === 0 ? 'high' : 'auto'
-      images[index] = image
-      image.src = sequenceFrames[index]
-
-      // decode() forces decompression before scroll-time drawImage(). The load fallback
-      // covers browsers that reject decode() even though the image itself loaded correctly.
-      try {
-        await image.decode()
-      } catch {
-        await waitForImageLoad(image)
-      }
-
-      if (isDisposed || !image.naturalWidth) return
-      decodedFrames.add(index)
-      if (Math.abs(index - requestedFrame) <= preloadRadius || index === 0) requestRender()
-    }
-
-    const pumpLoadQueue = () => {
-      while (!isDisposed && activeLoads < maxConcurrentLoads && loadQueue.length) {
-        const index = loadQueue.shift()
-        if (index === undefined) break
-        queuedFrames.delete(index)
-
-        if (decodedFrames.has(index) || loadingFrames.has(index)) continue
-        loadingFrames.add(index)
-        activeLoads += 1
-
-        void loadFrame(index).catch(() => {
-          images[index] = undefined
-        }).finally(() => {
-          loadingFrames.delete(index)
-          activeLoads -= 1
-          if (!isDisposed) pumpLoadQueue()
-        })
-      }
-    }
-
-    const queueFrame = (index: number, urgent = false) => {
-      if (
-        index < 0 ||
-        index >= frameCount ||
-        decodedFrames.has(index) ||
-        loadingFrames.has(index) ||
-        (queuedFrames.has(index) && !urgent)
-      ) return
-
-      // Promote frames around a fast scroll jump ahead of background loading.
-      if (queuedFrames.has(index)) {
-        const queuedIndex = loadQueue.indexOf(index)
-        if (queuedIndex >= 0) loadQueue.splice(queuedIndex, 1)
-      }
-      urgent ? loadQueue.unshift(index) : loadQueue.push(index)
-      queuedFrames.add(index)
-    }
-
-    const prepareFramesAround = (frame: number) => {
-      const roundedFrame = Math.round(frame)
-      requestedFrame = roundedFrame
-
-      // Current and nearby frames take priority over progressive sequential preloading.
-      for (let offset = preloadRadius; offset >= 1; offset -= 1) {
-        queueFrame(roundedFrame + offset, true)
-        queueFrame(roundedFrame - offset, true)
-      }
-      queueFrame(roundedFrame, true)
-      pumpLoadQueue()
-      requestRender()
-    }
-
-    const resizeCanvas = () => {
-      const rect = canvas.getBoundingClientRect()
-      // Cap physical canvas pixels to reduce GPU fill cost on low-end devices.
-      const dprCap = isConstrained ? 1 : isMobile ? 1.25 : 1.5
-      const dpr = Math.min(window.devicePixelRatio || 1, dprCap)
-      const width = Math.max(1, Math.round(rect.width * dpr))
-      const height = Math.max(1, Math.round(rect.height * dpr))
-      if (canvas.width === width && canvas.height === height) return
-      canvas.width = width
-      canvas.height = height
-      requestRender(true)
-    }
-
-    // Frame zero is eager/high-priority. The sampled remainder decodes progressively with
-    // bounded concurrency, so page interactivity never waits for the full sequence.
-    queueFrame(0, true)
-    for (let index = 1; index < frameCount; index += 1) queueFrame(index)
-    pumpLoadQueue()
-
-    const resizeObserver = new ResizeObserver(resizeCanvas)
-    resizeObserver.observe(canvas)
-    resizeCanvas()
-
-    const ctx = createHeroTimeline(section, stage, sequence, frameCount, prepareFramesAround)
-
-    return () => {
-      isDisposed = true
-      if (renderRequest) window.cancelAnimationFrame(renderRequest)
-      loadQueue.length = 0
-      queuedFrames.clear()
-      decodedFrames.clear()
-      resizeObserver.disconnect()
-      ctx.revert()
-      images.forEach((image) => {
-        if (!image) return
-        image.onload = null
-        image.onerror = null
-        image.src = ''
+      gsap.fromTo('.hero-intro__label', { opacity: 0, x: -24 }, {
+        opacity: 1, x: 0, duration: 0.9, ease: 'power3.out',
+        scrollTrigger: { trigger: '.hero-intro', start: 'top 75%' },
       })
-    }
-  }, [frames, heroMedia, siteMediaLoading])
+      gsap.fromTo('.hero-intro__line', { opacity: 0, y: 36 }, {
+        opacity: 1, y: 0, duration: 1, stagger: 0.12, ease: 'power3.out',
+        scrollTrigger: { trigger: '.hero-intro', start: 'top 75%' },
+      })
+    }, root)
+
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <section ref={sectionRef} className="hero-sequence" data-theme="dark" aria-label="Picarview introduction">
-      <div ref={stageRef} className="hero-sequence__stage">
-        <div className="hero-sequence__card">
-          {heroMedia?.mediaType === 'video' ? (
+    <div ref={rootRef}>
+      <section className="hero-reel" data-theme="dark" aria-label="Picarview studio reel">
+        <div className="hero-reel__media">
+          {heroMedia?.mediaType === 'image' ? (
+            <img src={heroMedia.mediaUrl} alt={heroMedia.altText} fetchPriority="high" decoding="async" />
+          ) : (
             <video
-              className="hero-sequence__custom-media"
-              src={heroMedia.mediaUrl}
-              aria-label={heroMedia.altText}
+              ref={videoRef}
+              key={heroMedia?.mediaUrl ?? 'reel'}
+              poster="/hero/reel-poster.webp"
               autoPlay
               muted
               loop
               playsInline
-              preload="metadata"
-            />
-          ) : heroMedia?.mediaType === 'image' ? (
-            <img
-              className="hero-sequence__custom-media"
-              src={heroMedia.mediaUrl}
-              alt={heroMedia.altText}
-              fetchPriority="high"
-              decoding="async"
-            />
-          ) : (
-            <canvas ref={canvasRef} className="hero-sequence__canvas" aria-hidden="true" />
+              preload="auto"
+              aria-label={heroMedia?.altText || 'Picarview studio reel: a montage of brand identities, posters and campaigns'}
+            >
+              {heroMedia?.mediaType === 'video' ? (
+                <source src={heroMedia.mediaUrl} />
+              ) : (
+                <>
+                  <source src="/hero/reel.webm" type="video/webm" />
+                  <source src="/hero/reel.mp4" type="video/mp4" />
+                </>
+              )}
+            </video>
           )}
-          <div className="hero-sequence__shade" aria-hidden="true" />
+        </div>
+      </section>
 
-          <header className="hero-sequence__intro">
-            <h1 className="hero-sequence__headline">
-              Great!!!
-              <span>you found us</span>
-            </h1>
-          </header>
-
-          <div className="hero-sequence__word" aria-label="Picarview">
-            <span className="hero-sequence__letters" aria-hidden="true">
-              {'PICARVIEW'.split('').map((letter, index) => (
-                <span className="hero-sequence__letter" key={`${letter}-${index}`}>{letter}</span>
-              ))}
-            </span>
-          </div>
-
-          <div className="hero-sequence__signature">
-            Create your view
+      <section className="hero-intro" data-theme="light" aria-labelledby="hero-intro-title">
+        <div className="hero-intro__gradient" aria-hidden="true"><i /><i /><i /><i /></div>
+        <div className="hero-intro__inner">
+          <h1 id="hero-intro-title" className="hero-intro__label">
+            <span>We are Picarview</span>
+            <i aria-hidden="true" />
+          </h1>
+          <div className="hero-intro__copy">
+            <p className="hero-intro__line">
+              a creative partner focused on <em>brand thinking</em> and <em>story-driven</em> visuals.
+            </p>
+            <p className="hero-intro__line">
+              We shape ideas and bring them to life through <em>strategy</em>, <em>identity</em>,{' '}
+              <em>art direction</em>, and <em>photography</em>.
+            </p>
+            <p className="hero-intro__line hero-intro__kicker">
+              Think boldly, create your view<span>.</span>
+            </p>
+            <Link href="/projects" className="hero-intro__line hero-intro__link">
+              See our work <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   )
 }

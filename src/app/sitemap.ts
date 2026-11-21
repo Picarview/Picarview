@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { getCmsEnv } from '@/lib/cloudflare-cms'
+import { getSiteProjects } from '@/lib/site-projects'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,6 +19,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency,
     priority,
   }))
+  const projectEntries: MetadataRoute.Sitemap = (await getSiteProjects()).map((project) => ({
+    url: `https://picarview.com/projects/${project.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }))
+  staticEntries.push(...projectEntries)
   try {
     const { CMS_DB } = getCmsEnv()
     if (!CMS_DB) return staticEntries
