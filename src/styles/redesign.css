@@ -1718,3 +1718,38 @@
   background: var(--pv-paper);
   pointer-events: none;
 }
+
+/* The title area sits above the toolbar's backing strip, so the strip only shows
+   once the header area has scrolled away (it used to cover "work" and the intro). */
+.work-index__header { position: relative; z-index: 21; background: var(--pv-paper); }
+
+/* "We create and build great ideas" on phones: a real title clear of the fixed
+   header, with the 2x2 card grid underneath. */
+@media (max-width: 767px) {
+  .cards-section {
+    height: auto;
+    max-height: none;
+    aspect-ratio: auto;
+    padding: 5.75rem 0 2.5rem;
+  }
+  .cards-section__heading {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    padding: 0 1.25rem;
+  }
+  .cards-section__heading span:first-child {
+    max-width: 13ch;
+    font-size: clamp(1.75rem, 8vw, 2.4rem);
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+  }
+  .cards-section__deck {
+    position: relative;
+    inset: auto;
+    top: auto;
+    height: 122vw;
+    margin-top: 1rem;
+  }
+}

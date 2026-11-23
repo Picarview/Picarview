@@ -13,14 +13,15 @@ import { SiteFooter } from '@/components/SiteFooter'
 
 gsap.registerPlugin(ScrollTrigger)
 
+// Section order mirrors the reference page: About, The Team, Careers, Values.
 const sections = [
   { id: 'about', label: 'About' },
   { id: 'the-team', label: 'The Team' },
-  { id: 'partnerships', label: 'Partnerships' },
   { id: 'careers', label: 'Careers' },
+  { id: 'values', label: 'Values' },
 ]
 
-// Our own work, used as a collage (no stock or invented photography).
+// Our own work, used for the join band (no stock or invented photography).
 const wall = ['/images/work1.webp', '/images/img3.webp', '/images/work3.webp', '/images/img1.webp', '/images/img4.webp', '/images/work4.webp']
 
 export function StudioPage() {
@@ -32,7 +33,7 @@ export function StudioPage() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((entry) => { if (entry.isIntersecting) setActive(entry.target.id) }),
-      { rootMargin: '-45% 0px -50% 0px' }
+      { rootMargin: '-40% 0px -55% 0px' }
     )
     sections.forEach(({ id }) => { const el = document.getElementById(id); if (el) observer.observe(el) })
     return () => observer.disconnect()
@@ -55,7 +56,7 @@ export function StudioPage() {
           scrollTrigger: { trigger: element, start: 'top 88%' },
         })
       })
-      gsap.fromTo('.team-card', { opacity: 0, y: 50, rotate: (index: number) => [-3, 2, -1.5][index % 3] }, {
+      gsap.fromTo('.team-card', { opacity: 0, y: 50 }, {
         opacity: 1, y: 0, duration: 0.8, stagger: 0.08, ease: 'power3.out',
         scrollTrigger: { trigger: '.team-grid', start: 'top 85%' },
       })
@@ -95,121 +96,161 @@ export function StudioPage() {
         </nav>
 
         <div className="studio-content">
-          {/* About */}
+          {/* 1. About */}
           <section id="about" className="studio-about">
             <p className="studio-about__lead studio-rise">
-              We are an independent creative practice that uses <em>identity</em>, <em>image-making</em> and{' '}
-              <em>story</em> to help brands be seen and remembered.
+              We are an independent creative practice that uses identity, image-making and story to help brands be
+              seen, felt and remembered.
             </p>
-            <div className="studio-about__body">
-              <div className="studio-wall studio-rise" aria-hidden="true">
-                {wall.slice(0, 4).map((src, index) => (
-                  <span key={src} style={{ '--i': index } as CSSProperties}>
-                    <Image src={src} alt="" fill sizes="160px" />
-                  </span>
-                ))}
-              </div>
-              <div className="studio-about__copy studio-rise">
+
+            <div className="studio-split">
+              <p className="studio-pull studio-rise">
+                We are a multidisciplinary studio creating identities and images that live across every medium.
+              </p>
+              <div className="studio-split__copy studio-rise">
                 <p>
                   At our core, we make things people can see and hold: identities, campaigns, posters, packaging and
-                  imagery. We move past mood boards into execution, carrying every idea through to the finished piece.
+                  imagery. We move past mood boards into execution and production, carrying every idea through to the
+                  finished piece, from a single logo to a full launch campaign.
                 </p>
                 <p>
-                  Strategists, designers, art directors and image-makers work side by side on every project. That means
-                  the thinking and the making never drift apart, and the work always sounds like you.
+                  Our skill set is broad. Strategists, designers, art directors and image-makers work side by side on
+                  every project, so the thinking and the making never drift apart and the work always sounds like you.
                 </p>
               </div>
             </div>
 
+            {/* 2. Let's get to the point */}
             <div className="studio-principles">
               <h2 className="studio-kicker studio-rise">Let&apos;s get to the point</h2>
-              {principles.map((principle, index) => (
+              {principles.map((principle) => (
                 <article className="studio-principle studio-rise" key={principle.title}>
-                  <span>{String(index + 1).padStart(2, '0')}</span>
                   <h3>{principle.title}</h3>
                   <p>{principle.body}</p>
                 </article>
               ))}
             </div>
 
+            {/* 3. Partners, not clients */}
             <div className="studio-belief studio-rise">
-              <h2 className="studio-kicker">Partners, not clients</h2>
+              <h2 className="studio-kicker">&ldquo;Client&rdquo; is a word we avoid</h2>
               <p className="studio-belief__lead">Your wins are <em>our</em> wins.</p>
-              <p>
-                We treat every engagement as a collaboration. We share the goal, we share the process openly, and we
-                stay around after launch, because the best work comes from relationships, not transactions.
-              </p>
+              <div className="studio-belief__copy">
+                <p>
+                  We see every engagement as a collaboration, much closer to a partnership than the usual
+                  &ldquo;client and supplier&rdquo; arrangement.
+                </p>
+                <p>
+                  Long-term relationships are where our best work comes from: brave ideas, careful craft and results we
+                  are both proud to put our names to.
+                </p>
+                <p>
+                  We focus on the right strategy for telling your story and building the most authentic brand
+                  experience, and we stay open about how we get there at every step.
+                </p>
+              </div>
             </div>
-          </section>
-
-          {/* Team */}
-          <section id="the-team" className="studio-team">
-            <h2 className="studio-section-title studio-rise">The team</h2>
-            <ul className="team-grid">
-              {team.map((member) => (
-                <li className="team-card" key={member.role} style={{ '--accent': member.accent } as CSSProperties}>
-                  <div className="team-card__photo">
-                    {member.photo ? (
-                      <Image src={member.photo} alt={member.name} fill sizes="(max-width: 760px) 80vw, 300px" />
-                    ) : (
-                      <span className="team-card__monogram" aria-hidden="true">
-                        <i>[</i>{member.initial}<i>]</i>
-                      </span>
-                    )}
-                  </div>
-                  <div className="team-card__caption">
-                    <h3>{member.placeholder ? member.role : member.name}</h3>
-                    <p>{member.placeholder ? 'Profile coming soon' : member.role}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
           </section>
         </div>
       </div>
 
+      {/* 4. Partnerships */}
       <div id="partnerships" className="studio-partners">
         <Partnerships />
       </div>
 
-      {/* Join band */}
-      <section id="careers" className="studio-join">
+      {/* 5. The team */}
+      <div className="studio-layout studio-layout--team">
+        <div aria-hidden="true" />
+        <section id="the-team" className="studio-team">
+          <h2 className="studio-section-title studio-rise">The team</h2>
+          <ul className="team-grid">
+            {team.map((member) => (
+              <li className="team-card" key={member.role} style={{ '--accent': member.accent } as CSSProperties}>
+                <div className="team-card__photo">
+                  {member.photo ? (
+                    <Image src={member.photo} alt={member.name} fill sizes="(max-width: 760px) 80vw, 300px" />
+                  ) : (
+                    <span className="team-card__monogram" aria-hidden="true">
+                      <i>[</i>{member.initial}<i>]</i>
+                    </span>
+                  )}
+                </div>
+                <div className="team-card__caption">
+                  <h3>{member.placeholder ? member.role : member.name}</h3>
+                  <p>{member.placeholder ? 'Profile coming soon' : member.role}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      {/* 6. Join our team */}
+      <section className="studio-join" aria-label="Join our team">
         <div className="studio-join__wall" aria-hidden="true">
           {wall.map((src) => (
             <span key={src}><Image src={src} alt="" fill sizes="(max-width: 760px) 50vw, 33vw" /></span>
           ))}
         </div>
-        <a href="mailto:create@picarview.com?subject=Joining%20Picarview" className="studio-join__title">
-          Join our team!
-        </a>
+        <a href="#careers" onClick={jump('careers')} className="studio-join__title">Join our team!</a>
       </section>
 
-      <section className="studio-culture">
+      {/* 7. Careers */}
+      <section id="careers" className="studio-culture">
         <div className="studio-culture__inner">
           <h2 className="studio-culture__title studio-rise">Our crew is our <em>secret ingredient</em></h2>
-          <div className="studio-culture__copy studio-rise">
-            <p className="studio-culture__lead">Different backgrounds make braver work.</p>
-            <p>
-              We build a studio where every voice is heard: designers next to strategists, photographers next to
-              writers. That mix of perspectives is what keeps our ideas fresh and our work honest.
-            </p>
-            <p className="studio-culture__lead">We are always looking for new talent.</p>
-            <p>
-              If you are a designer, art director, photographer, videographer, strategist or producer who cares about
-              craft, we would love to see your work.
-            </p>
-            <a href="mailto:create@picarview.com?subject=Joining%20Picarview" className="studio-link">
-              Send us your portfolio <ArrowUpRight className="h-4 w-4" />
-            </a>
+          <div className="studio-split">
+            <p className="studio-pull studio-rise">Different perspectives are at the heart of our creative work.</p>
+            <div className="studio-split__copy studio-rise">
+              <p>
+                We build a collaborative studio where every voice is heard: designers next to strategists,
+                photographers next to writers. That mix of backgrounds and experiences keeps our ideas fresh, our
+                questions sharp and our work honest.
+              </p>
+              <p className="studio-culture__lead">We are always looking for new talent.</p>
+              <p>
+                If you are a designer, art director, photographer, videographer, strategist, producer or simply a
+                talented person who cares about craft, send your portfolio to{' '}
+                <a href="mailto:create@picarview.com?subject=Joining%20Picarview">create@picarview.com</a> and tell us
+                what you love making.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="studio-next">
-        <Link href="/services" className="studio-next__link">
-          <span>Next</span>
-          <strong>What we do <ArrowUpRight /></strong>
-        </Link>
+      {/* 8. Values */}
+      <section id="values" className="studio-values">
+        <div className="studio-values__inner">
+          <h2 className="studio-section-title studio-rise">Values</h2>
+          <div className="studio-values__copy studio-rise">
+            <p className="studio-values__lead">
+              At Picarview, we are committed to an open, inclusive studio where different people do their best work.
+            </p>
+            <p>
+              The range of identities and experiences on our team helps us make work that is thoughtful, informed and
+              respectful of the people it is for.
+            </p>
+            <p>
+              We believe in creative solutions that put accessibility, fairness and empathy first, in who we invite to
+              the table, in the voices we amplify and in the work we put into the world.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 9. Promo */}
+      <section className="studio-promo">
+        <div className="studio-promo__inner">
+          <h2 className="studio-promo__title">
+            Not sure where to start?
+            <em>Start with a discovery session.</em>
+          </h2>
+          <p className="studio-promo__lead">Introducing Creative Discovery Workshops: a focused way to begin working with Picarview.</p>
+          <p>A short, structured session where we research your brand and audience together and leave you with a clear creative direction, tailored to you.</p>
+          <Link href="/contact" className="studio-link">Book a session <ArrowUpRight className="h-4 w-4" /></Link>
+        </div>
       </section>
 
       <SiteFooter />
