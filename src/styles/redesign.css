@@ -1753,3 +1753,27 @@
     margin-top: 1rem;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Fit media: whole image over a blurred fill (CMS uploads of any proportion)
+   -------------------------------------------------------------------------- */
+
+img.fit-media__fill {
+  object-fit: cover !important;
+  filter: blur(22px) saturate(1.15);
+  transform: scale(1.15);
+  opacity: 0.85;
+}
+
+img.fit-media__main { object-fit: contain !important; }
+
+/* Case cover in fit mode keeps the portrait frame and shows the whole image. */
+.case-cover--fit { background: var(--pv-ink); }
+
+/* Index-view hover preview: whole image. */
+.work-list__preview-img--fit { object-fit: contain; }
+
+/* Homepage carousel cards stack the fill and the image. */
+.aura-work__image-wrap { position: relative; }
+.aura-work__image-wrap img.fit-media__fill,
+.aura-work__image-wrap img.fit-media__main { position: absolute; inset: 0; }

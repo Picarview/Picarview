@@ -612,7 +612,8 @@ function WorksSection() {
             key={project.id}
           >
             <div className="aura-work__image-wrap">
-              <img src={project.imageUrl} alt={project.altText} loading="lazy" decoding="async" />
+              <img src={project.imageUrl} alt="" aria-hidden="true" className="fit-media__fill" loading="lazy" decoding="async" />
+              <img src={project.imageUrl} alt={project.altText} className="fit-media__main" loading="lazy" decoding="async" />
             </div>
             <footer>
               <span>{String(index + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}</span>

@@ -29,6 +29,27 @@ function isLightColor(hex: string) {
   return (r * 299 + g * 587 + b * 114) / 1000 > 160
 }
 
+/**
+ * Shows an image whole (no cropping) over a blurred, cover-sized copy of itself,
+ * so images of any proportion sit nicely in a fixed frame. Same URL, so the file
+ * is only downloaded once.
+ */
+export function FitImage({ src, alt, sizes, priority = false }: { src: string; alt: string; sizes: string; priority?: boolean }) {
+  return (
+    <>
+      <Image src={src} alt="" aria-hidden fill sizes={sizes} className="fit-media__fill" unoptimized={isRemote(src)} />
+      <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className="fit-media__main" unoptimized={isRemote(src)} />
+    </>
+  )
+}
+
+/** Renders a project's cover in whichever mode suits it. */
+function Cover({ project, sizes, priority = false, decorative = false }: { project: Project; sizes: string; priority?: boolean; decorative?: boolean }) {
+  const alt = decorative ? '' : project.coverAlt
+  if (project.coverFit === 'fit') return <FitImage src={project.cover} alt={alt} sizes={sizes} priority={priority} />
+  return <Image src={project.cover} alt={alt} fill priority={priority} sizes={sizes} unoptimized={isRemote(project.cover)} />
+}
+
 // Frames render at most ~560px wide, so the 1100–1600px source files stay crisp on 2x screens.
 const FRAME_SIZES = '(max-width: 760px) 92vw, 560px'
 
@@ -52,7 +73,9 @@ function Frame({ frame, project }: { frame: ProjectFrame; project: Project }) {
   return (
     <figure className={`case-frame case-frame--${frame.kind}`}>
       <div className="case-frame__surface" style={{ backgroundColor: frame.kind === 'tint' ? frame.tint : project.surface }}>
-        <Image src={frame.src} alt={frame.alt} fill sizes={FRAME_SIZES} unoptimized={isRemote(frame.src)} />
+        {frame.kind === 'image' && frame.fit
+          ? <FitImage src={frame.src} alt={frame.alt} sizes={FRAME_SIZES} />
+          : <Image src={frame.src} alt={frame.alt} fill sizes={FRAME_SIZES} unoptimized={isRemote(frame.src)} />}
       </div>
       {frame.caption && <figcaption>{frame.caption}</figcaption>}
     </figure>
@@ -109,14 +132,7 @@ export function ProjectDetail({ project, index, total, next, related }: ProjectD
       {/* Cover on the left at a moderate size; facts and overview beside it. */}
       <section className="case-intro case-wrap">
         <div className={`case-cover case-cover--${project.coverFit} case-hero__fade`}>
-          <Image
-            src={project.cover}
-            alt={project.coverAlt}
-            fill
-            priority
-            sizes="(max-width: 760px) 92vw, 520px"
-            unoptimized={isRemote(project.cover)}
-          />
+          <Cover project={project} priority sizes="(max-width: 760px) 92vw, 520px" />
         </div>
         <div className="case-intro__text">
           <dl className="case-meta case-rise">
@@ -202,7 +218,7 @@ export function ProjectDetail({ project, index, total, next, related }: ProjectD
             <span className="case-next__label">Next project</span>
             <span className="case-next__title">{next.title}<ArrowUpRight className="case-next__arrow" /></span>
             <span className={`case-next__media case-next__media--${next.coverFit}`}>
-              <Image src={next.cover} alt="" fill sizes="(max-width: 760px) 50vw, 260px" unoptimized={isRemote(next.cover)} />
+              <Cover project={next} decorative sizes="(max-width: 760px) 50vw, 260px" />
             </span>
           </span>
         </Link>
@@ -234,12 +250,9 @@ export function ProjectCard({ project, priority = false, feature = false }: { pr
       style={{ '--accent': project.accent, '--surface': project.surface } as CSSProperties}
     >
       <div className={`work-card__media work-card__media--${project.coverFit}`}>
-        <Image
-          src={project.cover}
-          alt={project.coverAlt}
-          fill
+        <Cover
+          project={project}
           priority={priority}
-          unoptimized={isRemote(project.cover)}
           sizes={feature ? '(max-width: 760px) 92vw, 560px' : '(max-width: 760px) 92vw, (max-width: 1100px) 46vw, 380px'}
         />
       </div>

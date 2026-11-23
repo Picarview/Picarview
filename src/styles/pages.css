@@ -781,3 +781,8 @@
   .studio-promo { border-radius: 50% 50% 0 0 / 5% 5% 0 0; }
   .studio-promo__title em { width: auto; }
 }
+
+/* "Join our team" collage keeps portrait-ish tiles on phones. */
+@media (max-width: 600px) {
+  .studio-join { min-height: 150vw; }
+}

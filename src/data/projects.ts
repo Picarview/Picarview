@@ -14,7 +14,7 @@ export interface ProjectSwatch {
 
 export type ProjectFrame =
   /** A regular image, shown in full. */
-  | { kind: 'image'; src: string; alt: string; caption?: string }
+  | { kind: 'image'; src: string; alt: string; caption?: string; fit?: boolean }
   /**
    * The artwork shown at a moderate size on a brand-colour panel: a poster hung
    * on a coloured wall, or a logo printed on a business card with its reverse
@@ -40,8 +40,11 @@ export interface Project {
   year: string
   cover: string
   coverAlt: string
-  /** Whether the cover is a full-bleed photograph or an artwork on a plain ground. */
-  coverFit: 'cover' | 'contain'
+  /**
+   * cover: full-bleed photograph cropped to the frame. contain: artwork on a plain
+   * ground. fit: unknown proportions (CMS uploads); shown whole over a blurred fill.
+   */
+  coverFit: 'cover' | 'contain' | 'fit'
   /** Background behind contained artwork; should match the artwork's own ground. */
   surface: string
   accent: string
@@ -612,7 +615,7 @@ export function projectFromCms(item: CmsProjectLike, index: number): Project {
     year: '2026',
     cover: images[0].imageUrl,
     coverAlt: images[0].altText || item.altText || title,
-    coverFit: 'cover',
+    coverFit: 'fit',
     surface: '#111111',
     accent,
     palette: [
@@ -636,6 +639,7 @@ export function projectFromCms(item: CmsProjectLike, index: number): Project {
       kind: 'image' as const,
       src: image.imageUrl,
       alt: image.altText || title,
+      fit: true,
     })),
   }
 }
