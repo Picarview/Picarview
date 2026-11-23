@@ -3807,3 +3807,89 @@ body {
   .admin-legal__slug > span { display: block; padding-bottom: 0; white-space: normal; overflow-wrap: anywhere; }
   .admin-legal__slug input { width: 100%; padding: 0.4rem 0.9rem 0.9rem !important; }
 }
+
+/* Admin: optional case-study fields (Add project form and project editor). */
+.admin-case-study {
+  border: 3px solid #111;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.admin-case-study > summary {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.admin-case-study > summary::-webkit-details-marker { display: none; }
+
+.admin-case-study > summary > span {
+  font-family: var(--font-urbanist-black);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.admin-case-study > summary > span::after { content: ' +'; }
+.admin-case-study[open] > summary > span::after { content: ' −'; }
+.admin-case-study > summary small { font-size: 0.78rem; opacity: 0.7; }
+
+.admin-case-study__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  padding: 0 1rem 1rem;
+}
+
+.admin-case-study label { display: grid; gap: 0.45rem; }
+
+.admin-case-study label > span,
+.admin-case-study legend {
+  font-family: var(--font-urbanist-black);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.admin-case-study small { font-size: 0.75rem; opacity: 0.65; }
+
+.admin-case-study input,
+.admin-case-study textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.65rem;
+  border: 3px solid #111;
+  background: #fff;
+  outline: none;
+  font: inherit;
+}
+
+.admin-case-study textarea { min-height: 0; resize: vertical; }
+
+.admin-case-study__wide,
+.admin-case-study__results { grid-column: 1 / -1; }
+
+.admin-case-study__results {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border: 3px dashed #111;
+}
+
+.admin-case-study__results > div { display: grid; gap: 0.4rem; }
+
+@media (max-width: 640px) {
+  .admin-case-study__grid { grid-template-columns: 1fr; }
+}
+
+/* Admin: team member without a portrait. */
+.admin-team__placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #f2efe8;
+}
+
+.admin-team__placeholder svg { width: 40%; height: 40%; opacity: 0.4; }

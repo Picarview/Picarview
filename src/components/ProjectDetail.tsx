@@ -124,9 +124,11 @@ export function ProjectDetail({ project, index, total, next, related }: ProjectD
         <p className="case-hero__tagline">
           <span className="case-hero__line"><span className="case-hero__reveal">{project.tagline}</span></span>
         </p>
-        <ul className="case-hero__tags case-hero__fade">
-          {project.services.map((service) => <li key={service}>{service}</li>)}
-        </ul>
+        {project.services.length > 0 && (
+          <ul className="case-hero__tags case-hero__fade">
+            {project.services.map((service) => <li key={service}>{service}</li>)}
+          </ul>
+        )}
       </header>
 
       {/* Cover on the left at a moderate size; facts and overview beside it. */}
@@ -138,8 +140,8 @@ export function ProjectDetail({ project, index, total, next, related }: ProjectD
           <dl className="case-meta case-rise">
             <div><dt>Client</dt><dd>{project.client}</dd></div>
             <div><dt>Industry</dt><dd>{project.industry}</dd></div>
-            <div><dt>Year</dt><dd>{project.year}</dd></div>
-            <div><dt>Deliverables</dt><dd>{project.deliverables.join(', ')}</dd></div>
+            {project.year && <div><dt>Year</dt><dd>{project.year}</dd></div>}
+            {project.deliverables.length > 0 && <div><dt>Deliverables</dt><dd>{project.deliverables.join(', ')}</dd></div>}
           </dl>
           <div className="case-overview case-rise">
             <span className="case-label">Overview</span>
@@ -257,9 +259,11 @@ export function ProjectCard({ project, priority = false, feature = false }: { pr
         />
       </div>
       <div className="work-card__body">
-        <ul className="work-card__tags">
-          {project.services.slice(0, 3).map((service) => <li key={service}>{service}</li>)}
-        </ul>
+        {project.services.length > 0 && (
+          <ul className="work-card__tags">
+            {project.services.slice(0, 3).map((service) => <li key={service}>{service}</li>)}
+          </ul>
+        )}
         <p className="work-card__client">{project.client}</p>
         <h2 className="work-card__title">{project.tagline}</h2>
         <span className="work-card__link">View project <i aria-hidden="true" /></span>

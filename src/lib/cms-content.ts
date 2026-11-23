@@ -1,4 +1,4 @@
-import { getCmsEnv, publicCmsItem, type CmsItem, type CmsProjectImage } from '@/lib/cloudflare-cms'
+import { CASE_STUDY_COLUMNS, getCmsEnv, publicCmsItem, type CmsItem, type CmsProjectImage } from '@/lib/cloudflare-cms'
 
 export type PublicContentItem = ReturnType<typeof publicCmsItem> & {
   images: Array<{ id: string; imageUrl: string; altText: string; sortOrder: number }>
@@ -13,7 +13,8 @@ export async function listPublishedContent(type: 'partner' | 'project'): Promise
   if (!CMS_DB) return null
 
   const query = await CMS_DB.prepare(
-    `SELECT id, type, title, subtitle, description, industry, alt_text, object_key, sort_order, published, archived, pinned, created_at
+    `SELECT id, type, title, subtitle, description, industry, alt_text, object_key, sort_order, published, archived, pinned, created_at,
+       ${CASE_STUDY_COLUMNS}
      FROM content_items
      WHERE type = ? AND published = 1 AND archived = 0
      ORDER BY pinned DESC, sort_order ASC, created_at DESC`

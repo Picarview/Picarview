@@ -24,11 +24,14 @@ import {
   Search,
   Settings,
   Trash2,
+  Users,
   X,
 } from 'lucide-react'
 import { AdminLegalEditor, type AdminLegalPage } from '@/components/AdminLegalEditor'
+import { AdminCaseStudyFields } from '@/components/AdminCaseStudyFields'
+import { AdminTeam } from '@/components/AdminTeam'
 
-type AdminView = 'overview' | 'media' | 'projects' | 'project-library' | 'archive' | 'partners' | 'drafts' | 'legal' | 'settings'
+type AdminView = 'overview' | 'media' | 'projects' | 'project-library' | 'archive' | 'partners' | 'team' | 'drafts' | 'legal' | 'settings'
 
 interface AdminItem {
   id: string
@@ -45,6 +48,12 @@ interface AdminItem {
   pinned: boolean
   images: Array<{ id: string; imageUrl: string; altText: string; sortOrder: number }>
   createdAt: string
+  year?: string
+  services?: string[]
+  deliverables?: string[]
+  challenge?: string
+  approach?: string
+  outcomes?: Array<{ title: string; body: string }>
 }
 
 interface AdminResponse {
@@ -129,6 +138,7 @@ export default function AdminPage() {
   const [visibleCount, setVisibleCount] = useState(6)
   const [activeView, setActiveView] = useState<AdminView>('overview')
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false)
+  const [teamCount, setTeamCount] = useState<number | null>(null)
 
   const loadItems = useCallback(async () => {
     const response = await fetch('/api/admin/items', { cache: 'no-store' })
@@ -542,6 +552,7 @@ export default function AdminPage() {
           <button className={activeView === 'project-library' ? 'is-active' : ''} onClick={() => navigateTo('project-library')}><Search /> All projects <i>{projectCount}</i></button>
           <button className={activeView === 'archive' ? 'is-active' : ''} onClick={() => navigateTo('archive')}><Archive /> Archive <i>{archiveCount}</i></button>
           <button className={activeView === 'partners' ? 'is-active' : ''} onClick={() => navigateTo('partners')}><Handshake /> Partners <i>{partnerCount}</i></button>
+          <button className={activeView === 'team' ? 'is-active' : ''} onClick={() => navigateTo('team')}><Users /> Team {teamCount !== null && <i>{teamCount}</i>}</button>
           <button className={activeView === 'drafts' ? 'is-active' : ''} onClick={() => navigateTo('drafts')}><FileClock /> Drafts <i>{draftCount}</i></button>
           <button className={activeView === 'legal' ? 'is-active' : ''} onClick={() => navigateTo('legal')}><FileText /> Legal pages <i>{legalPages.filter((page) => page.published).length}/2</i></button>
           <button className={activeView === 'settings' ? 'is-active' : ''} onClick={() => navigateTo('settings')}><Settings /> Settings</button>
@@ -593,6 +604,7 @@ export default function AdminPage() {
                 <div className="admin-quick-actions">
                   <button onClick={() => navigateTo('projects')}><FolderOpen /><span><strong>Add a project</strong><small>Publish new work</small></span></button>
                   <button onClick={() => navigateTo('partners')}><Handshake /><span><strong>Add a partner</strong><small>Upload a new logo</small></span></button>
+                  <button onClick={() => navigateTo('team')}><Users /><span><strong>Manage the team</strong><small>People on the studio page</small></span></button>
                   <button onClick={() => navigateTo('media')}><ImageIcon /><span><strong>Change website media</strong><small>Hero and expressions</small></span></button>
                   <button onClick={() => navigateTo('legal')}><FileText /><span><strong>Edit legal pages</strong><small>Privacy and terms</small></span></button>
                 </div>
@@ -669,6 +681,7 @@ export default function AdminPage() {
               </label>
               <datalist id="project-industries">{industries.map((industry) => <option value={industry} key={industry} />)}</datalist>
               <label><span>Project description</span><textarea name="description" placeholder="The idea, approach, and outcome of the project…" maxLength={1500} rows={5} /></label>
+              <AdminCaseStudyFields />
             </>
           )}
           <label><span>Image description</span><input name="altText" placeholder="Accessible description" maxLength={300} required /></label>
@@ -781,6 +794,7 @@ export default function AdminPage() {
       )}
 
       {activeView === 'legal' && <AdminLegalEditor pages={legalPages} onSaved={loadLegalPages} />}
+      {activeView === 'team' && <AdminTeam onCountChange={setTeamCount} />}
       </div>
 
       <nav className="admin-mobile-nav" aria-label="Mobile dashboard navigation">
@@ -795,6 +809,7 @@ export default function AdminPage() {
         <div className="admin-mobile-drawer">
           <button className="admin-mobile-drawer__close" onClick={() => setMobileMoreOpen(false)}><X /></button>
           <span>More controls</span>
+          <button onClick={() => navigateTo('team')}><Users /> Team</button>
           <button onClick={() => navigateTo('drafts')}><FileClock /> Drafts <i>{draftCount}</i></button>
           <button onClick={() => navigateTo('project-library')}><Search /> All projects <i>{projectCount}</i></button>
           <button onClick={() => navigateTo('archive')}><Archive /> Archive <i>{archiveCount}</i></button>
@@ -896,6 +911,7 @@ export default function AdminPage() {
               <datalist id="edit-project-industries">{industries.map((industry) => <option value={industry} key={industry} />)}</datalist>
               <label><span>Image description</span><input name="altText" defaultValue={editTarget.altText} maxLength={300} required /></label>
               <label className="admin-edit-card__wide"><span>Description</span><textarea name="description" defaultValue={editTarget.description} maxLength={1500} rows={5} /></label>
+              <div className="admin-edit-card__wide"><AdminCaseStudyFields values={editTarget} open /></div>
               <label><span>Status</span><select name="published" defaultValue={String(editTarget.published)}><option value="true">Published</option><option value="false">Draft</option></select></label>
             </div>
             <div className="admin-delete-card__actions">

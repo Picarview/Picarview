@@ -52,6 +52,28 @@ export interface CmsItem {
   archived: number
   pinned: number
   created_at: string
+  year?: string
+  services?: string
+  deliverables?: string
+  challenge?: string
+  approach?: string
+  outcomes_json?: string
+}
+
+export interface CmsOutcome {
+  title: string
+  body: string
+}
+
+export interface CmsTeamMember {
+  id: string
+  name: string
+  role: string
+  object_key: string | null
+  alt_text: string
+  sort_order: number
+  published: number
+  created_at: string
 }
 
 export interface CmsProjectImage {
@@ -99,7 +121,77 @@ export function publicCmsItem(item: CmsItem) {
     sortOrder: item.sort_order,
     createdAt: item.created_at,
     imageUrl: `/api/cms/media?key=${encodeURIComponent(item.object_key)}`,
+    year: item.year ?? '',
+    services: splitList(item.services),
+    deliverables: splitList(item.deliverables),
+    challenge: item.challenge ?? '',
+    approach: item.approach ?? '',
+    outcomes: parseOutcomes(item.outcomes_json),
   }
+}
+
+export function publicTeamMember(member: CmsTeamMember) {
+  return {
+    id: member.id,
+    name: member.name,
+    role: member.role,
+    altText: member.alt_text,
+    sortOrder: member.sort_order,
+    photoUrl: member.object_key ? `/api/cms/media?key=${encodeURIComponent(member.object_key)}` : '',
+  }
+}
+
+/** Comma-separated text column -> trimmed, non-empty list. */
+export function splitList(value: string | undefined) {
+  return (value ?? '').split(',').map((entry) => entry.trim()).filter(Boolean)
+}
+
+export function parseOutcomes(value: string | undefined): CmsOutcome[] {
+  try {
+    const data: unknown = JSON.parse(value || '[]')
+    if (!Array.isArray(data)) return []
+    return data
+      .filter((entry): entry is CmsOutcome => typeof entry?.title === 'string' && typeof entry?.body === 'string')
+      .slice(0, 3)
+  } catch {
+    return []
+  }
+}
+
+export const CASE_STUDY_COLUMNS = 'year, services, deliverables, challenge, approach, outcomes_json'
+
+/**
+ * Reads and validates the optional case-study fields from a project form
+ * (create or edit). Returns the column values in CASE_STUDY_COLUMNS order.
+ */
+export function readCaseStudy(get: (key: string) => unknown):
+  | { ok: true; values: [string, string, string, string, string, string] }
+  | { ok: false; error: string } {
+  const text = (key: string) => {
+    const value = get(key)
+    return typeof value === 'string' ? value.trim() : ''
+  }
+  const list = (key: string) => splitList(text(key)).join(', ')
+  const year = text('year')
+  const services = list('services')
+  const deliverables = list('deliverables')
+  const challenge = text('challenge')
+  const approach = text('approach')
+  const outcomes = [1, 2, 3]
+    .map((index) => ({ title: text(`outcome${index}Title`), body: text(`outcome${index}Body`) }))
+    .filter((outcome) => outcome.title || outcome.body)
+
+  if (
+    year.length > 20 || services.length > 300 || deliverables.length > 300 ||
+    challenge.length > 2000 || approach.length > 2000 ||
+    outcomes.some((outcome) => outcome.title.length > 80 || outcome.body.length > 400)
+  ) {
+    return { ok: false, error: 'One or more case study fields are too long.' }
+  }
+  if (outcomes.some((outcome) => !outcome.title || !outcome.body)) {
+    return { ok: false, error: 'Each result needs both a title and a short description.' }
+  }
+  return { ok: true, values: [year, services, deliverables, challenge, approach, JSON.stringify(outcomes)] }
 }
 
 export const SESSION_COOKIE = 'picarview_admin'

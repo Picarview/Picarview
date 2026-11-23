@@ -589,12 +589,19 @@ interface CmsProjectLike {
   altText: string
   imageUrl: string
   images?: Array<{ id: string; imageUrl: string; altText: string; sortOrder: number }>
+  year?: string
+  services?: string[]
+  deliverables?: string[]
+  challenge?: string
+  approach?: string
+  outcomes?: ProjectOutcome[]
 }
 
 /**
- * Turns a CMS project into a full case study. Any field the CMS doesn't
- * provide yet is filled with neutral placeholder copy so the page never
- * renders empty.
+ * Turns a CMS project into a full case study using the fields edited in the
+ * admin. Story fields left empty fall back to neutral placeholder copy so the
+ * page never renders empty; factual fields (year, services, deliverables) are
+ * simply hidden when empty rather than invented.
  */
 export function projectFromCms(item: CmsProjectLike, index: number): Project {
   const industry = item.industry || 'General'
@@ -610,9 +617,9 @@ export function projectFromCms(item: CmsProjectLike, index: number): Project {
     client: title,
     tagline: item.subtitle || `A ${industry.toLowerCase()} project shaped with clarity and craft.`,
     industry,
-    services: ['Brand Identity', 'Art Direction'],
-    deliverables: ['Visual identity', 'Campaign assets'],
-    year: '2026',
+    services: item.services ?? [],
+    deliverables: item.deliverables ?? [],
+    year: item.year ?? '',
     cover: images[0].imageUrl,
     coverAlt: images[0].altText || item.altText || title,
     coverFit: 'fit',
@@ -627,10 +634,12 @@ export function projectFromCms(item: CmsProjectLike, index: number): Project {
       item.description ||
       `${title} came to Picarview for a visual direction that could connect their idea with the people it is meant for.`,
     challenge:
+      item.challenge ||
       'The brief was to cut through a crowded space with something distinctive, while staying true to who the client already is.',
     approach:
+      item.approach ||
       'We started with research and conversation, then distilled the brand down to a few strong visual decisions — and applied them consistently everywhere.',
-    outcomes: [
+    outcomes: item.outcomes?.length ? item.outcomes : [
       { title: 'A clear idea', body: 'One strong concept ties every touchpoint together.' },
       { title: 'Consistent everywhere', body: 'Assets work across print, digital and social without losing character.' },
       { title: 'Built to grow', body: 'The system gives the team room to create new work on their own.' },

@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: Request) {
   const key = new URL(request.url).searchParams.get('key')
   // Project gallery images live one level deeper: projects/<project-id>/<image-id>.<ext>.
-  if (!key || key.includes('..') || !/^(?:partners\/[a-zA-Z0-9._-]+|projects\/(?:[a-zA-Z0-9_-]+\/)?[a-zA-Z0-9._-]+|site\/(?:hero|expression-[1-4])\/[a-zA-Z0-9._-]+)$/.test(key)) {
+  if (!key || key.includes('..') || !/^(?:(?:partners|team)\/[a-zA-Z0-9._-]+|projects\/(?:[a-zA-Z0-9_-]+\/)?[a-zA-Z0-9._-]+|site\/(?:hero|expression-[1-4])\/[a-zA-Z0-9._-]+)$/.test(key)) {
     return new Response('Invalid media key.', { status: 400 })
   }
 

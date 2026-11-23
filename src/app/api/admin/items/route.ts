@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import {
+  CASE_STUDY_COLUMNS,
   extensionFor,
+  readCaseStudy,
   getCmsEnv,
   isSameOrigin,
   publicCmsItem,
@@ -26,7 +28,8 @@ export async function GET(request: Request) {
   if (!CMS_DB) return NextResponse.json({ error: 'D1 is not configured.' }, { status: 503 })
 
   const query = await CMS_DB.prepare(
-    `SELECT id, type, title, subtitle, description, industry, alt_text, object_key, sort_order, published, archived, pinned, created_at
+    `SELECT id, type, title, subtitle, description, industry, alt_text, object_key, sort_order, published, archived, pinned, created_at,
+       ${CASE_STUDY_COLUMNS}
      FROM content_items ORDER BY type ASC, sort_order ASC, created_at DESC`
   ).all<CmsItem>()
 
@@ -195,6 +198,8 @@ export async function PATCH(request: Request) {
   if (title.length > 120 || subtitle.length > 200 || description.length > 1500 || industry.length > 80 || altText.length > 300) {
     return NextResponse.json({ error: 'One or more fields exceed their maximum length.' }, { status: 400 })
   }
+  const caseStudy = readCaseStudy((key) => body[key])
+  if (!caseStudy.ok) return NextResponse.json({ error: caseStudy.error }, { status: 400 })
 
   const hasReplacement = replacement instanceof File && replacement.size > 0
   if (hasReplacement && (!CMS_MEDIA || !safeImageType(replacement) || replacement.size > 10 * 1024 * 1024)) {
@@ -222,17 +227,19 @@ export async function PATCH(request: Request) {
     if (replacementKey) {
       await CMS_DB.prepare(
         `UPDATE content_items
-         SET title = ?, subtitle = ?, description = ?, industry = ?, alt_text = ?, published = ?, object_key = ?
+         SET title = ?, subtitle = ?, description = ?, industry = ?, alt_text = ?, published = ?, object_key = ?,
+             year = ?, services = ?, deliverables = ?, challenge = ?, approach = ?, outcomes_json = ?
          WHERE id = ? AND type = ? AND archived = 0`
-      ).bind(title, subtitle, description, industry, altText, published, replacementKey, id, 'project').run()
+      ).bind(title, subtitle, description, industry, altText, published, replacementKey, ...caseStudy.values, id, 'project').run()
       await CMS_DB.prepare('UPDATE project_images SET object_key = ?, alt_text = ? WHERE project_id = ? AND sort_order = 0')
         .bind(replacementKey, altText, id).run()
     } else {
       await CMS_DB.prepare(
         `UPDATE content_items
-         SET title = ?, subtitle = ?, description = ?, industry = ?, alt_text = ?, published = ?
+         SET title = ?, subtitle = ?, description = ?, industry = ?, alt_text = ?, published = ?,
+             year = ?, services = ?, deliverables = ?, challenge = ?, approach = ?, outcomes_json = ?
          WHERE id = ? AND type = ? AND archived = 0`
-      ).bind(title, subtitle, description, industry, altText, published, id, 'project').run()
+      ).bind(title, subtitle, description, industry, altText, published, ...caseStudy.values, id, 'project').run()
     }
   } catch (error) {
     if (replacementKey && CMS_MEDIA) await CMS_MEDIA.delete(replacementKey)
@@ -282,6 +289,11 @@ export async function POST(request: Request) {
   if (files.some((selectedFile) => !safeImageType(selectedFile) || selectedFile.size > 10 * 1024 * 1024)) {
     return NextResponse.json({ error: 'Use PNG, JPG, WebP, or AVIF images up to 10 MB each.' }, { status: 400 })
   }
+  // Partners have no case study; store empty values for them.
+  const caseStudy = type === 'project'
+    ? readCaseStudy((key) => form.get(key))
+    : { ok: true as const, values: ['', '', '', '', '', '[]'] as [string, string, string, string, string, string] }
+  if (!caseStudy.ok) return NextResponse.json({ error: caseStudy.error }, { status: 400 })
 
   const id = crypto.randomUUID()
   const uploadedImages: Array<{ id: string; objectKey: string }> = []
@@ -310,9 +322,9 @@ export async function POST(request: Request) {
   try {
     await CMS_DB.prepare(
       `INSERT INTO content_items
-       (id, type, title, subtitle, description, industry, alt_text, object_key, sort_order, published)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(id, type, title, subtitle, description, industry, altText, objectKey, sortOrder, published).run()
+       (id, type, title, subtitle, description, industry, alt_text, object_key, sort_order, published, ${CASE_STUDY_COLUMNS})
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(id, type, title, subtitle, description, industry, altText, objectKey, sortOrder, published, ...caseStudy.values).run()
     if (type === 'project') {
       for (let index = 0; index < uploadedImages.length; index += 1) {
         const uploaded = uploadedImages[index]

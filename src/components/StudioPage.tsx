@@ -7,7 +7,8 @@ import { useLenis } from 'lenis/react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ArrowUpRight } from 'lucide-react'
-import { principles, team } from '@/data/team'
+import { principles, team as placeholderTeam, type TeamMember } from '@/data/team'
+import { useCmsTeam } from '@/hooks/useCmsTeam'
 import { Partnerships } from '@/components/Partnerships'
 import { SiteFooter } from '@/components/SiteFooter'
 
@@ -28,6 +29,17 @@ export function StudioPage() {
   const rootRef = useRef<HTMLElement>(null)
   const lenis = useLenis()
   const [active, setActive] = useState('about')
+  const { members } = useCmsTeam()
+  // CMS team members (Admin → Team) replace the role placeholders once any are published.
+  const team: TeamMember[] = members.length
+    ? members.map((member, index) => ({
+        name: member.name,
+        role: member.role,
+        photo: member.photoUrl || undefined,
+        initial: member.name.trim().charAt(0).toUpperCase() || '•',
+        accent: placeholderTeam[index % placeholderTeam.length].accent,
+      }))
+    : placeholderTeam
 
   // Highlight the section currently in view in the side menu.
   useEffect(() => {
@@ -56,13 +68,22 @@ export function StudioPage() {
           scrollTrigger: { trigger: element, start: 'top 88%' },
         })
       })
+    }, rootRef)
+    return () => ctx.revert()
+  }, [])
+
+  // The team grid animates separately so it re-runs when CMS members arrive.
+  const teamKey = team.map((member) => member.name).join('|')
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const ctx = gsap.context(() => {
       gsap.fromTo('.team-card', { opacity: 0, y: 50 }, {
         opacity: 1, y: 0, duration: 0.8, stagger: 0.08, ease: 'power3.out',
         scrollTrigger: { trigger: '.team-grid', start: 'top 85%' },
       })
     }, rootRef)
     return () => ctx.revert()
-  }, [])
+  }, [teamKey])
 
   const jump = (id: string) => (event: React.MouseEvent) => {
     const target = document.getElementById(id)
@@ -166,10 +187,10 @@ export function StudioPage() {
           <h2 className="studio-section-title studio-rise">The team</h2>
           <ul className="team-grid">
             {team.map((member) => (
-              <li className="team-card" key={member.role} style={{ '--accent': member.accent } as CSSProperties}>
+              <li className="team-card" key={`${member.name}-${member.role}`} style={{ '--accent': member.accent } as CSSProperties}>
                 <div className="team-card__photo">
                   {member.photo ? (
-                    <Image src={member.photo} alt={member.name} fill sizes="(max-width: 760px) 80vw, 300px" />
+                    <Image src={member.photo} alt={member.name} fill sizes="(max-width: 760px) 80vw, 300px" unoptimized={member.photo.startsWith('/api/')} />
                   ) : (
                     <span className="team-card__monogram" aria-hidden="true">
                       <i>[</i>{member.initial}<i>]</i>
