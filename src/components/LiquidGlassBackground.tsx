@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { MeshTransmissionMaterial, Float, Environment } from '@react-three/drei'
 import * as THREE from 'three'
@@ -104,20 +104,24 @@ function AuroraParticles() {
   const pointsRef = useRef<THREE.Points>(null)
   const particleCount = 1000
 
-  const positions = new Float32Array(particleCount * 3)
-  const colors = new Float32Array(particleCount * 3)
+  // Generate the random field once; regenerating it every render re-uploaded the buffers.
+  const [{ positions, colors }] = useState(() => {
+    const positions = new Float32Array(particleCount * 3)
+    const colors = new Float32Array(particleCount * 3)
 
-  for (let i = 0; i < particleCount; i++) {
-    positions[i * 3] = (Math.random() - 0.5) * 20
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 20
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 2
+    for (let i = 0; i < particleCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 20
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 20
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 2
 
-    // Blue to orange gradient
-    const t = Math.random()
-    colors[i * 3] = t < 0.5 ? 0.23 + t * 0.54 : 0.97
-    colors[i * 3 + 1] = t < 0.5 ? 0.51 + t * 0.2 : 0.45 - t * 0.3
-    colors[i * 3 + 2] = t < 0.5 ? 0.96 - t * 0.6 : 0.22
-  }
+      // Blue to orange gradient
+      const t = Math.random()
+      colors[i * 3] = t < 0.5 ? 0.23 + t * 0.54 : 0.97
+      colors[i * 3 + 1] = t < 0.5 ? 0.51 + t * 0.2 : 0.45 - t * 0.3
+      colors[i * 3 + 2] = t < 0.5 ? 0.96 - t * 0.6 : 0.22
+    }
+    return { positions, colors }
+  })
 
   useFrame((state) => {
     if (pointsRef.current) {

@@ -27,8 +27,12 @@ export function Navbar() {
   const lenis = useLenis()
   const toggleRef = useRef<HTMLButtonElement>(null)
 
-  // Close on route change.
-  useEffect(() => { setIsOpen(false) }, [pathname])
+  // Close on route change: adjust state during render rather than in an effect.
+  const [menuPath, setMenuPath] = useState(pathname)
+  if (menuPath !== pathname) {
+    setMenuPath(pathname)
+    setIsOpen(false)
+  }
 
   useEffect(() => {
     if (!isOpen) return

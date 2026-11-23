@@ -26,11 +26,14 @@ export function AdminLegalEditor({ pages, onSaved }: { pages: AdminLegalPage[]; 
   const [message, setMessage] = useState('')
   const selected = pages.find((page) => page.slug === selectedSlug)
 
-  useEffect(() => {
-    if (creating) return
+  // Load the selected document into the draft when the selection changes
+  // (adjusted during render rather than in an effect).
+  const [draftSource, setDraftSource] = useState<AdminLegalPage | undefined | null>(null)
+  if (!creating && draftSource !== selected) {
+    setDraftSource(selected)
     setDraft(selected ? structuredClone(selected) : null)
     setMessage('')
-  }, [creating, selected])
+  }
 
   function beginCreate() {
     setCreating(true)
