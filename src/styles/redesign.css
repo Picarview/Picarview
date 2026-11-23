@@ -495,9 +495,8 @@
 .hero-intro__link:hover svg { transform: translateX(5px); }
 
 @media (max-width: 760px) {
-  /* Show the whole reel frame on phones, like an embedded 16:9 player. */
-  .hero-reel { height: auto; min-height: 0; aspect-ratio: 16 / 9; margin-top: 4.5rem; }
-  .hero-reel::after { display: none; }
+  /* Phones play the portrait reel full-screen (see Hero.tsx). */
+  .hero-reel { height: 100svh; min-height: 560px; }
   .hero-intro__inner { grid-template-columns: 1fr; }
   .hero-intro__label { padding-top: 0; }
 }
@@ -1513,3 +1512,209 @@
 .site-footer__bar a:hover { color: #fff; }
 
 .case-swatch--light { color: var(--pv-ink); text-shadow: none; }
+
+/* --------------------------------------------------------------------------
+   Mobile fixes for the homepage sections
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  /* About: size to content instead of a mostly empty near-full-screen block. */
+  .about-cover-section { min-height: 0; padding-top: 5rem; padding-bottom: 5rem; }
+
+  /* Cards: 2x2 grid (positions set in GSAP), sized to fit the screen. */
+  .cards-section { height: auto; min-height: 0; aspect-ratio: 390 / 640; max-height: 100svh; }
+  .brutalist-card { width: 40vw; padding: 0.45rem; box-shadow: 5px 5px 0 0 #000; border-width: 3px; }
+  .brutalist-card__image { height: calc(100% - 2rem); }
+  .brutalist-card__tag { font-size: 0.5rem; }
+  .cards-section__deck { top: 2.5rem; }
+
+  /* Partners headline: fit the screen width instead of running off the right edge. */
+  .partners-statement { min-height: 0; padding-top: 4.5rem; padding-bottom: 4.5rem; }
+  .partners-statement__text {
+    max-width: none;
+    font-size: clamp(1.7rem, 8vw, 2.6rem);
+    line-height: 1.02;
+    overflow-wrap: break-word;
+  }
+
+  /* Our Work: no pinning on phones. Heading on top, native swipe carousel below. */
+  .aura-work {
+    height: auto;
+    min-height: 0;
+    padding: 5.5rem 0 3.5rem;
+  }
+  .aura-work__heading { position: relative; top: auto; left: auto; padding: 0 1.25rem; }
+  .aura-work__heading > *,
+  .aura-work__orb { opacity: 1 !important; transform: none !important; }
+  .aura-work__track {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: auto;
+    margin-top: 2.25rem;
+    padding: 0.75rem 1.25rem 1.5rem;
+    gap: 1.1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    transform: none !important;
+  }
+  .aura-work__track::-webkit-scrollbar { display: none; }
+  .aura-work__card,
+  .aura-work__card:nth-child(n) {
+    width: min(72vw, 290px);
+    margin-top: 0;
+    scroll-snap-align: center;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .aura-work__rail { position: relative; left: auto; right: auto; bottom: auto; margin: 0 1.25rem; }
+  .aura-work__rail span:first-child { display: inline; }
+}
+
+/* Selected Work: the sticky filter bar sits below the fixed header instead of under it. */
+.work-index__toolbar { top: clamp(4.25rem, 6vw, 5.5rem); }
+
+/* --------------------------------------------------------------------------
+   Partnerships — dark band, big heading, rows of white logos between rules
+   -------------------------------------------------------------------------- */
+
+.partnerships {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  background: var(--pv-ink);
+  padding: clamp(4.5rem, 10vw, 8rem) var(--pv-gutter);
+}
+
+.partnerships__inner {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.partnerships__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  flex-wrap: wrap;
+  padding-bottom: clamp(1rem, 2vw, 1.5rem);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.85);
+}
+
+.partnerships__title-wrap { overflow: hidden; }
+
+.partnerships__title {
+  display: block;
+  font-family: var(--pv-display);
+  font-size: clamp(2.6rem, 8.5vw, 7rem);
+  line-height: 0.86;
+  letter-spacing: -0.055em;
+  text-transform: uppercase;
+}
+
+.partnerships__note {
+  display: grid;
+  gap: 0.3rem;
+  padding-bottom: 0.3rem;
+  font-size: clamp(1rem, 1.4vw, 1.3rem);
+  text-align: right;
+}
+
+.partnerships__note em {
+  font-family: var(--pv-serif);
+  font-style: italic;
+}
+
+.partnerships__count {
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.partnerships__row {
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.partnerships__track { display: flex; width: max-content; min-width: 100%; }
+
+.partnerships__group {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  flex: 1 0 auto;
+  min-width: 100%;
+  padding: clamp(1.4rem, 3vw, 2.25rem) clamp(1rem, 2.5vw, 2.25rem);
+  list-style: none;
+}
+
+/* Still rows fit the container and wrap on small screens. */
+.partnerships__row:not(.is-moving) .partnerships__track { width: 100%; }
+.partnerships__row:not(.is-moving) .partnerships__group { flex: 1 1 100%; min-width: 0; flex-wrap: wrap; row-gap: 1.75rem; }
+
+/* Full rows scroll like a ticker; the duplicated group makes the loop seamless. */
+.partnerships__row.is-moving .partnerships__group { justify-content: flex-start; min-width: 0; }
+.partnerships__row.is-moving .partnerships__track { animation: pv-ticker 38s linear infinite; }
+.partnerships__row.is-moving.is-reverse .partnerships__track { animation-direction: reverse; }
+.partnerships__row.is-moving:hover .partnerships__track { animation-play-state: paused; }
+
+@keyframes pv-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.partnerships__group li {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+/* Any transparent logo becomes a white silhouette; hovering shows its real colours. */
+.partnerships__group img {
+  display: block;
+  width: auto;
+  height: clamp(2.4rem, 4.5vw, 3.6rem);
+  max-width: clamp(140px, 18vw, 220px);
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.88;
+  transition: filter 0.35s ease, opacity 0.35s ease;
+}
+
+.partnerships__group li:hover img { filter: none; opacity: 1; }
+
+.partnerships__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: clamp(1.75rem, 3vw, 2.5rem);
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid currentColor;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .partnerships__note { text-align: left; }
+  .partnerships__row:not(.is-moving) .partnerships__group { flex-wrap: wrap; justify-content: center; gap: 1.75rem 2.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partnerships__row.is-moving .partnerships__track { animation: none; }
+}
+/* Fill the strip between the header and the sticky toolbar so cards don't scroll behind the logo. */
+.work-index__toolbar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 1px);
+  height: 7rem;
+  background: var(--pv-paper);
+  pointer-events: none;
+}

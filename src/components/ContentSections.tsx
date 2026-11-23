@@ -10,6 +10,8 @@ import { useCmsItems } from '@/hooks/useCmsItems'
 import { useCmsSiteMedia } from '@/hooks/useCmsSiteMedia'
 import { useLegalPages } from '@/hooks/useLegalPages'
 import { projects as showcaseProjects } from '@/data/projects'
+import { Partnerships } from '@/components/Partnerships'
+import { servicePillars } from '@/data/services'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -112,10 +114,10 @@ function InteractiveCardsTransition() {
         gsap.set(heading, { opacity: 1, y: 0 })
         gsap.set(cards, {
           opacity: 1,
-          scale: 0.78,
-          x: (index) => ['-39vw', '-13vw', '13vw', '39vw'][index],
-          y: -4,
-          rotation: (index) => [-8, -3, 3, 8][index],
+          scale: 1,
+          x: (index) => ['-22vw', '22vw', '-22vw', '22vw'][index],
+          y: (index) => index < 2 ? '-27vw' : '27vw',
+          rotation: (index) => [-4, 3, 3, -4][index],
         })
       })
 
@@ -170,10 +172,11 @@ function InteractiveCardsTransition() {
 
           tl.to(cards, {
             opacity: 1,
-            scale: 0.78,
-            x: (index) => ['-39vw', '-13vw', '13vw', '39vw'][index],
-            y: -4,
-            rotation: (index) => [-8, -3, 3, 8][index],
+            // Two-by-two grid that fits the phone screen.
+            scale: 1,
+            x: (index) => ['-22vw', '22vw', '-22vw', '22vw'][index],
+            y: (index) => index < 2 ? '-27vw' : '27vw',
+            rotation: (index) => [-4, 3, 3, -4][index],
             duration: 0.72,
             stagger: 0.13,
             ease: 'back.out(1.15)',
@@ -346,16 +349,6 @@ function AboutSection() {
 function GoalSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLHeadingElement>(null)
-  const partners = useCmsItems('partner')
-  const partnerRowsBase = partners.length >= 6
-    ? [partners.slice(0, Math.ceil(partners.length / 2)), partners.slice(Math.ceil(partners.length / 2))]
-    : [partners]
-  const partnerRows = partnerRowsBase.map((row) => (
-    row.length === 0 || row.length >= 4
-      ? row
-      : Array.from({ length: Math.ceil(4 / row.length) }, () => row).flat()
-  ))
-
   useSoftMaskReveal(textRef, false)
 
   useEffect(() => {
@@ -375,26 +368,10 @@ function GoalSection() {
         }
       )
 
-      gsap.fromTo(
-        '.partners-statement__marquee',
-        { opacity: 0, y: 42, rotate: (index) => index % 2 === 0 ? -2 : 2 },
-        {
-          opacity: 1,
-          y: 0,
-          rotate: 0,
-          duration: 0.8,
-          stagger: 0.16,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: '.partners-statement__marquees',
-            start: 'top 82%',
-          },
-        }
-      )
     }, sectionRef)
 
     return () => ctx.revert()
-  }, [partners.length])
+  }, [])
 
   return (
     <section
@@ -412,37 +389,6 @@ function GoalSection() {
           And bring meaningful visions to life through creativity.<br />
           Innovation, and design.
         </h2>
-        {partners.length > 0 && (
-          <div className="partners-statement__showcase">
-            <header>
-              <span>Partners</span>
-              <span>{String(partners.length).padStart(2, '0')} collaborations</span>
-            </header>
-            <div className="partners-statement__marquees" aria-label="Picarview partners">
-              {partnerRows.map((row, rowIndex) => (
-                <div className={`partners-statement__marquee partners-statement__marquee--${rowIndex % 2 === 0 ? 'left' : 'right'}`} key={`row-${rowIndex}`}>
-                  <div className="partners-statement__track">
-                    {[0, 1].map((copy) => (
-                      <div className="partners-statement__group" aria-hidden={copy === 1} key={`copy-${copy}`}>
-                        {row.map((partner, index) => (
-                          <figure key={`${copy}-${partner.id}-${index}`}>
-                            <div className="partners-statement__logo-frame">
-                              <img src={partner.imageUrl} alt={copy === 0 ? partner.altText : ''} loading="lazy" />
-                            </div>
-                            <figcaption>
-                              <span>{String(partners.findIndex((item) => item.id === partner.id) + 1).padStart(2, '0')}</span>
-                              <strong>{partner.title}</strong>
-                            </figcaption>
-                          </figure>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </section>
   )
@@ -452,52 +398,7 @@ function GoalSection() {
 function ServicesSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
 
-  const services = [
-    {
-      title: 'Discovery',
-      number: '01',
-      statement: 'Uncovering the creative opportunity.',
-      offerings: [
-        'Creative Idea Development',
-        'Visual & Identity Exploration',
-        'Creative Direction Alignment',
-        'Creative Discovery Workshops',
-      ],
-    },
-    {
-      title: 'Strategy',
-      number: '02',
-      statement: 'Giving every creative decision a purpose.',
-      offerings: [
-        'Campaign Planning',
-        'Concept Development',
-        'Brand & Audience Research',
-        'Creative Strategy & Insights',
-      ],
-    },
-    {
-      title: 'Innovation',
-      number: '03',
-      statement: 'Building new ideas into tangible experiences.',
-      offerings: [
-        'Creative Innovation',
-        'Product Development',
-        'Creative Concept Development',
-        'Picture & Art Development',
-      ],
-    },
-    {
-      title: 'Expression',
-      number: '04',
-      statement: 'Turning strategy into work people can feel.',
-      offerings: [
-        'Creative Design',
-        'Brand Expression',
-        'Photography & Videography',
-        'Visual Art & Experimental Content',
-      ],
-    },
-  ]
+  const services = servicePillars
 
   useEffect(() => {
     const media = gsap.matchMedia()
@@ -612,6 +513,10 @@ function WorksSection() {
   const projectsKey = projects.map((project) => project.id).join(',')
 
   useEffect(() => {
+    const media = gsap.matchMedia()
+    // Phones use a native swipe carousel (see CSS); pinning and scroll-jacking there
+    // made the section eat several screens of scrolling and start out blank.
+    media.add('(min-width: 768px)', () => {
     const ctx = gsap.context(() => {
       const cards = gsap.utils.toArray<HTMLElement>('.aura-work__card')
       const track = trackRef.current
@@ -668,6 +573,9 @@ function WorksSection() {
     }, sectionRef)
 
     return () => ctx.revert()
+    })
+
+    return () => media.revert()
   }, [projectsKey])
 
   return (
@@ -990,6 +898,7 @@ export function ContentSections() {
       <GoalSection />
       <ServicesSection />
       <WorksSection />
+      <Partnerships />
       <ContactSection />
       <Footer />
     </div>

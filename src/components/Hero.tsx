@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -18,6 +18,16 @@ export function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const { items: siteMedia } = useCmsSiteMedia()
   const heroMedia = siteMedia.find((item) => item.slot === 'hero')
+  // Phones get a portrait cut of the reel; pick the matching poster once mounted.
+  const [isPhone, setIsPhone] = useState(false)
+
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsPhone(query.matches)
+    update()
+    query.addEventListener('change', update)
+    return () => query.removeEventListener('change', update)
+  }, [])
 
   useEffect(() => {
     const root = rootRef.current
@@ -60,7 +70,7 @@ export function Hero() {
             <video
               ref={videoRef}
               key={heroMedia?.mediaUrl ?? 'reel'}
-              poster="/hero/reel-poster.webp"
+              poster={isPhone ? '/hero/reel-portrait-poster.webp' : '/hero/reel-poster.webp'}
               autoPlay
               muted
               loop
@@ -72,6 +82,7 @@ export function Hero() {
                 <source src={heroMedia.mediaUrl} />
               ) : (
                 <>
+                  <source src="/hero/reel-portrait.mp4" type="video/mp4" media="(max-width: 767px)" />
                   <source src="/hero/reel.webm" type="video/webm" />
                   <source src="/hero/reel.mp4" type="video/mp4" />
                 </>
