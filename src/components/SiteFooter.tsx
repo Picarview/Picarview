@@ -26,6 +26,11 @@ export function SiteFooter() {
         <Link href="/" aria-label="Picarview home" className="site-footer__logo">
           <Image src="/images/logo.webp" alt="Picarview" width={900} height={204} />
         </Link>
+        <nav aria-label="Site">
+          <Link href="/projects">Work</Link>
+          <Link href="/about">Studio</Link>
+          <Link href="/services">Services</Link>
+        </nav>
         <a href="mailto:create@picarview.com">create@picarview.com</a>
         <nav aria-label="Legal">
           {links.map((page) => <Link href={page.href} key={page.slug}>{page.title}</Link>)}

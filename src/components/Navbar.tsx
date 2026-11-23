@@ -10,8 +10,8 @@ import { ArrowUpRight } from 'lucide-react'
 const menuLinks = [
   { name: 'Home', href: '/', image: '/images/work1.webp', note: 'Create your view' },
   { name: 'Work', href: '/projects', image: '/images/work3.webp', note: 'Selected projects' },
-  { name: 'About', href: '/#about', image: '/images/img3.webp', note: 'The studio' },
-  { name: 'Services', href: '/#services', image: '/images/img1.webp', note: 'What we make' },
+  { name: 'Studio', href: '/about', image: '/images/img3.webp', note: 'Our team & partners' },
+  { name: 'Services', href: '/services', image: '/images/img1.webp', note: 'What we do' },
   { name: 'Contact', href: '/contact', image: '/images/img4.webp', note: 'Start a project' },
 ]
 
@@ -53,7 +53,7 @@ export function Navbar() {
     }
   }, [isOpen, lenis])
 
-  const activeIndex = menuLinks.findIndex((link) => link.href === pathname || (link.href === '/projects' && pathname.startsWith('/projects')))
+  const activeIndex = menuLinks.findIndex((link) => link.href === pathname || (link.href !== '/' && pathname.startsWith(link.href)))
 
   return (
     <>

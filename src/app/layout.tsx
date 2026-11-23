@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
 import '@/styles/redesign.css'
+import '@/styles/pages.css'
 import { LenisProvider } from '@/components/LenisProvider'
 import { FloatingContactButton } from '@/components/FloatingContactButton'
 
