@@ -164,8 +164,22 @@ export default function AdminPage() {
     setLegalPages(Array.isArray(data.pages) ? data.pages : [])
   }, [])
 
+  // Initial data load. The loaders only set state after awaiting fetch, so this doesn't
+  // cause a synchronous cascading render; the rule can't see through the async callbacks.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void Promise.all([loadItems(), loadSiteMedia(), loadLegalPages()]) }, [loadItems, loadSiteMedia, loadLegalPages])
-  useEffect(() => { setVisibleCount(6) }, [search, typeFilter, statusFilter, dateFilter, sort])
+
+  // Reset pagination whenever the filters change (adjusted during render, not in an effect).
+  const filterKey = [search, typeFilter, statusFilter, dateFilter, sort].join('|')
+  const [paginatedFor, setPaginatedFor] = useState(filterKey)
+  if (paginatedFor !== filterKey) {
+    setPaginatedFor(filterKey)
+    setVisibleCount(6)
+  }
+
+  // Reference time for the upload-date filter. It's captured when the filter changes
+  // (in the event handler) so rendering stays pure.
+  const [filterNow, setFilterNow] = useState(() => Date.now())
 
   useEffect(() => {
     if (!authenticated) return
@@ -206,7 +220,7 @@ export default function AdminPage() {
 
   const filteredItems = useMemo(() => {
     const query = search.trim().toLowerCase()
-    const cutoff = dateFilter === 'all' ? 0 : Date.now() - Number(dateFilter) * 24 * 60 * 60 * 1000
+    const cutoff = dateFilter === 'all' ? 0 : filterNow - Number(dateFilter) * 24 * 60 * 60 * 1000
 
     return items
       .filter((item) => activeView === 'archive' ? item.type === 'project' && item.archived : !item.archived)
@@ -220,7 +234,7 @@ export default function AdminPage() {
         const difference = new Date(`${b.createdAt}Z`).getTime() - new Date(`${a.createdAt}Z`).getTime()
         return sort === 'newest' ? difference : -difference
       })
-  }, [activeView, dateFilter, items, search, sort, statusFilter, typeFilter])
+  }, [activeView, dateFilter, filterNow, items, search, sort, statusFilter, typeFilter])
 
   const previewCount = activeView === 'projects' ? 4 : visibleCount
   const visibleItems = (activeView === 'project-library' || activeView === 'archive') ? filteredItems : filteredItems.slice(0, previewCount)
@@ -690,7 +704,7 @@ export default function AdminPage() {
               <option value="published">Published</option>
               <option value="draft">Drafts</option>
             </select>}
-            <select value={dateFilter} onChange={(event) => setDateFilter(event.target.value as typeof dateFilter)} aria-label="Filter by upload date">
+            <select value={dateFilter} onChange={(event) => { setDateFilter(event.target.value as typeof dateFilter); setFilterNow(Date.now()) }} aria-label="Filter by upload date">
               <option value="all">Any date</option>
               <option value="7">Last 7 days</option>
               <option value="30">Last 30 days</option>
